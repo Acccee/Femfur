@@ -4,81 +4,54 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ˢᵉˢˡᵃ</title>
-    
     <link rel="icon" type="image/png" href="seslalogo.png">
-
     <style>
-        /* Нейтральный темный фон в стиле вашего скриншота */
         body {
             margin: 0;
-            padding: 0;
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: #0a0a0a; 
+            background-color: #0a0a0a; /* Чистый нейтральный темный фон */
             overflow: hidden;
-            perspective: 1000px; /* Глубина для 3D */
+            perspective: 1000px;
         }
 
-        .logo-container {
-            position: relative;
-            transition: transform 0.1s ease-out;
-            transform-style: preserve-3d;
-            will-change: transform;
-        }
-
-        /* Стиль самого логотипа */
-        .logo-img {
-            max-width: 300px; /* Размер логотипа (можно менять) */
-            max-height: 300px;
+        #logo {
+            max-width: 80vw;
+            max-height: 80vh;
+            /* Убираем все лишние фильтры и наложения */
             display: block;
-            filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.1)); /* Легкое свечение */
             user-select: none;
-            -webkit-user-drag: none;
-        }
-
-        /* Эффект блика, который бегает по PNG (опционально) */
-        .logo-container::after {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 50%);
-            pointer-events: none;
-            transform: translateZ(50px); /* Блик чуть «выше» логотипа */
+            transition: transform 0.1s ease-out;
+            will-change: transform;
         }
     </style>
 </head>
 <body>
 
-    <div class="logo-container" id="logoContainer">
-        <img src="seslalogo.png" alt="ˢᵉˢˡᵃ" class="logo-img" id="logo">
-    </div>
+    <img src="seslalogo.png" alt="ˢᵉˢˡᵃ" id="logo">
 
     <script>
-        const container = document.getElementById('logoContainer');
-        const sensitivity = 15; // Чем меньше число, тем сильнее наклон
+        const logo = document.getElementById('logo');
+        const sensitivity = 20; // Настрой под себя (чем больше число, тем слабее наклон)
 
         document.addEventListener('mousemove', (e) => {
-            // Координаты мыши относительно центра экрана
             const x = (window.innerWidth / 2 - e.pageX) / sensitivity;
             const y = (window.innerHeight / 2 - e.pageY) / sensitivity;
 
-            // Применяем вращение
-            // rotateY — поворот влево-вправо при движении по горизонтали
-            // rotateX — поворот вверх-вниз при движении по вертикали
-            container.style.transform = `rotateY(${-x}deg) rotateX(${y}deg)`;
+            // Инвертируем X и Y для естественного слежения
+            logo.style.transform = `rotateY(${-x}deg) rotateX(${y}deg)`;
         });
 
-        // Плавное возвращение в исходное положение, когда мышь уходит
+        // Возврат в центр
         document.addEventListener('mouseleave', () => {
-            container.style.transition = "transform 1s cubic-bezier(0.23, 1, 0.32, 1)";
-            container.style.transform = `rotateY(0deg) rotateX(0deg)`;
+            logo.style.transition = "transform 0.8s ease";
+            logo.style.transform = `rotateY(0deg) rotateX(0deg)`;
         });
 
-        // Отключаем задержку при входе мыши для мгновенного отклика
         document.addEventListener('mouseenter', () => {
-            container.style.transition = "transform 0.1s ease-out";
+            logo.style.transition = "transform 0.1s ease-out";
         });
     </script>
 </body>
