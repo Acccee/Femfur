@@ -1,165 +1,401 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Miracula Browser 2.0.0</title>
-<link rel="icon" href="icon.png">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Miracula Browser — 2.0.0 (Beta)</title>
+<link rel="icon" href="icon.png" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+
 <style>
-  /* --- Основные цвета --- */
-  :root {
-    --bg-color: #1c1c1c;
-    --text-color: #ffffff;
-    --accent-color: #00b7c2;
+  :root{
+    --bg:#0f1112;
+    --panel:#18181a;
+    --muted:#a6adb3;
+    --accent:#00b7c2; /* морской */
+    --glass: rgba(255,255,255,0.03);
+    --glass-2: rgba(255,255,255,0.02);
+    --radius:16px;
   }
 
-  body {
-    margin: 0;
-    font-family: 'Segoe UI', sans-serif;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    overflow-x: hidden;
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+    background: radial-gradient(1200px 600px at 10% 10%, rgba(0,183,194,0.04), transparent 10%),
+                radial-gradient(800px 400px at 90% 90%, rgba(0,183,194,0.02), transparent 10%),
+                var(--bg);
+    color:#e7eef0;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    overflow-x:hidden;
   }
 
-  header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1rem 2rem;
-    background-color: #111;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+  header{
+    height:72px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 28px;
+    backdrop-filter: blur(6px);
+    background: linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+  .brand{
+    display:flex;
+    gap:12px;
+    align-items:center;
+  }
+  .brand img{height:36px; width:36px; border-radius:8px; box-shadow:0 6px 22px rgba(0,0,0,0.6), inset 0 -1px rgba(255,255,255,0.02); transform: translateZ(0); }
+  .brand h1{
+    margin:0;
+    font-size:18px;
+    font-weight:800;
+    letter-spacing:0.6px;
+    color:var(--accent);
+    text-shadow: 0 6px 18px rgba(0,183,194,0.06);
+  }
+  .controls{display:flex; gap:10px; align-items:center;}
+  .control-btn{
+    background:var(--glass);
+    border:1px solid rgba(255,255,255,0.03);
+    color:var(--muted);
+    padding:8px 10px;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:13px;
+    display:inline-flex;
+    gap:8px;
+    align-items:center;
+    transition: all .18s ease;
+  }
+  .control-btn:hover{ transform: translateY(-3px); color:#fff; border-color: rgba(0,183,194,0.12); }
+
+  /* HERO */
+  .hero{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:48px 28px 40px;
+  }
+  .hero-inner{
+    width:100%;
+    max-width:1180px;
+    border-radius:20px;
+    padding:48px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.012), rgba(255,255,255,0.006));
+    box-shadow: 0 10px 40px rgba(2,6,8,0.6);
+    border: 1px solid rgba(255,255,255,0.02);
+    position:relative;
+    overflow:hidden;
   }
 
-  header img {
-    height: 50px;
-    transition: transform 0.3s ease;
-  }
-  header img:hover {
-    transform: rotate(-15deg);
-  }
-
-  nav button {
-    background-color: var(--accent-color);
-    border: none;
-    padding: 0.5rem 1rem;
-    color: #fff;
-    font-size: 1rem;
-    cursor: pointer;
-    border-radius: 6px;
-    transition: all 0.3s ease;
+  /* subtle decorative gradient */
+  .hero-inner::before{
+    content:"";
+    position:absolute;
+    inset:-30% -10% auto auto;
+    width:520px; height:520px;
+    background: radial-gradient(circle at 30% 30%, rgba(0,183,194,0.06), transparent 20%);
+    transform: rotate(22deg);
+    filter: blur(40px);
+    pointer-events:none;
   }
 
-  nav button:hover {
-    background-color: #008c99;
-    transform: scale(1.05);
+  .hero-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+  }
+  .left-hero{
+    display:flex;
+    gap:18px;
+    align-items:center;
+  }
+  .logo-blob{
+    width:84px; height:84px; border-radius:18px; display:flex; align-items:center; justify-content:center;
+    background: linear-gradient(135deg, rgba(0,183,194,0.16), rgba(0,183,194,0.04));
+    border: 1px solid rgba(255,255,255,0.03);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+  }
+  .logo-blob img{width:56px; height:56px; border-radius:8px}
+
+  .hero-title{
+    font-size:36px;
+    margin:0;
+    letter-spacing:0.4px;
+    color: #eafafc;
+    font-weight:800;
+    line-height:1.02;
+  }
+  .hero-sub{
+    margin-top:6px;
+    color:var(--muted);
+    font-size:15px;
+    max-width:760px;
   }
 
-  main {
-    text-align: center;
-    padding: 5rem 2rem;
+  /* center actions */
+  .hero-cta{
+    display:flex;
+    gap:18px;
+    align-items:center;
+    justify-content:center;
+    margin-top:26px;
+  }
+  .btn-primary{
+    background: linear-gradient(180deg,var(--accent), #00a6b0);
+    color:#022023;
+    padding:18px 34px;
+    border-radius:36px;
+    font-weight:700;
+    border:none;
+    box-shadow: 0 10px 30px rgba(0,183,194,0.16);
+    cursor:pointer;
+    font-size:18px;
+    transition: transform .18s ease, box-shadow .18s ease;
+  }
+  .btn-primary:hover{ transform: translateY(-6px) scale(1.02); box-shadow: 0 20px 50px rgba(0,183,194,0.22); }
+  .btn-ghost{
+    background:transparent;
+    border:1px solid rgba(255,255,255,0.04);
+    color:var(--muted);
+    padding:12px 18px;
+    border-radius:12px;
+    cursor:pointer;
   }
 
-  main h1 {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    animation: fadeInDown 1s ease forwards;
+  /* quick-access grid */
+  .quick {
+    margin-top:42px;
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap:18px;
+  }
+  .tile {
+    background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.006));
+    border-radius:14px;
+    padding:20px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:12px;
+    justify-content:center;
+    border:1px solid rgba(255,255,255,0.02);
+    transition: transform .18s ease, box-shadow .18s ease;
+    cursor:pointer;
+  }
+  .tile:hover{ transform: translateY(-6px); box-shadow: 0 18px 40px rgba(0,0,0,0.6); }
+  .tile .ico {
+    width:44px; height:44px; border-radius:10px; display:grid; place-items:center;
+    background: linear-gradient(180deg, rgba(0,183,194,0.12), rgba(0,183,194,0.04));
+    color:var(--accent);
+    font-weight:700;
+    font-size:20px;
+  }
+  .tile .label { font-size:14px; color:#dbe9ea; font-weight:600; text-align:center; }
+
+  /* centered small download under tiles for mobile */
+  .center-download { display:none; justify-content:center; margin-top:28px; }
+
+  footer{
+    margin-top:28px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding-top:22px;
+    border-top:1px solid rgba(255,255,255,0.02);
+    color:var(--muted);
+    font-size:13px;
   }
 
-  main p {
-    font-size: 1.2rem;
-    max-width: 700px;
-    margin: 0 auto 2rem;
-    animation: fadeIn 1.5s ease forwards;
+  /* responsive */
+  @media (max-width:900px){
+    .hero-inner{ padding:28px; }
+    .hero-title{ font-size:26px }
+    .logo-blob{ width:64px; height:64px }
+    .hero-top{ flex-direction:column; align-items:flex-start; gap:14px }
+    .quick{ grid-template-columns: repeat(2, 1fr) }
+    .center-download{ display:flex }
   }
 
-  /* Анимации */
-  @keyframes fadeInDown {
-    0% {opacity: 0; transform: translateY(-50px);}
-    100% {opacity: 1; transform: translateY(0);}
-  }
+  /* page fade-in */
+  .hero-inner, header { opacity:0; transform: translateY(12px); animation: appear .7s ease forwards; }
+  header{ animation-delay:.05s }
+  .hero-inner{ animation-delay:.12s }
+  @keyframes appear { to{opacity:1; transform:none} }
 
-  @keyframes fadeIn {
-    0% {opacity: 0;}
-    100% {opacity: 1;}
-  }
-
-  footer {
-    text-align: center;
-    padding: 2rem;
-    font-size: 0.9rem;
-    color: #888;
-  }
-
-  /* Языковой переключатель */
-  #lang-switch {
-    margin-left: 1rem;
-    padding: 0.3rem 0.7rem;
-    border-radius: 5px;
-    border: 1px solid var(--accent-color);
-    background: transparent;
-    color: var(--text-color);
-    cursor: pointer;
-    transition: 0.3s;
-  }
-  #lang-switch:hover {
-    background-color: var(--accent-color);
-    color: #000;
+  /* little pulse on accent */
+  .accent-pulse{
+    position:absolute; inset:auto 0 0 0; height:2px;
+    background: linear-gradient(90deg, rgba(0,183,194,0.02), rgba(0,183,194,0.2), rgba(0,183,194,0.02));
+    filter: blur(8px);
+    transform: translateY(10px);
+    pointer-events:none;
   }
 </style>
 </head>
 <body>
+
 <header>
-  <img src="icon.png" alt="Miracula Browser">
-  <div>
-    <button id="download-btn">Скачать</button>
-    <button id="lang-switch">EN</button>
+  <div class="brand">
+    <img src="icon.png" alt="Miracula">
+    <h1>MIRACULA</h1>
+  </div>
+
+  <div class="controls">
+    <div class="control-btn" id="version-badge">v2.0.0 • Beta</div>
+    <button class="control-btn" id="langBtn" aria-label="Switch language">EN</button>
   </div>
 </header>
 
-<main>
-  <h1 id="title">Miracula Browser 2.0.0 (Бета)</h1>
-  <p id="description">
-    Miracula — это современный и оптимизированный браузер с темной темой и множеством функций. 
-    Сейчас он находится в бета-версии, но уже готов для использования на Windows.
-  </p>
+<main class="hero">
+  <section class="hero-inner" role="main" aria-labelledby="hero-heading">
+    <div class="hero-top">
+      <div class="left-hero">
+        <div class="logo-blob"><img src="icon.png" alt="Miracula"></div>
+        <div>
+          <h2 class="hero-title" id="hero-heading">Miracula Browser — быстро, красиво, оптимально</h2>
+          <div class="hero-sub" id="hero-sub">Современный браузер с тёмной темой и премиальными фичами. Находится в бета-версии — попробуйте и оставьте отзыв.</div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:12px;">
+        <!-- big centered download -->
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:10px;">
+          <button class="btn-primary" id="download-center">Скачать (Windows)</button>
+          <button class="btn-ghost" id="changelog">Список изменений</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-cta" aria-hidden="true">
+      <!-- visually redundant, main button above is primary -->
+    </div>
+
+    <div class="quick" id="quick-grid" aria-label="Quick access">
+      <div class="tile" data-url="https://www.google.com">
+        <div class="ico">G</div>
+        <div class="label">Google</div>
+      </div>
+      <div class="tile" data-url="https://www.youtube.com">
+        <div class="ico">▶</div>
+        <div class="label">YouTube</div>
+      </div>
+      <div class="tile" data-url="https://github.com">
+        <div class="ico">GH</div>
+        <div class="label">GitHub</div>
+      </div>
+      <div class="tile" data-url="https://twitter.com">
+        <div class="ico">T</div>
+        <div class="label">Twitter</div>
+      </div>
+      <div class="tile" data-url="https://www.reddit.com">
+        <div class="ico">R</div>
+        <div class="label">Reddit</div>
+      </div>
+      <div class="tile" data-url="https://stackoverflow.com">
+        <div class="ico">SO</div>
+        <div class="label">Stack Overflow</div>
+      </div>
+    </div>
+
+    <div class="center-download" style="margin-top:28px">
+      <button class="btn-primary" id="download-mobile">Скачать Miracula 2.0.0</button>
+    </div>
+
+    <div class="accent-pulse" aria-hidden="true"></div>
+
+    <footer>
+      <div>© 2026 Miracula Team</div>
+      <div style="display:flex;gap:12px;align-items:center;color:var(--muted)"><div>Beta</div><div style="opacity:.9">Безопасность и конфиденциальность — на первом месте</div></div>
+    </footer>
+  </section>
 </main>
 
-<footer>
-  &copy; 2026 Miracula Team
-</footer>
-
 <script>
-  const downloadBtn = document.getElementById('download-btn');
-  const langSwitch = document.getElementById('lang-switch');
-  let lang = 'ru';
+  // Config: path to .exe (adjust if different)
+  const downloadPath = 'downloads/Miracula Browser Setup 2.0.0.exe';
 
-  const texts = {
+  // Language texts
+  const TEXTS = {
     ru: {
-      title: "Miracula Browser 2.0.0 (Бета)",
-      description: "Miracula — это современный и оптимизированный браузер с темной темой и множеством функций. Сейчас он находится в бета-версии, но уже готов для использования на Windows.",
-      download: "Скачать",
-      switch: "EN"
+      heroTitle: 'Miracula Browser — быстро, красиво, оптимально',
+      heroSub: 'Современный браузер с тёмной темой и премиальными фичами. Находится в бета-версии — попробуйте и оставьте отзыв.',
+      downloadWin: 'Скачать (Windows)',
+      mobileDL: 'Скачать Miracula 2.0.0',
+      changelog: 'Список изменений',
+      version: 'v2.0.0 • Beta',
+      langBtn: 'EN'
     },
     en: {
-      title: "Miracula Browser 2.0.0 (Beta)",
-      description: "Miracula is a modern and optimized browser with a dark theme and many features. It is currently in beta, but ready to use on Windows.",
-      download: "Download",
-      switch: "RU"
+      heroTitle: 'Miracula Browser — fast, beautiful, optimized',
+      heroSub: 'A modern browser with a dark theme and premium features. Currently in beta — try it and give feedback.',
+      downloadWin: 'Download (Windows)',
+      mobileDL: 'Download Miracula 2.0.0',
+      changelog: 'Changelog',
+      version: 'v2.0.0 • Beta',
+      langBtn: 'RU'
     }
   };
 
-  langSwitch.addEventListener('click', () => {
-    lang = lang === 'ru' ? 'en' : 'ru';
-    document.getElementById('title').innerText = texts[lang].title;
-    document.getElementById('description').innerText = texts[lang].description;
-    downloadBtn.innerText = texts[lang].download;
-    langSwitch.innerText = texts[lang].switch;
+  // initial language from localStorage or browser
+  const saved = localStorage.getItem('miracula_lang');
+  let lang = saved || (navigator.language && navigator.language.startsWith('en') ? 'en' : 'ru');
+
+  // DOM refs
+  const heroHeading = document.getElementById('hero-heading');
+  const heroSub = document.getElementById('hero-sub');
+  const downloadCenter = document.getElementById('download-center');
+  const downloadMobile = document.getElementById('download-mobile');
+  const changelogBtn = document.getElementById('changelog');
+  const versionBadge = document.getElementById('version-badge');
+  const langBtn = document.getElementById('langBtn');
+
+  function applyLang(){
+    const t = TEXTS[lang];
+    heroHeading.textContent = t.heroTitle;
+    heroSub.textContent = t.heroSub;
+    downloadCenter.textContent = t.downloadWin;
+    downloadMobile.textContent = t.mobileDL;
+    changelogBtn.textContent = t.changelog;
+    versionBadge.textContent = t.version;
+    langBtn.textContent = t.langBtn;
+    localStorage.setItem('miracula_lang', lang);
+  }
+
+  // click handlers
+  downloadCenter.addEventListener('click', () => { window.location.href = downloadPath; });
+  downloadMobile.addEventListener('click', () => { window.location.href = downloadPath; });
+  changelogBtn.addEventListener('click', () => { alert(lang === 'ru' ? 'Список изменений пока недоступен.' : 'Changelog is not available yet.'); });
+
+  // language toggle
+  langBtn.addEventListener('click', () => {
+    lang = (lang === 'ru') ? 'en' : 'ru';
+    applyLang();
   });
 
-  downloadBtn.addEventListener('click', () => {
-    // Укажите путь к вашему .exe
-    window.location.href = 'downloads/Miracula Browser Setup 2.0.0.exe';
+  // quick tiles click: open in new tab
+  document.querySelectorAll('.tile').forEach(tile=>{
+    tile.addEventListener('click', () => {
+      const u = tile.getAttribute('data-url');
+      window.open(u, '_blank', 'noopener');
+    });
   });
+
+  // initial application
+  applyLang();
+
+  // small: keyboard shortcut D to download (dev convenience)
+  document.addEventListener('keydown', e=>{
+    if(e.key.toLowerCase() === 'd' && (e.ctrlKey || e.metaKey)){
+      window.location.href = downloadPath;
+    }
+  });
+
 </script>
 </body>
 </html>
