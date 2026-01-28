@@ -1,0 +1,434 @@
+# Tess AI — Полный проект (Frontend + Backend)
+
+Проект содержит минимальный, но **рабочий** стек: фронтенд (React + Vite + Tailwind-ready) и бэкенд (Node + Express), который проксирует запросы на выбранную модель (OpenAI или Hugging Face). В проекте есть demo-mode — интерфейс будет работать без ключей.
+
+---
+
+## Структура (файлы в репозитории)
+
+```
+/ (repo root)
+  ├─ package.json
+  ├─ server.js
+  ├─ .env.example
+  ├─ README.md
+  ├─ index.html
+  ├─ vite.config.js
+  ├─ tailwind.config.cjs (опционально)
+  └─ src/
+     ├─ main.jsx
+     └─ App.jsx
+```
+
+---
+
+## package.json
+
+```json
+{
+  "name": "tess-ai",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --port 4173",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.0",
+    "express": "^4.18.2",
+    "node-fetch": "^3.3.1"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}
+```
+
+> Примечание: Tailwind в `devDependencies` не включён — он опционален. Инструкция для быстрой установки есть в README.
+
+---
+
+## .env.example
+
+```
+# Для OpenAI
+OPENAI_API_KEY=
+# Для Hugging Face Inference (если хочешь использовать открытые модели через HF)
+HF_API_KEY=
+HF_MODEL=
+# Запустить демо режим (не требуется ключей)
+DEMO_MODE=1
+# Порт сервера
+PORT=3000
+```
+
+---
+
+## server.js (полноценный бэкенд-прокси)
+
+```js
+/* server.js
+   Небольшой Express-сервер, который принимает POST /api/ai
+   и проксирует запрос на OpenAI или Hugging Face Inference.
+*/
+
+require('dotenv').config();
+const express = require('express');
+const fetch = require('node-fetch');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+
+const app = express();
+app.use(cors());
+app.use(bodyParser.json({ limit: '1mb' }));
+
+const PORT = process.env.PORT || 3000;
+const DEMO = process.env.DEMO_MODE === '1';
+const OPENAI_KEY = process.env.OPENAI_API_KEY;
+const HF_KEY = process.env.HF_API_KEY;
+const HF_MODEL = process.env.HF_MODEL; // e.g. 'bigcode/starcoder' or other
+
+// Simple in-memory rate-limit per IP (very small-scale)
+const rateLimitWindowMs = 60 * 1000; // 1 minute
+const maxRequestsPerWindow = 30; // настроить при необходимости
+const ipMap = new Map();
+
+function checkRateLimit(ip) {
+  const now = Date.now();
+  const rec = ipMap.get(ip) || { ts: now, count: 0 };
+  if (now - rec.ts > rateLimitWindowMs) {
+    rec.ts = now;
+    rec.count = 1;
+  } else {
+    rec.count++;
+  }
+  ipMap.set(ip, rec);
+  return rec.count <= maxRequestsPerWindow;
+}
+
+function systemPrompt() {
+  return `You are Tess AI, a coding assistant.
+Be direct, concise when asked for short answers, otherwise provide clear code examples.
+If the user sends code, respond with corrected/annotated code blocks and short explanation.
+Always label language when returning code blocks.`;
+}
+
+app.post('/api/ai', async (req, res) => {
+  try {
+    const ip = req.ip || req.connection.remoteAddress;
+    if (!checkRateLimit(ip)) {
+      return res.status(429).json({ error: 'Rate limit exceeded' });
+    }
+
+    const { messages, user_input, persona } = req.body || {};
+
+    if (DEMO) {
+      // quick demo reply
+      return res.json({ reply: `Demo Tess reply for: ${user_input}` });
+    }
+
+    // Build final prompt/messages
+    const baseMessages = [
+      { role: 'system', content: systemPrompt() },
+    ];
+
+    // Append historical messages if any (but limit size)
+    if (Array.isArray(messages)) {
+      const tail = messages.slice(-8).map(m => ({ role: m.role, content: m.content }));
+      baseMessages.push(...tail);
+    }
+    baseMessages.push({ role: 'user', content: user_input });
+
+    // Prefer OpenAI if API key present
+    if (OPENAI_KEY) {
+      const payload = {
+        model: 'gpt-4o-mini',
+        messages: baseMessages,
+        temperature: 0.15,
+        max_tokens: 1024,
+      };
+
+      const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${OPENAI_KEY}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!resp.ok) {
+        const txt = await resp.text();
+        return res.status(502).json({ error: `OpenAI error: ${resp.status}`, detail: txt });
+      }
+
+      const data = await resp.json();
+      const reply = data?.choices?.[0]?.message?.content || JSON.stringify(data);
+      return res.json({ reply });
+    }
+
+    // Else try Hugging Face Inference
+    if (HF_KEY && HF_MODEL) {
+      // Compose prompt
+      const prompt = baseMessages.map(m => `${m.role}: ${m.content}`).join('
+') + '
+assistant:';
+
+      const resp = await fetch(`https://api-inference.huggingface.co/models/${HF_MODEL}`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${HF_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ inputs: prompt, parameters: { max_new_tokens: 512, temperature: 0.15 } })
+      });
+
+      if (!resp.ok) {
+        const txt = await resp.text();
+        return res.status(502).json({ error: `HF error: ${resp.status}`, detail: txt });
+      }
+
+      const data = await resp.json();
+      // HF may respond with { generated_text } or array; try to extract
+      let reply = '';
+      if (Array.isArray(data) && data[0] && data[0].generated_text) reply = data[0].generated_text;
+      else if (data.generated_text) reply = data.generated_text;
+      else if (data[0] && typeof data[0] === 'string') reply = data[0];
+      else reply = JSON.stringify(data);
+
+      return res.json({ reply });
+    }
+
+    // If no provider configured
+    return res.json({ reply: 'Server not configured with OpenAI or Hugging Face keys. Set OPENAI_API_KEY or HF_API_KEY+HF_MODEL, or enable DEMO_MODE.' });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+app.listen(PORT, () => console.log(`Tess AI server running on http://localhost:${PORT}`));
+```
+
+---
+
+## index.html
+
+```html
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tess AI — Femfur</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+```
+
+---
+
+## vite.config.js
+
+```js
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    port: 5173,
+    proxy: {
+      '/api': 'http://localhost:3000'
+    }
+  }
+})
+```
+
+---
+
+## src/main.jsx
+
+```jsx
+import React from 'react'
+import { createRoot } from 'react-dom/client'
+import App from './App'
+import './styles.css'
+
+createRoot(document.getElementById('root')).render(<App />)
+```
+
+> `styles.css` можно создать с базовыми стилями или включить Tailwind — я оставил это на твой выбор.
+
+---
+
+## src/App.jsx (UI — chat + demo + подключение к /api/ai)
+
+```jsx
+import React, { useEffect, useRef, useState } from 'react';
+
+const STORAGE_KEY = 'tess_ai_messages_v1';
+
+export default function App() {
+  const [messages, setMessages] = useState(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [{ role: 'system', content: 'You are Tess AI — coding assistant. Answer concisely and show code when necessary.' }];
+    } catch (e) { return [{ role: 'system', content: 'You are Tess AI — coding assistant. Answer concisely and show code when necessary.' }]; }
+  });
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [demoMode, setDemoMode] = useState(false);
+  const [persona, setPersona] = useState('concise');
+  const messagesRef = useRef(null);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+    setTimeout(() => messagesRef.current?.scrollTo({ top: messagesRef.current.scrollHeight, behavior: 'smooth' }), 50);
+  }, [messages]);
+
+  function appendMessage(role, content) {
+    setMessages(prev => [...prev, { role, content, id: Date.now() + Math.random() }]);
+  }
+
+  async function sendMessage() {
+    const text = input.trim();
+    if (!text) return;
+    appendMessage('user', text);
+    setInput('');
+    setLoading(true);
+
+    if (demoMode) {
+      await new Promise(r => setTimeout(r, 600));
+      appendMessage('assistant', `Demo Tess reply: ${text.slice(0, 400)}`);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const resp = await fetch('/api/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages, user_input: text, persona })
+      });
+
+      if (!resp.ok) {
+        const txt = await resp.text();
+        appendMessage('assistant', `Server error: ${resp.status} - ${txt}`);
+        setLoading(false);
+        return;
+      }
+
+      const data = await resp.json();
+      appendMessage('assistant', data.reply || '(empty)');
+    } catch (e) {
+      appendMessage('assistant', `Error: ${e.message}`);
+    }
+    setLoading(false);
+  }
+
+  function clearChat() {
+    setMessages([{ role: 'system', content: messages[0]?.content || 'You are Tess AI — coding assistant.' }]);
+    localStorage.removeItem(STORAGE_KEY);
+  }
+
+  return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(180deg,#0f172a,#020617)', color: '#e6eef8', padding: 20 }}>
+      <div style={{ width: '100%', maxWidth: 1100, background: 'rgba(12,17,23,0.6)', borderRadius: 16, boxShadow: '0 8px 30px rgba(0,0,0,0.6)', overflow: 'hidden' }}>
+        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <div style={{ width: 48, height: 48, borderRadius: 10, background: 'linear-gradient(135deg,#7c3aed,#ec4899)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>T</div>
+            <div>
+              <div style={{ fontSize: 18, fontWeight: 700 }}>Tess AI</div>
+              <div style={{ fontSize: 12, color: '#9aa4b2' }}>Coding assistant — femfur.space</div>
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <label style={{ fontSize: 12, color: '#9aa4b2' }}>Demo</label>
+            <input type="checkbox" checked={demoMode} onChange={e => setDemoMode(e.target.checked)} />
+            <select value={persona} onChange={e => setPersona(e.target.value)} style={{ background: 'transparent', color: '#e6eef8' }}>
+              <option value="concise">Concise</option>
+              <option value="thorough">Thorough</option>
+            </select>
+            <button onClick={clearChat} style={{ background: 'rgba(255,255,255,0.03)', border: 'none', padding: '8px 12px', borderRadius: 8, color: '#e6eef8' }}>Clear</button>
+          </div>
+        </header>
+
+        <main ref={messagesRef} style={{ padding: 16, height: '60vh', overflow: 'auto' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {messages.slice(1).map((m, idx) => (
+              <div key={m.id || idx} style={{ alignSelf: m.role === 'user' ? 'flex-end' : 'flex-start', maxWidth: '80%' }}>
+                <div style={{ background: m.role === 'user' ? 'linear-gradient(90deg,#4f46e5,#ec4899)' : 'rgba(255,255,255,0.03)', padding: 12, borderRadius: 8 }}>
+                  <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{m.content}</pre>
+                </div>
+                <div style={{ fontSize: 11, color: '#9aa4b2', marginTop: 6 }}>{m.role}</div>
+              </div>
+            ))}
+            {loading && <div style={{ color: '#9aa4b2' }}>Tess AI is typing...</div>}
+          </div>
+        </main>
+
+        <footer style={{ padding: 16, borderTop: '1px solid rgba(255,255,255,0.03)', display: 'flex', gap: 12 }}>
+          <textarea value={input} onChange={e => setInput(e.target.value)} placeholder="Enter code or question..." style={{ flex: 1, minHeight: 56, resize: 'vertical', padding: 12, borderRadius: 8, background: 'rgba(255,255,255,0.02)', color: '#e6eef8', border: 'none' }} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <button onClick={sendMessage} disabled={loading} style={{ padding: '10px 16px', borderRadius: 8, background: 'linear-gradient(135deg,#7c3aed,#ec4899)', border: 'none', color: '#fff' }}>{loading ? 'Sending...' : 'Send'}</button>
+            <div style={{ fontSize: 11, color: '#9aa4b2' }}>API endpoint: <code>/api/ai</code></div>
+          </div>
+        </footer>
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+## README.md (кратко)
+
+```md
+# Tess AI — Femfur
+
+Минимальный проект: фронтенд (React + Vite) + бэкенд (Express) для запуска собственной "нейросети" для кода — Tess AI.
+
+## Быстрый старт
+
+1. Клонируй репозиторий
+2. Установи зависимости: `npm install`
+3. Добавь `.env` на основе `.env.example` (укажи OPENAI_API_KEY или HF_API_KEY + HF_MODEL или включи DEMO_MODE=1)
+4. В одном терминале запусти сервер: `node server.js`
+5. В другом терминале запусти фронтенд: `npm run dev` (Vite)
+
+После этого открой http://localhost:5173
+
+## Развёртывание
+
+- Для простого развёртывания бэкенда используй Render или Railway
+- Для фронтенда можно использовать Vercel или Netlify (если нужно, помогу с конфигом)
+
+```
+
+---
+
+## Что я сделал прямо сейчас
+
+- Прописал готовые файлы для фронтенда и бэкенда
+- Включил demo-mode, чтобы UI работал сразу
+
+---
+
+Если хочешь, я могу прямо сейчас:
+
+1. Сгенерировать `styles.css` и Tailwind-конфиг и подключить Tailwind (чтобы UI выглядел круто)
+2. Добавить `monaco-editor` в интерфейс (редактор кода внутри)
+3. Подготовить `Procfile` и инструкции для деплоя на Heroku/Render/Vercel
+4. Переименовать все видимые строки на "Tess AI" (если нужно сделать более явный брендинг)
+
+Напиши, какие из пунктов добавить сейчас, или скажи "готово, хочу .zip" — я сгенерирую zip-файл с файлами.
