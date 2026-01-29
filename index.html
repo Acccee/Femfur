@@ -268,12 +268,20 @@
         }
 
         .form-group textarea {
-            min-height: 120px;
             resize: vertical;
+            min-height: 100px;
         }
 
-        .form-group input[type="file"] {
-            border: none;
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            background: #D6DAF0;
+            border: 1px solid #B7C5D9;
+        }
+
+        .empty-state h3 {
+            color: #0039A6;
+            margin-bottom: 10px;
         }
 
         .greentext {
@@ -281,97 +289,71 @@
         }
 
         .quote-link {
-            color: #D00;
-            text-decoration: underline;
+            color: #d00;
+            text-decoration: none;
         }
 
         .quote-link:hover {
-            color: #F00;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-            background: #D6DAF0;
-            border: 1px solid #B7C5D9;
-        }
-
-        .footer {
-            background: #D6DAF0;
-            border-top: 1px solid #B7C5D9;
-            padding: 15px;
-            text-align: center;
-            margin-top: 40px;
-            font-size: 9pt;
+            text-decoration: underline;
         }
 
         .modal {
             display: none;
             position: fixed;
-            top: 0;
+            z-index: 1000;
             left: 0;
+            top: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.6);
-            z-index: 1000;
+            background-color: rgba(0,0,0,0.4);
         }
 
         .modal.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: block;
         }
 
         .modal-content {
-            background: #EEF2FF;
-            border: 2px solid #0039A6;
-            padding: 20px;
-            max-width: 600px;
+            background-color: #EEF2FF;
+            margin: 5% auto;
+            padding: 0;
+            border: 1px solid #888;
             width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
+            max-width: 600px;
         }
 
         .modal-header {
+            background: #0039A6;
+            color: white;
+            padding: 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
         }
 
         .modal-header h2 {
-            color: #0039A6;
+            margin: 0;
         }
 
-        .close-modal {
-            font-size: 24px;
-            cursor: pointer;
-            color: #0039A6;
-            background: none;
-            border: none;
+        .close {
+            color: white;
+            font-size: 28px;
             font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
         }
 
-        .close-modal:hover {
-            color: #D00;
+        .close:hover {
+            color: #ccc;
         }
 
-        @media (max-width: 768px) {
-            .board-links {
-                grid-template-columns: 1fr;
-            }
+        .modal-body {
+            padding: 20px;
+        }
 
-            .post-image {
-                float: none;
-                display: block;
-                margin: 10px 0;
-                max-width: 100%;
-            }
-
-            .reply {
-                margin-left: 10px;
-            }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #0039A6;
         }
     </style>
 </head>
@@ -379,219 +361,238 @@
     <div class="header">
         <div class="header-content">
             <a href="#" class="logo" onclick="showHome(); return false;">Femfur</a>
-            <div class="nav">
+            <nav class="nav">
                 <a href="#" onclick="showHome(); return false;">Главная</a>
-                <a href="#" onclick="alert('FAQ в разработке'); return false;">FAQ</a>
-            </div>
+                <a href="#">Правила</a>
+                <a href="#">FAQ</a>
+            </nav>
         </div>
     </div>
 
     <div class="container">
+        <!-- Главная страница -->
         <div id="home" class="page active">
             <div class="welcome">
-                <h1>🎨 Femfur Имиджборд 🎨</h1>
-                <p>Добро пожаловать! Выберите борду для начала общения.</p>
+                <h1>Добро пожаловать на Femfur!</h1>
+                <p>Выберите борду ниже</p>
             </div>
 
             <div class="board-categories">
                 <div class="board-category">
-                    <h3>Японская культура</h3>
+                    <h3>🎨 Творчество</h3>
                     <div class="board-links">
-                        <a href="#" class="board-link" onclick="showBoard('anime'); return false;">
-                            <span class="board-code">/anime/</span> - Аниме & Манга
-                        </a>
-                        <a href="#" class="board-link" onclick="showBoard('jp'); return false;">
-                            <span class="board-code">/jp/</span> - Японская культура
-                        </a>
-                        <a href="#" class="board-link" onclick="showBoard('otaku'); return false;">
-                            <span class="board-code">/otaku/</span> - Отаку
-                        </a>
-                    </div>
-                </div>
-
-                <div class="board-category">
-                    <h3>Видеоигры</h3>
-                    <div class="board-links">
-                        <a href="#" class="board-link" onclick="showBoard('v'); return false;">
-                            <span class="board-code">/v/</span> - Видеоигры
-                        </a>
-                        <a href="#" class="board-link" onclick="showBoard('vr'); return false;">
-                            <span class="board-code">/vr/</span> - Ретро игры
-                        </a>
-                        <a href="#" class="board-link" onclick="showBoard('vm'); return false;">
-                            <span class="board-code">/vm/</span> - Мультиплеер
-                        </a>
-                    </div>
-                </div>
-
-                <div class="board-category">
-                    <h3>Интересы</h3>
-                    <div class="board-links">
-                        <a href="#" class="board-link" onclick="showBoard('tech'); return false;">
-                            <span class="board-code">/tech/</span> - Технологии
-                        </a>
-                        <a href="#" class="board-link" onclick="showBoard('mu'); return false;">
-                            <span class="board-code">/mu/</span> - Музыка
-                        </a>
-                        <a href="#" class="board-link" onclick="showBoard('tv'); return false;">
-                            <span class="board-code">/tv/</span> - ТВ & Кино
+                        <a href="#" class="board-link" onclick="showBoard('art'); return false;">
+                            <span class="board-code">/art/</span> - Арт и рисование
                         </a>
                         <a href="#" class="board-link" onclick="showBoard('lit'); return false;">
                             <span class="board-code">/lit/</span> - Литература
                         </a>
-                    </div>
-                </div>
-
-                <div class="board-category">
-                    <h3>Творчество</h3>
-                    <div class="board-links">
-                        <a href="#" class="board-link" onclick="showBoard('art'); return false;">
-                            <span class="board-code">/art/</span> - Искусство
-                        </a>
-                        <a href="#" class="board-link" onclick="showBoard('design'); return false;">
-                            <span class="board-code">/design/</span> - Дизайн
-                        </a>
-                        <a href="#" class="board-link" onclick="showBoard('photo'); return false;">
-                            <span class="board-code">/photo/</span> - Фотография
+                        <a href="#" class="board-link" onclick="showBoard('music'); return false;">
+                            <span class="board-code">/music/</span> - Музыка
                         </a>
                     </div>
                 </div>
 
                 <div class="board-category">
-                    <h3>Разное</h3>
+                    <h3>💬 Общение</h3>
                     <div class="board-links">
                         <a href="#" class="board-link" onclick="showBoard('b'); return false;">
-                            <span class="board-code">/b/</span> - Random
+                            <span class="board-code">/b/</span> - Бред
                         </a>
-                        <a href="#" class="board-link" onclick="showBoard('pol'); return false;">
-                            <span class="board-code">/pol/</span> - Политика
+                        <a href="#" class="board-link" onclick="showBoard('fur'); return false;">
+                            <span class="board-code">/fur/</span> - Фурри
                         </a>
-                        <a href="#" class="board-link" onclick="showBoard('news'); return false;">
-                            <span class="board-code">/news/</span> - Новости
+                        <a href="#" class="board-link" onclick="showBoard('chat'); return false;">
+                            <span class="board-code">/chat/</span> - Болталка
+                        </a>
+                    </div>
+                </div>
+
+                <div class="board-category">
+                    <h3>🎮 Интересы</h3>
+                    <div class="board-links">
+                        <a href="#" class="board-link" onclick="showBoard('game'); return false;">
+                            <span class="board-code">/game/</span> - Видеоигры
+                        </a>
+                        <a href="#" class="board-link" onclick="showBoard('tech'); return false;">
+                            <span class="board-code">/tech/</span> - Технологии
+                        </a>
+                        <a href="#" class="board-link" onclick="showBoard('anime'); return false;">
+                            <span class="board-code">/anime/</span> - Аниме
                         </a>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- Страница борды -->
         <div id="board" class="page">
             <div class="board-header">
-                <div>
-                    <div class="board-title" id="boardTitle"></div>
-                    <div style="font-size: 10pt; color: #666; margin-top: 5px;" id="boardDesc"></div>
-                </div>
+                <h1 class="board-title" id="boardTitle"></h1>
                 <button class="btn" onclick="openNewThreadModal()">Создать тред</button>
             </div>
+            <p id="boardDesc" style="margin-bottom: 20px;"></p>
             <div id="threadsContainer"></div>
         </div>
 
+        <!-- Страница треда -->
         <div id="thread" class="page">
             <div class="board-header">
-                <button class="btn btn-secondary" onclick="backToBoard()">← Назад</button>
-                <div class="board-title" id="threadBoardTitle"></div>
+                <h1 class="board-title" id="threadBoardTitle"></h1>
+                <button class="btn btn-secondary" onclick="backToBoard()">← Назад к борде</button>
             </div>
+            
             <div id="threadContainer"></div>
+
             <div class="form-container">
-                <h3>Ответить</h3>
+                <h3>Ответить в тред</h3>
                 <form onsubmit="submitReply(event)">
                     <div class="form-group">
-                        <textarea id="replyText" placeholder="Текст сообщения" required maxlength="2000"></textarea>
+                        <label for="replyText">Сообщение</label>
+                        <textarea id="replyText" required></textarea>
                     </div>
                     <div class="form-group">
-                        <label>Изображение (необязательно):</label>
+                        <label for="replyImage">Изображение (необязательно)</label>
                         <input type="file" id="replyImage" accept="image/*">
                     </div>
-                    <button type="submit" class="btn">Отправить ответ</button>
+                    <button type="submit" class="btn">Отправить</button>
                 </form>
             </div>
         </div>
     </div>
 
+    <!-- Модальное окно создания треда -->
     <div id="newThreadModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Создать новый тред</h2>
-                <button class="close-modal" onclick="closeNewThreadModal()">&times;</button>
+                <span class="close" onclick="closeNewThreadModal()">&times;</span>
             </div>
-            <form onsubmit="submitThread(event)">
-                <div class="form-group">
-                    <label>Тема (необязательно):</label>
-                    <input type="text" id="threadSubject" maxlength="100">
-                </div>
-                <div class="form-group">
-                    <label>Текст сообщения:</label>
-                    <textarea id="threadText" required maxlength="2000"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Изображение (необязательно):</label>
-                    <input type="file" id="threadImage" accept="image/*">
-                </div>
-                <button type="submit" class="btn">Создать тред</button>
-            </form>
+            <div class="modal-body">
+                <form onsubmit="submitThread(event)">
+                    <div class="form-group">
+                        <label for="threadSubject">Тема (необязательно)</label>
+                        <input type="text" id="threadSubject">
+                    </div>
+                    <div class="form-group">
+                        <label for="threadText">Сообщение</label>
+                        <textarea id="threadText" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="threadImage">Изображение (необязательно)</label>
+                        <input type="file" id="threadImage" accept="image/*">
+                    </div>
+                    <button type="submit" class="btn">Создать тред</button>
+                </form>
+            </div>
         </div>
     </div>
 
-    <div class="footer">
-        <p>Femfur © 2026 | Все посты анонимны | Данные хранятся локально в браузере</p>
-    </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
+        const SUPABASE_URL = 'https://httzzyjltrfzagkipojv.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0dHp6eWpsdHJmemFna2lwb2p2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3MTY0NTksImV4cCI6MjA4NTI5MjQ1OX0.o210K6q3HRNbRsDgTEYlzMYGUm1Gk0cgYWMj4zGe3j0';
+
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         const BOARDS = {
-            anime: { name: 'Аниме & Манга', desc: 'Обсуждение аниме и манги' },
-            jp: { name: 'Японская культура', desc: 'Всё о Японии' },
-            otaku: { name: 'Отаку', desc: 'Отаку культура' },
-            v: { name: 'Видеоигры', desc: 'Обсуждение видеоигр' },
-            vr: { name: 'Ретро игры', desc: 'Старые добрые игры' },
-            vm: { name: 'Мультиплеер', desc: 'Многопользовательские игры' },
-            tech: { name: 'Технологии', desc: 'Технологии и программирование' },
-            mu: { name: 'Музыка', desc: 'Музыка всех жанров' },
-            tv: { name: 'ТВ & Кино', desc: 'Фильмы и сериалы' },
-            lit: { name: 'Литература', desc: 'Книги и чтение' },
-            art: { name: 'Искусство', desc: 'Рисование и творчество' },
-            design: { name: 'Дизайн', desc: 'Графический дизайн' },
-            photo: { name: 'Фотография', desc: 'Фотография' },
-            b: { name: 'Random', desc: 'Случайные темы' },
-            pol: { name: 'Политика', desc: 'Политические дискуссии' },
-            news: { name: 'Новости', desc: 'Новости мира' }
+            'art': { name: 'Арт и рисование', desc: 'Делитесь своими работами и обсуждайте искусство' },
+            'lit': { name: 'Литература', desc: 'Книги, фанфики, истории' },
+            'music': { name: 'Музыка', desc: 'Обсуждение музыки всех жанров' },
+            'b': { name: 'Бред', desc: 'Всё, что не подходит для других борд' },
+            'fur': { name: 'Фурри', desc: 'Обсуждение фурри-тематики' },
+            'chat': { name: 'Болталка', desc: 'Общение на свободные темы' },
+            'game': { name: 'Видеоигры', desc: 'Обсуждение игр' },
+            'tech': { name: 'Технологии', desc: 'IT, гаджеты, софт' },
+            'anime': { name: 'Аниме', desc: 'Аниме и манга' }
         };
 
         let currentBoard = null;
         let currentThreadId = null;
 
-        function initStorage() {
-            if (!localStorage.getItem('femfur_threads')) {
-                localStorage.setItem('femfur_threads', JSON.stringify({}));
+        // Загрузка тредов из Supabase
+        async function getThreads(board) {
+            try {
+                const { data, error } = await supabase
+                    .from('threads')
+                    .select('*')
+                    .eq('board', board)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                return data || [];
+            } catch (error) {
+                console.error('Ошибка загрузки тредов:', error);
+                return [];
             }
         }
 
-        function getThreads(board) {
-            const allThreads = JSON.parse(localStorage.getItem('femfur_threads') || '{}');
-            return allThreads[board] || [];
-        }
+        // Сохранение треда в Supabase
+        async function saveThread(board, thread) {
+            try {
+                const { data, error } = await supabase
+                    .from('threads')
+                    .insert([{
+                        board: board,
+                        thread_id: thread.id,
+                        subject: thread.subject,
+                        text: thread.text,
+                        image: thread.image,
+                        replies: thread.replies || [],
+                        image_count: thread.imageCount || 0
+                    }])
+                    .select();
 
-        function saveThread(board, thread) {
-            const allThreads = JSON.parse(localStorage.getItem('femfur_threads') || '{}');
-            if (!allThreads[board]) allThreads[board] = [];
-            allThreads[board].unshift(thread);
-            localStorage.setItem('femfur_threads', JSON.stringify(allThreads));
-        }
-
-        function updateThread(board, threadId, updates) {
-            const allThreads = JSON.parse(localStorage.getItem('femfur_threads') || '{}');
-            if (!allThreads[board]) return;
-            const thread = allThreads[board].find(t => t.id === threadId);
-            if (thread) {
-                Object.assign(thread, updates);
-                localStorage.setItem('femfur_threads', JSON.stringify(allThreads));
+                if (error) throw error;
+                return data;
+            } catch (error) {
+                console.error('Ошибка сохранения треда:', error);
+                alert('Ошибка при создании треда. Попробуйте ещё раз.');
             }
         }
 
-        function getThread(board, threadId) {
-            const threads = getThreads(board);
-            return threads.find(t => t.id === threadId);
+        // Получение конкретного треда
+        async function getThread(board, threadId) {
+            try {
+                const { data, error } = await supabase
+                    .from('threads')
+                    .select('*')
+                    .eq('board', board)
+                    .eq('thread_id', threadId)
+                    .single();
+
+                if (error) throw error;
+                return data;
+            } catch (error) {
+                console.error('Ошибка загрузки треда:', error);
+                return null;
+            }
         }
 
-        function formatDate(date) {
+        // Обновление треда (для добавления ответов)
+        async function updateThread(board, threadId, updates) {
+            try {
+                const thread = await getThread(board, threadId);
+                if (!thread) return;
+
+                const { error } = await supabase
+                    .from('threads')
+                    .update({
+                        replies: updates.replies,
+                        image_count: updates.imageCount
+                    })
+                    .eq('board', board)
+                    .eq('thread_id', threadId);
+
+                if (error) throw error;
+            } catch (error) {
+                console.error('Ошибка обновления треда:', error);
+                alert('Ошибка при добавлении ответа. Попробуйте ещё раз.');
+            }
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
             const now = new Date();
             const diff = now - date;
             const minutes = Math.floor(diff / 60000);
@@ -653,7 +654,7 @@
             currentThreadId = null;
         }
 
-        function showBoard(board) {
+        async function showBoard(board) {
             currentBoard = board;
             currentThreadId = null;
             showPage('board');
@@ -662,12 +663,14 @@
             document.getElementById('boardTitle').textContent = '/' + board + '/ - ' + boardInfo.name;
             document.getElementById('boardDesc').textContent = boardInfo.desc;
 
-            renderThreads(board);
+            await renderThreads(board);
         }
 
-        function renderThreads(board) {
+        async function renderThreads(board) {
             const container = document.getElementById('threadsContainer');
-            const threads = getThreads(board);
+            container.innerHTML = '<div class="loading">Загрузка тредов...</div>';
+
+            const threads = await getThreads(board);
 
             if (threads.length === 0) {
                 container.innerHTML = '<div class="empty-state"><h3>Нет тредов</h3><p>Будьте первым, кто создаст тред на этой борде!</p></div>';
@@ -677,22 +680,22 @@
             container.innerHTML = threads.map(thread => {
                 const shortText = thread.text.length > 500 ? thread.text.substring(0, 500) + '...' : thread.text;
                 return `
-                    <div class="thread" onclick="showThread('${board}', ${thread.id})">
+                    <div class="thread" onclick="showThread('${board}', ${thread.thread_id})">
                         <div class="post-header">
                             <span class="post-name">Аноним</span>
-                            <span class="post-date">${formatDate(new Date(thread.date))}</span>
-                            <span class="post-no">№${thread.id}</span>
+                            <span class="post-date">${formatDate(thread.created_at)}</span>
+                            <span class="post-no">№${thread.thread_id}</span>
                         </div>
                         ${thread.subject ? '<div class="post-subject">' + thread.subject + '</div>' : ''}
                         ${thread.image ? '<img src="' + thread.image + '" class="post-image" alt="Изображение">' : ''}
                         <div class="post-text">${formatText(shortText)}</div>
-                        <div class="thread-stats">Ответов: ${thread.replies ? thread.replies.length : 0} | Изображений: ${thread.imageCount || 0}</div>
+                        <div class="thread-stats">Ответов: ${thread.replies ? thread.replies.length : 0} | Изображений: ${thread.image_count || 0}</div>
                     </div>
                 `;
             }).join('');
         }
 
-        function showThread(board, threadId) {
+        async function showThread(board, threadId) {
             currentBoard = board;
             currentThreadId = threadId;
             showPage('thread');
@@ -700,12 +703,14 @@
             const boardInfo = BOARDS[board];
             document.getElementById('threadBoardTitle').textContent = '/' + board + '/ - ' + boardInfo.name;
 
-            renderThread(board, threadId);
+            await renderThread(board, threadId);
         }
 
-        function renderThread(board, threadId) {
+        async function renderThread(board, threadId) {
             const container = document.getElementById('threadContainer');
-            const thread = getThread(board, threadId);
+            container.innerHTML = '<div class="loading">Загрузка треда...</div>';
+
+            const thread = await getThread(board, threadId);
 
             if (!thread) {
                 container.innerHTML = '<div class="empty-state">Тред не найден</div>';
@@ -716,8 +721,8 @@
                 <div class="post op">
                     <div class="post-header">
                         <span class="post-name">Аноним</span>
-                        <span class="post-date">${formatDate(new Date(thread.date))}</span>
-                        <span class="post-no" id="post-${thread.id}">№${thread.id}</span>
+                        <span class="post-date">${formatDate(thread.created_at)}</span>
+                        <span class="post-no" id="post-${thread.thread_id}">№${thread.thread_id}</span>
                     </div>
                     ${thread.subject ? '<div class="post-subject">' + thread.subject + '</div>' : ''}
                     ${thread.image ? '<img src="' + thread.image + '" class="post-image" alt="Изображение">' : ''}
@@ -730,7 +735,7 @@
                     <div class="post reply">
                         <div class="post-header">
                             <span class="post-name">Аноним</span>
-                            <span class="post-date">${formatDate(new Date(reply.date))}</span>
+                            <span class="post-date">${formatDate(reply.date)}</span>
                             <span class="post-no" id="post-${reply.id}">№${reply.id}</span>
                         </div>
                         ${reply.image ? '<img src="' + reply.image + '" class="post-image" alt="Изображение">' : ''}
@@ -780,14 +785,13 @@
                 subject: subject || null,
                 text: text,
                 image: image,
-                date: new Date().toISOString(),
                 replies: [],
                 imageCount: image ? 1 : 0
             };
 
-            saveThread(currentBoard, thread);
+            await saveThread(currentBoard, thread);
             closeNewThreadModal();
-            renderThreads(currentBoard);
+            await renderThreads(currentBoard);
             alert('Тред создан!');
         }
 
@@ -804,7 +808,7 @@
 
             const image = await readImage(imageFile);
 
-            const thread = getThread(currentBoard, currentThreadId);
+            const thread = await getThread(currentBoard, currentThreadId);
             if (!thread) return;
 
             const reply = {
@@ -814,19 +818,19 @@
                 date: new Date().toISOString()
             };
 
-            if (!thread.replies) thread.replies = [];
-            thread.replies.push(reply);
-            if (image) thread.imageCount = (thread.imageCount || 0) + 1;
+            const replies = thread.replies || [];
+            replies.push(reply);
+            const imageCount = (thread.image_count || 0) + (image ? 1 : 0);
 
-            updateThread(currentBoard, currentThreadId, {
-                replies: thread.replies,
-                imageCount: thread.imageCount
+            await updateThread(currentBoard, currentThreadId, {
+                replies: replies,
+                imageCount: imageCount
             });
 
             document.getElementById('replyText').value = '';
             document.getElementById('replyImage').value = '';
 
-            renderThread(currentBoard, currentThreadId);
+            await renderThread(currentBoard, currentThreadId);
             alert('Ответ добавлен!');
         }
 
@@ -847,8 +851,6 @@
                 closeNewThreadModal();
             }
         }
-
-        initStorage();
     </script>
 </body>
 </html>
