@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Femfur - Имиджборд</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1 class="site-title">Femfur</h1>
+            <nav class="main-nav">
+                <a href="#" data-page="home">Главная</a>
+                <a href="#" data-page="boards">Борды</a>
+                <a href="#" data-page="faq">FAQ</a>
+            </nav>
+        </div>
+    </header>
+
+    <main id="main-content">
+        <!-- Home Page -->
+        <div id="home-page" class="page active">
+            <div class="intro-box">
+                <h2>Добро пожаловать на Femfur!</h2>
+                <p>Анонимный имиджборд для обсуждения всего на свете.</p>
+            </div>
+
+            <div class="boards-grid">
+                <div class="board-category">
+                    <h3>Японская культура</h3>
+                    <div class="board-list">
+                        <a href="#" class="board-link" data-board="anime">
+                            <span class="board-code">/anime/</span>
+                            <span class="board-name">Аниме & Манга</span>
+                        </a>
+                        <a href="#" class="board-link" data-board="jp">
+                            <span class="board-code">/jp/</span>
+                            <span class="board-name">Японская культура</span>
+                        </a>
+                        <a href="#" class="board-link" data-board="otaku">
+                            <span class="board-code">/otaku/</span>
+                            <span class="board-name">Отаку культура</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="board-category">
+                    <h3>Видеоигры</h3>
+                    <div class="board-list">
+                        <a href="#" class="board-link" data-board="v">
+                            <span class="board-code">/v/</span>
+                            <span class="board-name">Видеоигры</span>
+                        </a>
+                        <a href="#" class="board-link" data-board="vr">
+                            <span class="board-code">/vr/</span>
+                            <span class="board-name">Ретро игры</span>
+                        </a>
+                        <a href="#" class="board-link" data-board="vm">
+                            <span class="board-code">/vm/</span>
+                            <span class="board-name">Видеоигры/Мультиплеер</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="board-category">
+                    <h3>Интересы</h3>
+                    <div class="board-list">
+                        <a href="#" class="board-link" data-board="tech">
+                            <span class="board-code">/tech/</span>
+                            <span class="board-name">Технологии</span>
+                        </a>
+                        <a href="#" class="board-link" data-board="mu">
+                            <span class="board-code">/mu/</span>
+                            <span class="board-name">Музыка</span>
+                        </a>
+                        <a href="#" class="board-link" data-board="tv">
+                            <span class="board-code">/tv/</span>
+                            <span class="board-name">ТВ и Кино</span>
+                        </a>
+                        <a href="#" class="board-link" data-board="lit">
+                            <span class="board-code">/lit/</span>
+                            <span class="board-name">Литература</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="board-category">
+                    <h3>Творчество</h3>
+                    <div class="board-list">
+                        <a href="#" class="board-link" data-board="art">
+                            <span class="board-code">/art/</span>
+                            <span class="board-name">Искусство</span>
+                        </a>
+                        <a href="#" class="board-link" data-board="design">
+                            <span class="board-code">/design/</span>
+                            <span class="board-name">Дизайн</span>
+                        </a>
+                        <a href="#" class="board-link" data-board="photo">
+                            <span class="board-code">/photo/</span>
+                            <span class="board-name">Фотография</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="board-category">
+                    <h3>Разное</h3>
+                    <div class="board-list">
+                        <a href="#" class="board-link" data-board="b">
+                            <span class="board-code">/b/</span>
+                            <span class="board-name">Random</span>
+                        </a>
+                        <a href="#" class="board-link" data-board="pol">
+                            <span class="board-code">/pol/</span>
+                            <span class="board-name">Политика</span>
+                        </a>
+                        <a href="#" class="board-link" data-board="news">
+                            <span class="board-code">/news/</span>
+                            <span class="board-name">Новости</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Board Page -->
+        <div id="board-page" class="page">
+            <div class="board-header">
+                <h2 id="board-title"></h2>
+                <button id="new-thread-btn" class="btn-primary">Создать тред</button>
+            </div>
+
+            <div id="threads-container" class="threads-container"></div>
+        </div>
+
+        <!-- Thread Page -->
+        <div id="thread-page" class="page">
+            <div class="thread-header">
+                <button id="back-to-board" class="btn-secondary">← Назад к борде</button>
+            </div>
+            <div id="thread-container"></div>
+            <div id="reply-form-container"></div>
+        </div>
+    </main>
+
+    <!-- New Thread Modal -->
+    <div id="thread-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Создать новый тред</h2>
+            <form id="thread-form">
+                <input type="text" id="thread-subject" placeholder="Тема (необязательно)" maxlength="100">
+                <textarea id="thread-text" placeholder="Текст сообщения" required maxlength="2000"></textarea>
+                <input type="file" id="thread-image" accept="image/*">
+                <button type="submit" class="btn-primary">Создать</button>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <p>Femfur © 2026 | Все посты анонимны</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
