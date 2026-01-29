@@ -3,165 +3,852 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Femfur - Имиджборд</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>Femfur</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: arial, helvetica, sans-serif;
+            font-size: 10pt;
+            background: #EEF2FF;
+            color: #000;
+        }
+
+        .header {
+            background: #0039A6;
+            padding: 5px 10px;
+            color: white;
+            border-bottom: 1px solid #000;
+        }
+
+        .header-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            text-decoration: none;
+            color: white;
+        }
+
+        .nav a {
+            color: white;
+            margin-left: 15px;
+            text-decoration: none;
+            font-size: 11pt;
+        }
+
+        .nav a:hover {
+            text-decoration: underline;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .welcome {
+            background: #D6DAF0;
+            border: 1px solid #B7C5D9;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .welcome h1 {
+            color: #0039A6;
+            margin-bottom: 10px;
+        }
+
+        .board-categories {
+            display: grid;
+            gap: 15px;
+        }
+
+        .board-category {
+            background: #D6DAF0;
+            border: 1px solid #B7C5D9;
+            padding: 15px;
+        }
+
+        .board-category h3 {
+            color: #0039A6;
+            margin-bottom: 10px;
+            font-size: 14pt;
+            border-bottom: 1px solid #B7C5D9;
+            padding-bottom: 5px;
+        }
+
+        .board-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .board-link {
+            display: block;
+            padding: 8px 12px;
+            background: white;
+            border: 1px solid #B7C5D9;
+            text-decoration: none;
+            color: #000;
+            transition: background 0.2s;
+        }
+
+        .board-link:hover {
+            background: #FFE;
+        }
+
+        .board-code {
+            color: #0039A6;
+            font-weight: bold;
+            font-size: 11pt;
+        }
+
+        .board-header {
+            background: #D6DAF0;
+            border: 1px solid #B7C5D9;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .board-title {
+            color: #0039A6;
+            font-size: 18pt;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            background: #0039A6;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 10pt;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            background: #002D7F;
+        }
+
+        .btn-secondary {
+            background: #999;
+        }
+
+        .btn-secondary:hover {
+            background: #777;
+        }
+
+        .thread {
+            background: #F0E0D6;
+            border: 1px solid #D9BFB7;
+            padding: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .thread:hover {
+            background: #FFE;
+        }
+
+        .post-header {
+            font-size: 11px;
+            margin-bottom: 8px;
+        }
+
+        .post-name {
+            font-weight: bold;
+            color: #117743;
+        }
+
+        .post-date {
+            color: #000;
+            margin-left: 5px;
+        }
+
+        .post-no {
+            margin-left: 5px;
+        }
+
+        .post-subject {
+            color: #0F0C5D;
+            font-weight: bold;
+            font-size: 12pt;
+            margin-bottom: 5px;
+        }
+
+        .post-image {
+            float: left;
+            max-width: 200px;
+            max-height: 200px;
+            margin: 5px 15px 10px 0;
+            border: 1px solid #B7C5D9;
+        }
+
+        .post-text {
+            margin-bottom: 10px;
+            word-wrap: break-word;
+        }
+
+        .thread-stats {
+            clear: both;
+            font-size: 9pt;
+            color: #0039A6;
+            margin-top: 10px;
+        }
+
+        .post {
+            background: #F0E0D6;
+            border: 1px solid #D9BFB7;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .post.op {
+            background: #F0E0D6;
+            border: 2px solid #D9BFB7;
+        }
+
+        .reply {
+            margin-left: 20px;
+        }
+
+        .form-container {
+            background: #D6DAF0;
+            border: 1px solid #B7C5D9;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-container h3 {
+            color: #0039A6;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input[type="text"],
+        .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #B7C5D9;
+            font-family: arial, helvetica, sans-serif;
+            font-size: 10pt;
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-group input[type="file"] {
+            border: none;
+        }
+
+        .greentext {
+            color: #789922;
+        }
+
+        .quote-link {
+            color: #D00;
+            text-decoration: underline;
+        }
+
+        .quote-link:hover {
+            color: #F00;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            background: #D6DAF0;
+            border: 1px solid #B7C5D9;
+        }
+
+        .footer {
+            background: #D6DAF0;
+            border-top: 1px solid #B7C5D9;
+            padding: 15px;
+            text-align: center;
+            margin-top: 40px;
+            font-size: 9pt;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: #EEF2FF;
+            border: 2px solid #0039A6;
+            padding: 20px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .modal-header h2 {
+            color: #0039A6;
+        }
+
+        .close-modal {
+            font-size: 24px;
+            cursor: pointer;
+            color: #0039A6;
+            background: none;
+            border: none;
+            font-weight: bold;
+        }
+
+        .close-modal:hover {
+            color: #D00;
+        }
+
+        @media (max-width: 768px) {
+            .board-links {
+                grid-template-columns: 1fr;
+            }
+
+            .post-image {
+                float: none;
+                display: block;
+                margin: 10px 0;
+                max-width: 100%;
+            }
+
+            .reply {
+                margin-left: 10px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <header>
+    <div class="header">
         <div class="header-content">
-            <h1 class="site-title">Femfur</h1>
-            <nav class="main-nav">
-                <a href="#" data-page="home">Главная</a>
-                <a href="#" data-page="boards">Борды</a>
-                <a href="#" data-page="faq">FAQ</a>
-            </nav>
+            <a href="#" class="logo" onclick="showHome(); return false;">Femfur</a>
+            <div class="nav">
+                <a href="#" onclick="showHome(); return false;">Главная</a>
+                <a href="#" onclick="alert('FAQ в разработке'); return false;">FAQ</a>
+            </div>
         </div>
-    </header>
+    </div>
 
-    <main id="main-content">
-        <!-- Home Page -->
-        <div id="home-page" class="page active">
-            <div class="intro-box">
-                <h2>Добро пожаловать на Femfur!</h2>
-                <p>Анонимный имиджборд для обсуждения всего на свете.</p>
+    <div class="container">
+        <div id="home" class="page active">
+            <div class="welcome">
+                <h1>🎨 Femfur Имиджборд 🎨</h1>
+                <p>Добро пожаловать! Выберите борду для начала общения.</p>
             </div>
 
-            <div class="boards-grid">
+            <div class="board-categories">
                 <div class="board-category">
                     <h3>Японская культура</h3>
-                    <div class="board-list">
-                        <a href="#" class="board-link" data-board="anime">
-                            <span class="board-code">/anime/</span>
-                            <span class="board-name">Аниме & Манга</span>
+                    <div class="board-links">
+                        <a href="#" class="board-link" onclick="showBoard('anime'); return false;">
+                            <span class="board-code">/anime/</span> - Аниме & Манга
                         </a>
-                        <a href="#" class="board-link" data-board="jp">
-                            <span class="board-code">/jp/</span>
-                            <span class="board-name">Японская культура</span>
+                        <a href="#" class="board-link" onclick="showBoard('jp'); return false;">
+                            <span class="board-code">/jp/</span> - Японская культура
                         </a>
-                        <a href="#" class="board-link" data-board="otaku">
-                            <span class="board-code">/otaku/</span>
-                            <span class="board-name">Отаку культура</span>
+                        <a href="#" class="board-link" onclick="showBoard('otaku'); return false;">
+                            <span class="board-code">/otaku/</span> - Отаку
                         </a>
                     </div>
                 </div>
 
                 <div class="board-category">
                     <h3>Видеоигры</h3>
-                    <div class="board-list">
-                        <a href="#" class="board-link" data-board="v">
-                            <span class="board-code">/v/</span>
-                            <span class="board-name">Видеоигры</span>
+                    <div class="board-links">
+                        <a href="#" class="board-link" onclick="showBoard('v'); return false;">
+                            <span class="board-code">/v/</span> - Видеоигры
                         </a>
-                        <a href="#" class="board-link" data-board="vr">
-                            <span class="board-code">/vr/</span>
-                            <span class="board-name">Ретро игры</span>
+                        <a href="#" class="board-link" onclick="showBoard('vr'); return false;">
+                            <span class="board-code">/vr/</span> - Ретро игры
                         </a>
-                        <a href="#" class="board-link" data-board="vm">
-                            <span class="board-code">/vm/</span>
-                            <span class="board-name">Видеоигры/Мультиплеер</span>
+                        <a href="#" class="board-link" onclick="showBoard('vm'); return false;">
+                            <span class="board-code">/vm/</span> - Мультиплеер
                         </a>
                     </div>
                 </div>
 
                 <div class="board-category">
                     <h3>Интересы</h3>
-                    <div class="board-list">
-                        <a href="#" class="board-link" data-board="tech">
-                            <span class="board-code">/tech/</span>
-                            <span class="board-name">Технологии</span>
+                    <div class="board-links">
+                        <a href="#" class="board-link" onclick="showBoard('tech'); return false;">
+                            <span class="board-code">/tech/</span> - Технологии
                         </a>
-                        <a href="#" class="board-link" data-board="mu">
-                            <span class="board-code">/mu/</span>
-                            <span class="board-name">Музыка</span>
+                        <a href="#" class="board-link" onclick="showBoard('mu'); return false;">
+                            <span class="board-code">/mu/</span> - Музыка
                         </a>
-                        <a href="#" class="board-link" data-board="tv">
-                            <span class="board-code">/tv/</span>
-                            <span class="board-name">ТВ и Кино</span>
+                        <a href="#" class="board-link" onclick="showBoard('tv'); return false;">
+                            <span class="board-code">/tv/</span> - ТВ & Кино
                         </a>
-                        <a href="#" class="board-link" data-board="lit">
-                            <span class="board-code">/lit/</span>
-                            <span class="board-name">Литература</span>
+                        <a href="#" class="board-link" onclick="showBoard('lit'); return false;">
+                            <span class="board-code">/lit/</span> - Литература
                         </a>
                     </div>
                 </div>
 
                 <div class="board-category">
                     <h3>Творчество</h3>
-                    <div class="board-list">
-                        <a href="#" class="board-link" data-board="art">
-                            <span class="board-code">/art/</span>
-                            <span class="board-name">Искусство</span>
+                    <div class="board-links">
+                        <a href="#" class="board-link" onclick="showBoard('art'); return false;">
+                            <span class="board-code">/art/</span> - Искусство
                         </a>
-                        <a href="#" class="board-link" data-board="design">
-                            <span class="board-code">/design/</span>
-                            <span class="board-name">Дизайн</span>
+                        <a href="#" class="board-link" onclick="showBoard('design'); return false;">
+                            <span class="board-code">/design/</span> - Дизайн
                         </a>
-                        <a href="#" class="board-link" data-board="photo">
-                            <span class="board-code">/photo/</span>
-                            <span class="board-name">Фотография</span>
+                        <a href="#" class="board-link" onclick="showBoard('photo'); return false;">
+                            <span class="board-code">/photo/</span> - Фотография
                         </a>
                     </div>
                 </div>
 
                 <div class="board-category">
                     <h3>Разное</h3>
-                    <div class="board-list">
-                        <a href="#" class="board-link" data-board="b">
-                            <span class="board-code">/b/</span>
-                            <span class="board-name">Random</span>
+                    <div class="board-links">
+                        <a href="#" class="board-link" onclick="showBoard('b'); return false;">
+                            <span class="board-code">/b/</span> - Random
                         </a>
-                        <a href="#" class="board-link" data-board="pol">
-                            <span class="board-code">/pol/</span>
-                            <span class="board-name">Политика</span>
+                        <a href="#" class="board-link" onclick="showBoard('pol'); return false;">
+                            <span class="board-code">/pol/</span> - Политика
                         </a>
-                        <a href="#" class="board-link" data-board="news">
-                            <span class="board-code">/news/</span>
-                            <span class="board-name">Новости</span>
+                        <a href="#" class="board-link" onclick="showBoard('news'); return false;">
+                            <span class="board-code">/news/</span> - Новости
                         </a>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Board Page -->
-        <div id="board-page" class="page">
+        <div id="board" class="page">
             <div class="board-header">
-                <h2 id="board-title"></h2>
-                <button id="new-thread-btn" class="btn-primary">Создать тред</button>
+                <div>
+                    <div class="board-title" id="boardTitle"></div>
+                    <div style="font-size: 10pt; color: #666; margin-top: 5px;" id="boardDesc"></div>
+                </div>
+                <button class="btn" onclick="openNewThreadModal()">Создать тред</button>
             </div>
-
-            <div id="threads-container" class="threads-container"></div>
+            <div id="threadsContainer"></div>
         </div>
 
-        <!-- Thread Page -->
-        <div id="thread-page" class="page">
-            <div class="thread-header">
-                <button id="back-to-board" class="btn-secondary">← Назад к борде</button>
+        <div id="thread" class="page">
+            <div class="board-header">
+                <button class="btn btn-secondary" onclick="backToBoard()">← Назад</button>
+                <div class="board-title" id="threadBoardTitle"></div>
             </div>
-            <div id="thread-container"></div>
-            <div id="reply-form-container"></div>
+            <div id="threadContainer"></div>
+            <div class="form-container">
+                <h3>Ответить</h3>
+                <form onsubmit="submitReply(event)">
+                    <div class="form-group">
+                        <textarea id="replyText" placeholder="Текст сообщения" required maxlength="2000"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Изображение (необязательно):</label>
+                        <input type="file" id="replyImage" accept="image/*">
+                    </div>
+                    <button type="submit" class="btn">Отправить ответ</button>
+                </form>
+            </div>
         </div>
-    </main>
+    </div>
 
-    <!-- New Thread Modal -->
-    <div id="thread-modal" class="modal">
+    <div id="newThreadModal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Создать новый тред</h2>
-            <form id="thread-form">
-                <input type="text" id="thread-subject" placeholder="Тема (необязательно)" maxlength="100">
-                <textarea id="thread-text" placeholder="Текст сообщения" required maxlength="2000"></textarea>
-                <input type="file" id="thread-image" accept="image/*">
-                <button type="submit" class="btn-primary">Создать</button>
+            <div class="modal-header">
+                <h2>Создать новый тред</h2>
+                <button class="close-modal" onclick="closeNewThreadModal()">&times;</button>
+            </div>
+            <form onsubmit="submitThread(event)">
+                <div class="form-group">
+                    <label>Тема (необязательно):</label>
+                    <input type="text" id="threadSubject" maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label>Текст сообщения:</label>
+                    <textarea id="threadText" required maxlength="2000"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Изображение (необязательно):</label>
+                    <input type="file" id="threadImage" accept="image/*">
+                </div>
+                <button type="submit" class="btn">Создать тред</button>
             </form>
         </div>
     </div>
 
-    <footer>
-        <p>Femfur © 2026 | Все посты анонимны</p>
-    </footer>
+    <div class="footer">
+        <p>Femfur © 2026 | Все посты анонимны | Данные хранятся локально в браузере</p>
+    </div>
 
-    <script src="app.js"></script>
+    <script>
+        const BOARDS = {
+            anime: { name: 'Аниме & Манга', desc: 'Обсуждение аниме и манги' },
+            jp: { name: 'Японская культура', desc: 'Всё о Японии' },
+            otaku: { name: 'Отаку', desc: 'Отаку культура' },
+            v: { name: 'Видеоигры', desc: 'Обсуждение видеоигр' },
+            vr: { name: 'Ретро игры', desc: 'Старые добрые игры' },
+            vm: { name: 'Мультиплеер', desc: 'Многопользовательские игры' },
+            tech: { name: 'Технологии', desc: 'Технологии и программирование' },
+            mu: { name: 'Музыка', desc: 'Музыка всех жанров' },
+            tv: { name: 'ТВ & Кино', desc: 'Фильмы и сериалы' },
+            lit: { name: 'Литература', desc: 'Книги и чтение' },
+            art: { name: 'Искусство', desc: 'Рисование и творчество' },
+            design: { name: 'Дизайн', desc: 'Графический дизайн' },
+            photo: { name: 'Фотография', desc: 'Фотография' },
+            b: { name: 'Random', desc: 'Случайные темы' },
+            pol: { name: 'Политика', desc: 'Политические дискуссии' },
+            news: { name: 'Новости', desc: 'Новости мира' }
+        };
+
+        let currentBoard = null;
+        let currentThreadId = null;
+
+        function initStorage() {
+            if (!localStorage.getItem('femfur_threads')) {
+                localStorage.setItem('femfur_threads', JSON.stringify({}));
+            }
+        }
+
+        function getThreads(board) {
+            const allThreads = JSON.parse(localStorage.getItem('femfur_threads') || '{}');
+            return allThreads[board] || [];
+        }
+
+        function saveThread(board, thread) {
+            const allThreads = JSON.parse(localStorage.getItem('femfur_threads') || '{}');
+            if (!allThreads[board]) allThreads[board] = [];
+            allThreads[board].unshift(thread);
+            localStorage.setItem('femfur_threads', JSON.stringify(allThreads));
+        }
+
+        function updateThread(board, threadId, updates) {
+            const allThreads = JSON.parse(localStorage.getItem('femfur_threads') || '{}');
+            if (!allThreads[board]) return;
+            const thread = allThreads[board].find(t => t.id === threadId);
+            if (thread) {
+                Object.assign(thread, updates);
+                localStorage.setItem('femfur_threads', JSON.stringify(allThreads));
+            }
+        }
+
+        function getThread(board, threadId) {
+            const threads = getThreads(board);
+            return threads.find(t => t.id === threadId);
+        }
+
+        function formatDate(date) {
+            const now = new Date();
+            const diff = now - date;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+
+            if (minutes < 1) return 'только что';
+            if (minutes < 60) return minutes + ' мин назад';
+            if (hours < 24) return hours + ' ч назад';
+            if (days < 7) return days + ' д назад';
+
+            return date.toLocaleDateString('ru-RU', {
+                day: '2-digit',
+                month: '2-digit',
+                year: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function formatText(text) {
+            let formatted = text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+
+            formatted = formatted.replace(/^&gt;(.+)$/gm, '<span class="greentext">&gt;$1</span>');
+            formatted = formatted.replace(/&gt;&gt;(\d+)/g, '<a href="#" class="quote-link" onclick="scrollToPost($1); return false;">&gt;&gt;$1</a>');
+            formatted = formatted.replace(/\n/g, '<br>');
+
+            return formatted;
+        }
+
+        function generateId() {
+            return Date.now() + Math.floor(Math.random() * 10000);
+        }
+
+        function readImage(file) {
+            return new Promise((resolve) => {
+                if (!file) {
+                    resolve(null);
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function showPage(pageName) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageName).classList.add('active');
+        }
+
+        function showHome() {
+            showPage('home');
+            currentBoard = null;
+            currentThreadId = null;
+        }
+
+        function showBoard(board) {
+            currentBoard = board;
+            currentThreadId = null;
+            showPage('board');
+
+            const boardInfo = BOARDS[board];
+            document.getElementById('boardTitle').textContent = '/' + board + '/ - ' + boardInfo.name;
+            document.getElementById('boardDesc').textContent = boardInfo.desc;
+
+            renderThreads(board);
+        }
+
+        function renderThreads(board) {
+            const container = document.getElementById('threadsContainer');
+            const threads = getThreads(board);
+
+            if (threads.length === 0) {
+                container.innerHTML = '<div class="empty-state"><h3>Нет тредов</h3><p>Будьте первым, кто создаст тред на этой борде!</p></div>';
+                return;
+            }
+
+            container.innerHTML = threads.map(thread => {
+                const shortText = thread.text.length > 500 ? thread.text.substring(0, 500) + '...' : thread.text;
+                return `
+                    <div class="thread" onclick="showThread('${board}', ${thread.id})">
+                        <div class="post-header">
+                            <span class="post-name">Аноним</span>
+                            <span class="post-date">${formatDate(new Date(thread.date))}</span>
+                            <span class="post-no">№${thread.id}</span>
+                        </div>
+                        ${thread.subject ? '<div class="post-subject">' + thread.subject + '</div>' : ''}
+                        ${thread.image ? '<img src="' + thread.image + '" class="post-image" alt="Изображение">' : ''}
+                        <div class="post-text">${formatText(shortText)}</div>
+                        <div class="thread-stats">Ответов: ${thread.replies ? thread.replies.length : 0} | Изображений: ${thread.imageCount || 0}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function showThread(board, threadId) {
+            currentBoard = board;
+            currentThreadId = threadId;
+            showPage('thread');
+
+            const boardInfo = BOARDS[board];
+            document.getElementById('threadBoardTitle').textContent = '/' + board + '/ - ' + boardInfo.name;
+
+            renderThread(board, threadId);
+        }
+
+        function renderThread(board, threadId) {
+            const container = document.getElementById('threadContainer');
+            const thread = getThread(board, threadId);
+
+            if (!thread) {
+                container.innerHTML = '<div class="empty-state">Тред не найден</div>';
+                return;
+            }
+
+            let html = `
+                <div class="post op">
+                    <div class="post-header">
+                        <span class="post-name">Аноним</span>
+                        <span class="post-date">${formatDate(new Date(thread.date))}</span>
+                        <span class="post-no" id="post-${thread.id}">№${thread.id}</span>
+                    </div>
+                    ${thread.subject ? '<div class="post-subject">' + thread.subject + '</div>' : ''}
+                    ${thread.image ? '<img src="' + thread.image + '" class="post-image" alt="Изображение">' : ''}
+                    <div class="post-text">${formatText(thread.text)}</div>
+                </div>
+            `;
+
+            if (thread.replies && thread.replies.length > 0) {
+                html += thread.replies.map(reply => `
+                    <div class="post reply">
+                        <div class="post-header">
+                            <span class="post-name">Аноним</span>
+                            <span class="post-date">${formatDate(new Date(reply.date))}</span>
+                            <span class="post-no" id="post-${reply.id}">№${reply.id}</span>
+                        </div>
+                        ${reply.image ? '<img src="' + reply.image + '" class="post-image" alt="Изображение">' : ''}
+                        <div class="post-text">${formatText(reply.text)}</div>
+                    </div>
+                `).join('');
+            }
+
+            container.innerHTML = html;
+        }
+
+        function backToBoard() {
+            if (currentBoard) {
+                showBoard(currentBoard);
+            } else {
+                showHome();
+            }
+        }
+
+        function openNewThreadModal() {
+            document.getElementById('newThreadModal').classList.add('active');
+        }
+
+        function closeNewThreadModal() {
+            document.getElementById('newThreadModal').classList.remove('active');
+            document.getElementById('threadSubject').value = '';
+            document.getElementById('threadText').value = '';
+            document.getElementById('threadImage').value = '';
+        }
+
+        async function submitThread(e) {
+            e.preventDefault();
+
+            const subject = document.getElementById('threadSubject').value.trim();
+            const text = document.getElementById('threadText').value.trim();
+            const imageFile = document.getElementById('threadImage').files[0];
+
+            if (!text) {
+                alert('Введите текст сообщения');
+                return;
+            }
+
+            const image = await readImage(imageFile);
+
+            const thread = {
+                id: generateId(),
+                subject: subject || null,
+                text: text,
+                image: image,
+                date: new Date().toISOString(),
+                replies: [],
+                imageCount: image ? 1 : 0
+            };
+
+            saveThread(currentBoard, thread);
+            closeNewThreadModal();
+            renderThreads(currentBoard);
+            alert('Тред создан!');
+        }
+
+        async function submitReply(e) {
+            e.preventDefault();
+
+            const text = document.getElementById('replyText').value.trim();
+            const imageFile = document.getElementById('replyImage').files[0];
+
+            if (!text) {
+                alert('Введите текст сообщения');
+                return;
+            }
+
+            const image = await readImage(imageFile);
+
+            const thread = getThread(currentBoard, currentThreadId);
+            if (!thread) return;
+
+            const reply = {
+                id: generateId(),
+                text: text,
+                image: image,
+                date: new Date().toISOString()
+            };
+
+            if (!thread.replies) thread.replies = [];
+            thread.replies.push(reply);
+            if (image) thread.imageCount = (thread.imageCount || 0) + 1;
+
+            updateThread(currentBoard, currentThreadId, {
+                replies: thread.replies,
+                imageCount: thread.imageCount
+            });
+
+            document.getElementById('replyText').value = '';
+            document.getElementById('replyImage').value = '';
+
+            renderThread(currentBoard, currentThreadId);
+            alert('Ответ добавлен!');
+        }
+
+        function scrollToPost(postId) {
+            const element = document.getElementById('post-' + postId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                element.style.backgroundColor = '#FFE';
+                setTimeout(function() {
+                    element.style.backgroundColor = '';
+                }, 2000);
+            }
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('newThreadModal');
+            if (event.target === modal) {
+                closeNewThreadModal();
+            }
+        }
+
+        initStorage();
+    </script>
 </body>
 </html>
