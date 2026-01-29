@@ -4,7 +4,6 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// STATE
 let currentUser = null;
 let currentView = 'home';
 let currentCategory = null;
@@ -13,14 +12,12 @@ let currentThread = null;
 let lastPostTime = 0;
 const COOLDOWN_MS = 10000;
 
-// INIT
 document.addEventListener('DOMContentLoaded', async () => {
     await checkAuth();
     setupEventListeners();
     loadHome();
 });
 
-// AUTH
 async function checkAuth() {
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
@@ -115,30 +112,38 @@ async function logout() {
     loadHome();
 }
 
-// NAVIGATION
 function showView(viewName) {
     document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
-    document.getElementById(`view-${viewName}`).style.display = 'block';
-    currentView = viewName;
+    const targetView = document.getElementById(`view-${viewName}`);
+    if (targetView) {
+        targetView.style.display = 'block';
+        currentView = viewName;
+    }
 }
 
 function showModal(modalId) {
-    document.getElementById(modalId).style.display = 'block';
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'block';
+    }
 }
 
 function hideModal(modalId) {
-    document.getElementById(modalId).style.display = 'none';
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'none';
+    }
 }
 
 function showMessage(message, type) {
+    const container = document.getElementById('message-container');
     const div = document.createElement('div');
     div.className = type;
     div.textContent = message;
-    document.querySelector('.container').prepend(div);
+    container.appendChild(div);
     setTimeout(() => div.remove(), 5000);
 }
 
-// COOLDOWN
 function checkCooldown() {
     const now = Date.now();
     if (now - lastPostTime < COOLDOWN_MS) {
@@ -153,14 +158,12 @@ function updateCooldown() {
     lastPostTime = Date.now();
 }
 
-// SANITIZE
 function sanitizeHTML(str) {
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
 }
 
-// HOME
 async function loadHome() {
     showView('home');
     const { data: categories } = await supabase
@@ -176,7 +179,7 @@ async function loadHome() {
             const div = document.createElement('div');
             div.className = 'category-item';
             div.innerHTML = `<h3>${sanitizeHTML(cat.name)}</h3>`;
-            div.onclick = () => loadCategory(cat.id);
+            div.addEventListener('click', () => loadCategory(cat.id));
             container.appendChild(div);
         });
     } else {
@@ -199,11 +202,11 @@ async function createCategory(name) {
     } else {
         updateCooldown();
         hideModal('modal-create-category');
+        document.getElementById('input-category-name').value = '';
         loadHome();
     }
 }
 
-// CATEGORY
 async function loadCategory(categoryId) {
     currentCategory = categoryId;
     showView('category');
@@ -222,8 +225,10 @@ async function loadCategory(categoryId) {
 
     document.getElementById('category-header').innerHTML = `
         <h2>${sanitizeHTML(category.name)}</h2>
-        <a href="#" onclick="loadHome(); return false;">← Back to Home</a>
+        <span class="back-link" id="back-to-home">← Back to Home</span>
     `;
+
+    document.getElementById('back-to-home').addEventListener('click', loadHome);
 
     const container = document.getElementById('boards-list');
     container.innerHTML = '';
@@ -236,7 +241,7 @@ async function loadCategory(categoryId) {
                 <h3><span class="board-code">${sanitizeHTML(board.code)}</span> ${sanitizeHTML(board.name)}</h3>
                 <p>${sanitizeHTML(board.description || '')}</p>
             `;
-            div.onclick = () => loadBoard(board.id);
+            div.addEventListener('click', () => loadBoard(board.id));
             container.appendChild(div);
         });
     } else {
@@ -262,11 +267,13 @@ async function createBoard(name, code, description) {
     } else {
         updateCooldown();
         hideModal('modal-create-board');
+        document.getElementById('input-board-name').value = '';
+        document.getElementById('input-board-code').value = '';
+        document.getElementById('input-board-desc').value = '';
         loadCategory(currentCategory);
     }
 }
 
-// BOARD
 async function loadBoard(boardId) {
     currentBoard = boardId;
     showView('board');
@@ -286,8 +293,10 @@ async function loadBoard(boardId) {
     document.getElementById('board-header').innerHTML = `
         <h2><span class="board-code">${sanitizeHTML(board.code)}</span> ${sanitizeHTML(board.name)}</h2>
         <p>${sanitizeHTML(board.description || '')}</p>
-        <a href="#" onclick="loadCategory(${board.category_id}); return false;">← Back to ${sanitizeHTML(board.categories.name)}</a>
+        <span class="back-link" id="back-to-category">← Back to ${sanitizeHTML(board.categories.name)}</span>
     `;
+
+    document.getElementById('back-to-category').addEventListener('click', () => loadCategory(board.category_id));
 
     const container = document.getElementById('threads-list');
     container.innerHTML = '';
@@ -304,7 +313,7 @@ async function loadBoard(boardId) {
                     ${new Date(thread.created_at).toLocaleString()}
                 </div>
             `;
-            div.onclick = () => loadThread(thread.id);
+            div.addEventListener('click', () => loadThread(thread.id));
             container.appendChild(div);
         });
     } else {
@@ -329,11 +338,12 @@ async function createThread(title, content) {
     } else {
         updateCooldown();
         hideModal('modal-create-thread');
+        document.getElementById('input-thread-title').value = '';
+        document.getElementById('input-thread-content').value = '';
         loadBoard(currentBoard);
     }
 }
 
-// THREAD
 async function loadThread(threadId) {
     currentThread = threadId;
     showView('thread');
@@ -361,8 +371,10 @@ async function loadThread(threadId) {
             </div>
             <div class="post-content">${sanitizeHTML(thread.content)}</div>
         </div>
-        <a href="#" onclick="loadBoard(${thread.boards.id}); return false;">← Back to ${sanitizeHTML(thread.boards.code)}</a>
+        <span class="back-link" id="back-to-board">← Back to ${sanitizeHTML(thread.boards.code)}</span>
     `;
+
+    document.getElementById('back-to-board').addEventListener('click', () => loadBoard(thread.boards.id));
 
     const container = document.getElementById('thread-posts');
     container.innerHTML = '<h3>Replies</h3>';
@@ -404,110 +416,128 @@ async function createPost(content) {
     }
 }
 
-// EVENT LISTENERS
 function setupEventListeners() {
-    // Navigation
-    document.getElementById('nav-home').onclick = (e) => {
-        e.preventDefault();
-        loadHome();
-    };
-
-    document.getElementById('nav-boards').onclick = (e) => {
-        e.preventDefault();
-        loadHome();
-    };
-
-    document.getElementById('nav-login').onclick = (e) => {
-        e.preventDefault();
-        showView('login');
-    };
-
-    document.getElementById('nav-register').onclick = (e) => {
-        e.preventDefault();
-        showView('register');
-    };
-
-    document.getElementById('nav-logout').onclick = (e) => {
-        e.preventDefault();
-        logout();
-    };
-
-    // Forms
-    document.getElementById('form-login').onsubmit = async (e) => {
-        e.preventDefault();
-        const username = document.getElementById('login-username').value;
-        const password = document.getElementById('login-password').value;
-        await login(username, password);
-    };
-
-    document.getElementById('form-register').onsubmit = async (e) => {
-        e.preventDefault();
-        const username = document.getElementById('register-username').value;
-        const password = document.getElementById('register-password').value;
-        await register(username, password);
-    };
-
-    // Buttons
-    document.getElementById('btn-create-category').onclick = () => {
-        showModal('modal-create-category');
-    };
-
-    document.getElementById('btn-create-board').onclick = () => {
-        showModal('modal-create-board');
-    };
-
-    document.getElementById('btn-create-thread').onclick = () => {
-        showModal('modal-create-thread');
-    };
-
-    document.getElementById('btn-submit-category').onclick = () => {
-        const name = document.getElementById('input-category-name').value;
-        if (name.trim()) {
-            createCategory(name);
-            document.getElementById('input-category-name').value = '';
-        }
-    };
-
-    document.getElementById('btn-submit-board').onclick = () => {
-        const name = document.getElementById('input-board-name').value;
-        const code = document.getElementById('input-board-code').value;
-        const desc = document.getElementById('input-board-desc').value;
-        if (name.trim() && code.trim()) {
-            createBoard(name, code, desc);
-            document.getElementById('input-board-name').value = '';
-            document.getElementById('input-board-code').value = '';
-            document.getElementById('input-board-desc').value = '';
-        }
-    };
-
-    document.getElementById('btn-submit-thread').onclick = () => {
-        const title = document.getElementById('input-thread-title').value;
-        const content = document.getElementById('input-thread-content').value;
-        if (title.trim() && content.trim()) {
-            createThread(title, content);
-            document.getElementById('input-thread-title').value = '';
-            document.getElementById('input-thread-content').value = '';
-        }
-    };
-
-    document.getElementById('btn-submit-reply').onclick = () => {
-        const content = document.getElementById('reply-content').value;
-        if (content.trim()) {
-            createPost(content);
-        }
-    };
-
-    // Modal close buttons
-    document.querySelectorAll('.close').forEach(btn => {
-        btn.onclick = function() {
-            this.parentElement.parentElement.style.display = 'none';
-        };
+    document.querySelectorAll('.nav-btn[data-view]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const view = btn.getAttribute('data-view');
+            if (view === 'home' || view === 'boards') {
+                loadHome();
+            } else {
+                showView(view);
+            }
+        });
     });
 
-    // Close modals on outside click
-    window.onclick = function(event) {
+    const logoutBtn = document.getElementById('btn-logout');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            logout();
+        });
+    }
+
+    const loginForm = document.getElementById('form-login');
+    if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            await login(username, password);
+        });
+    }
+
+    const registerForm = document.getElementById('form-register');
+    if (registerForm) {
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('register-username').value;
+            const password = document.getElementById('register-password').value;
+            await register(username, password);
+        });
+    }
+
+    const btnCreateCategory = document.getElementById('btn-create-category');
+    if (btnCreateCategory) {
+        btnCreateCategory.addEventListener('click', (e) => {
+            e.preventDefault();
+            showModal('modal-create-category');
+        });
+    }
+
+    const btnCreateBoard = document.getElementById('btn-create-board');
+    if (btnCreateBoard) {
+        btnCreateBoard.addEventListener('click', (e) => {
+            e.preventDefault();
+            showModal('modal-create-board');
+        });
+    }
+
+    const btnCreateThread = document.getElementById('btn-create-thread');
+    if (btnCreateThread) {
+        btnCreateThread.addEventListener('click', (e) => {
+            e.preventDefault();
+            showModal('modal-create-thread');
+        });
+    }
+
+    const btnSubmitCategory = document.getElementById('btn-submit-category');
+    if (btnSubmitCategory) {
+        btnSubmitCategory.addEventListener('click', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('input-category-name').value;
+            if (name.trim()) {
+                createCategory(name);
+            }
+        });
+    }
+
+    const btnSubmitBoard = document.getElementById('btn-submit-board');
+    if (btnSubmitBoard) {
+        btnSubmitBoard.addEventListener('click', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('input-board-name').value;
+            const code = document.getElementById('input-board-code').value;
+            const desc = document.getElementById('input-board-desc').value;
+            if (name.trim() && code.trim()) {
+                createBoard(name, code, desc);
+            }
+        });
+    }
+
+    const btnSubmitThread = document.getElementById('btn-submit-thread');
+    if (btnSubmitThread) {
+        btnSubmitThread.addEventListener('click', (e) => {
+            e.preventDefault();
+            const title = document.getElementById('input-thread-title').value;
+            const content = document.getElementById('input-thread-content').value;
+            if (title.trim() && content.trim()) {
+                createThread(title, content);
+            }
+        });
+    }
+
+    const btnSubmitReply = document.getElementById('btn-submit-reply');
+    if (btnSubmitReply) {
+        btnSubmitReply.addEventListener('click', (e) => {
+            e.preventDefault();
+            const content = document.getElementById('reply-content').value;
+            if (content.trim()) {
+                createPost(content);
+            }
+        });
+    }
+
+    document.querySelectorAll('.close').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const modalId = this.getAttribute('data-modal');
+            hideModal(modalId);
+        });
+    });
+
+    window.addEventListener('click', function(event) {
         if (event.target.classList.contains('modal')) {
             event.target.style.display = 'none';
         }
-    };
+    });
 }
