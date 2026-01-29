@@ -14,6 +14,7 @@ body {
 a {
     color: #4a9eff;
     text-decoration: none;
+    cursor: pointer;
 }
 
 a:hover {
@@ -43,11 +44,24 @@ nav {
     display: inline-block;
 }
 
-nav a {
+.nav-btn {
+    background: none;
+    border: none;
+    color: #4a9eff;
+    text-decoration: none;
     margin-right: 20px;
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    padding: 0;
 }
 
-button {
+.nav-btn:hover {
+    text-decoration: underline;
+}
+
+button,
+.action-btn {
     background-color: #2a2a2a;
     color: #c0c0c0;
     border: 1px solid #444;
@@ -57,7 +71,8 @@ button {
     margin: 10px 0;
 }
 
-button:hover {
+button:hover,
+.action-btn:hover {
     background-color: #3a3a3a;
 }
 
@@ -154,12 +169,16 @@ h2, h3 {
     color: #ff4444;
     padding: 10px;
     margin: 10px 0;
+    background-color: #1a1a1a;
+    border: 1px solid #ff4444;
 }
 
 .success {
     color: #44ff44;
     padding: 10px;
     margin: 10px 0;
+    background-color: #1a1a1a;
+    border: 1px solid #44ff44;
 }
 
 .board-code {
@@ -176,4 +195,23 @@ h2, h3 {
     margin-top: 30px;
     padding-top: 20px;
     border-top: 2px solid #333;
+}
+
+.back-link {
+    display: inline-block;
+    margin: 10px 0;
+    color: #4a9eff;
+    cursor: pointer;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
+#message-container {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 2000;
+    max-width: 400px;
 }
