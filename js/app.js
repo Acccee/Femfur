@@ -356,52 +356,37 @@ function openNewThreadModal() {
 }
 
 // Обработка создания треда
-async function handleEditProfileSubmit(e) {
+async function handleNewThreadSubmit(e) {
     e.preventDefault();
     
-    // 1. Прямое получение элементов
-    const avatarEl = document.getElementById('editAvatar');
-    const statusEl = document.getElementById('editStatus');
-
-    // 2. Получение значений
-    const avatarFile = avatarEl && avatarEl.files ? avatarEl.files[0] : null;
-    const status = statusEl ? statusEl.value.trim() : "";
-
-    // ВАЖНО: Вывод в консоль для проверки (нажмите F12 в браузере -> Console)
-    console.log("Данные перед отправкой:", {
-        status: status,
-        avatar: avatarFile ? avatarFile.name : "Файл не выбран"
-    });
-
-    // 3. Проверка: разрешаем отправку, если есть ХОТЯ БЫ что-то одно
-    if (status === "" && !avatarFile) {
-        alert("Заполните статус или выберите аватар");
+    if (!currentBoard) {
+        alert(t('error_empty_fields'));
+        return;
+    }
+    
+    const title = document.getElementById('threadTitle').value.trim();
+    const content = document.getElementById('threadContent').value.trim();
+    const imageFile = document.getElementById('threadImage').files[0];
+    const isAnon = document.getElementById('threadPostAnon').checked;
+    
+    if (!title || !content) {
+        alert(t('error_empty_fields'));
         return;
     }
     
     try {
-        // Передаем данные дальше
-        // Если updateProfile ругается внутри, мы увидим это в catch
-        await updateProfile(avatarFile, status);
+        await createThread(currentBoard, title, content, imageFile, isAnon);
+        newThreadModal.style.display = 'none';
         
-        if (typeof editProfileModal !== 'undefined') {
-            editProfileModal.style.display = 'none';
-        }
-
-        alert(t('success_profile_update', 'Profile updated successfully!'));
+        // Перезагрузка тредов борды
+        const threads = await loadBoardThreads(currentBoard);
+        renderThreads(threads);
         
-        const currentUser = await getCurrentUser();
-        if (currentUser) {
-            window.location.reload(); 
-        }
+        alert(t('success_thread'));
     } catch (error) {
-        // Если ошибка приходит от сервера или из функции updateProfile
-        console.error("Ошибка при обновлении:", error);
-        alert("Ошибка: " + error.message);
+        alert(t('error_thread_create') + ': ' + error.message);
     }
 }
-
-
 
 // Обработка логина
 async function handleLoginSubmit(e) {
@@ -474,42 +459,17 @@ async function handleReplySubmit() {
 async function handleEditProfileSubmit(e) {
     e.preventDefault();
     
-    // Получаем форму, на которой произошло событие
-    const form = e.target;
+    const avatarFile = document.getElementById('editAvatar').files[0];
+    const status = document.getElementById('editStatus').value.trim();
     
-    // Ищем элементы ВНУТРИ этой конкретной формы, а не по всей странице
-    const avatarInput = form.querySelector('#editAvatar');
-    const statusInput = form.querySelector('#editStatus');
-
-    // Проверяем, нашли ли мы элементы вообще (для отладки)
-    if (!avatarInput || !statusInput) {
-        console.error("Поля формы не найдены! Проверь ID в HTML.");
-        return;
-    }
-
-    const avatarFile = avatarInput.files[0];
-    const status = statusInput.value.trim();
-    
-    // Если статус обязателен и он пустой — вот тут сработает твоя "ошибка"
-    if (!status && !avatarFile) {
-        alert("Заполните хотя бы одно поле");
-        return;
-    }
-
     try {
         await updateProfile(avatarFile, status);
-        
-        // Закрываем модалку (убедись, что editProfileModal определена выше)
-        if (typeof editProfileModal !== 'undefined') {
-            editProfileModal.style.display = 'none';
-        }
-
+        editProfileModal.style.display = 'none';
         alert(t('success_profile_update', 'Profile updated successfully!'));
         
+        // Reload current page to show updated profile
         const currentUser = await getCurrentUser();
         if (currentUser) {
-            // Если мы уже на этой странице, reload может быть избыточен, 
-            // но для обновления аватара — это самый простой путь
             window.location.hash = `u/${currentUser.profile_hash}`;
             window.location.reload();
         }
