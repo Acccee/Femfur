@@ -356,39 +356,48 @@ function openNewThreadModal() {
 }
 
 // Обработка создания треда
-async function handleNewThreadSubmit(e) {
+async function handleEditProfileSubmit(e) {
     e.preventDefault();
+    
+    // 1. Прямое получение элементов
+    const avatarEl = document.getElementById('editAvatar');
+    const statusEl = document.getElementById('editStatus');
 
-    // ✅ БЕРЁМ БОРДУ ИЗ #b
-    const boardId = window.location.hash.replace('#', '');
+    // 2. Получение значений
+    const avatarFile = avatarEl && avatarEl.files ? avatarEl.files[0] : null;
+    const status = statusEl ? statusEl.value.trim() : "";
 
-    if (!boardId) {
-        alert('Ошибка: борда не определена');
+    // ВАЖНО: Вывод в консоль для проверки (нажмите F12 в браузере -> Console)
+    console.log("Данные перед отправкой:", {
+        status: status,
+        avatar: avatarFile ? avatarFile.name : "Файл не выбран"
+    });
+
+    // 3. Проверка: разрешаем отправку, если есть ХОТЯ БЫ что-то одно
+    if (status === "" && !avatarFile) {
+        alert("Заполните статус или выберите аватар");
         return;
     }
-
-    const titleEl = document.getElementById('threadTitle');
-    const contentEl = document.getElementById('threadContent');
-
-    const title = titleEl.value.trim();
-    const content = contentEl.value.trim();
-
-    if (!title || !content) {
-        alert(t('error_empty_fields'));
-        return;
-    }
-
+    
     try {
-        await createThread(boardId, title, content, null, false);
-        newThreadModal.style.display = 'none';
+        // Передаем данные дальше
+        // Если updateProfile ругается внутри, мы увидим это в catch
+        await updateProfile(avatarFile, status);
+        
+        if (typeof editProfileModal !== 'undefined') {
+            editProfileModal.style.display = 'none';
+        }
 
-        // 🔄 перезагрузка тредов ТЕКУЩЕЙ борды
-        const threads = await loadBoardThreads(boardId);
-        renderThreads(threads);
-
-        alert(t('success_thread'));
+        alert(t('success_profile_update', 'Profile updated successfully!'));
+        
+        const currentUser = await getCurrentUser();
+        if (currentUser) {
+            window.location.reload(); 
+        }
     } catch (error) {
-        alert(t('error_thread_create') + ': ' + error.message);
+        // Если ошибка приходит от сервера или из функции updateProfile
+        console.error("Ошибка при обновлении:", error);
+        alert("Ошибка: " + error.message);
     }
 }
 
