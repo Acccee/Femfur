@@ -1,179 +1,290 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Miracula - Имиджборд</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>Femfur - Anonymous Imageboard</title>
+    <link rel="icon" type="image/png" href="assets/fav.png">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <!-- Header with site-wide controls -->
-    <header class="site-header">
+    <header>
         <div class="container">
-            <div class="header-content">
-                <h1>Miracula</h1>
+            <div class="header-top">
+                <h1><a href="/" id="logo">Femfur</a></h1>
                 <div class="header-controls">
-                    <button id="themeToggle" class="icon-btn" title="Сменить тему">🌓</button>
-                    <button id="settingsBtn" class="icon-btn" title="Настройки">⚙️</button>
-                    <button id="changelogBtn" class="icon-btn" title="Что нового?">📋</button>
-                    <button id="authBtn" class="btn-primary">Войти</button>
+                    <div class="language-switcher">
+                        <select id="langSelect">
+                            <option value="en">English</option>
+                            <option value="uk">Українська</option>
+                            <option value="ru">Русский</option>
+                        </select>
+                    </div>
+                    <div class="user-controls">
+                        <button id="loginBtn" class="btn-secondary" data-i18n="login">Login</button>
+                        <button id="registerBtn" class="btn-secondary" data-i18n="register">Register</button>
+                        <div id="userMenu" style="display: none;">
+                            <a href="#profile" id="profileLink"></a>
+                            <button id="logoutBtn" class="btn-secondary" data-i18n="logout">Logout</button>
+                        </div>
+                    </div>
                 </div>
             </div>
+            <nav id="boardNav"></nav>
         </div>
     </header>
 
-    <!-- Main content -->
     <main class="container">
-        <div id="authSection" style="display: none;">
-            <div class="auth-form">
-                <h2>Вход / Регистрация</h2>
-                <input type="text" id="username" placeholder="Имя пользователя" autocomplete="username">
-                <input type="password" id="password" placeholder="Пароль" autocomplete="current-password">
-                <div class="form-actions">
-                    <button id="loginBtn" class="btn-primary">Войти</button>
-                    <button id="registerBtn" class="btn-secondary">Регистрация</button>
-                    <button id="cancelAuthBtn" class="btn-secondary">Отмена</button>
+        <!-- Home View -->
+        <div id="homeView">
+            <h2 data-i18n="welcome">Welcome to Femfur</h2>
+            <p data-i18n="selectBoard">Select a board from the menu above</p>
+            
+            <!-- Thread of the Day Widget -->
+            <div class="widget thread-of-day">
+                <h3 data-i18n="threadOfDay">Thread of the Day</h3>
+                <div id="threadOfDayContent" class="loading"></div>
+            </div>
+
+            <!-- Thread of the Week Widget -->
+            <div class="widget thread-of-week">
+                <h3 data-i18n="threadOfWeek">Thread of the Week</h3>
+                <div id="threadOfWeekContent" class="loading"></div>
+            </div>
+
+            <!-- Recent Threads Widget -->
+            <div class="widget recent-threads">
+                <h3 data-i18n="recentThreads">Recent Threads</h3>
+                <div id="recentThreadsContent" class="loading"></div>
+            </div>
+            
+            <div class="board-categories">
+                <div class="category">
+                    <h3>Art</h3>
+                    <div class="board-links">
+                        <a href="#art">/art/ - <span data-i18n="board_art">Art</span></a>
+                        <a href="#lit">/lit/ - <span data-i18n="board_lit">Literature</span></a>
+                        <a href="#po">/po/ - <span data-i18n="board_po">Poetry</span></a>
+                        <a href="#mu">/mu/ - <span data-i18n="board_mu">Music</span></a>
+                        <a href="#diy">/diy/ - DIY</a>
+                        <a href="#ph">/ph/ - <span data-i18n="board_ph">Photography</span></a>
+                    </div>
                 </div>
-                <div id="authMessage" class="message"></div>
+
+                <div class="category">
+                    <h3>Chat</h3>
+                    <div class="board-links">
+                        <a href="#b">/b/ - Random</a>
+                        <a href="#soc">/soc/ - <span data-i18n="board_soc">Social</span></a>
+                        <a href="#chat">/chat/ - <span data-i18n="board_chat">Chat</span></a>
+                        <a href="#news">/news/ - <span data-i18n="board_news">News</span></a>
+                        <a href="#int">/int/ - <span data-i18n="board_int">International</span></a>
+                        <a href="#r9k">/r9k/ - Robot9000</a>
+                    </div>
+                </div>
+
+                <div class="category">
+                    <h3>Furry/Anime</h3>
+                    <div class="board-links">
+                        <a href="#fur">/fur/ - Furry</a>
+                        <a href="#a">/a/ - <span data-i18n="board_a">Anime</span></a>
+                        <a href="#vn">/vn/ - <span data-i18n="board_vn">Visual Novels</span></a>
+                        <a href="#cm">/cm/ - Cute Male</a>
+                        <a href="#c">/c/ - Cute</a>
+                    </div>
+                </div>
+
+                <div class="category">
+                    <h3>Games</h3>
+                    <div class="board-links">
+                        <a href="#vg">/vg/ - <span data-i18n="board_vg">Video Games</span></a>
+                        <a href="#tg">/tg/ - <span data-i18n="board_tg">Board Games</span></a>
+                        <a href="#vr">/vr/ - VR</a>
+                        <a href="#vm">/vm/ - <span data-i18n="board_vm">Retro Games</span></a>
+                        <a href="#tv">/tv/ - <span data-i18n="board_tv">TV & Movies</span></a>
+                        <a href="#co">/co/ - <span data-i18n="board_co">Comics</span></a>
+                    </div>
+                </div>
+
+                <div class="category">
+                    <h3>IT</h3>
+                    <div class="board-links">
+                        <a href="#g">/g/ - <span data-i18n="board_g">Technology</span></a>
+                        <a href="#pr">/pr/ - <span data-i18n="board_pr">Programming</span></a>
+                        <a href="#sci">/sci/ - <span data-i18n="board_sci">Science</span></a>
+                        <a href="#wsr">/wsr/ - <span data-i18n="board_wsr">Help</span></a>
+                        <a href="#3">/3/ - <span data-i18n="board_3">3D Printing</span></a>
+                    </div>
+                </div>
+
+                <div class="category">
+                    <h3 data-i18n="cat_life">About Life</h3>
+                    <div class="board-links">
+                        <a href="#fit">/fit/ - <span data-i18n="board_fit">Fitness</span></a>
+                        <a href="#ck">/ck/ - <span data-i18n="board_ck">Cooking</span></a>
+                        <a href="#fa">/fa/ - <span data-i18n="board_fa">Fashion</span></a>
+                        <a href="#adv">/adv/ - <span data-i18n="board_adv">Advice</span></a>
+                        <a href="#trv">/trv/ - <span data-i18n="board_trv">Travel</span></a>
+                        <a href="#out">/out/ - <span data-i18n="board_out">Outdoors</span></a>
+                    </div>
+                </div>
+
+                <div class="category">
+                    <h3 data-i18n="cat_hobby">Hobby</h3>
+                    <div class="board-links">
+                        <a href="#sp">/sp/ - <span data-i18n="board_sp">Sports</span></a>
+                        <a href="#auto">/auto/ - <span data-i18n="board_auto">Automobiles</span></a>
+                        <a href="#an">/an/ - <span data-i18n="board_an">Animals</span></a>
+                        <a href="#his">/his/ - <span data-i18n="board_his">History</span></a>
+                        <a href="#p">/p/ - <span data-i18n="board_p">Photography</span></a>
+                    </div>
+                </div>
+
+                <div class="category">
+                    <h3>Adult (18+)</h3>
+                    <div class="board-links">
+                        <a href="#e">/e/ - Ecchi</a>
+                        <a href="#h">/h/ - Hentai</a>
+                        <a href="#gif">/gif/ - Adult GIF</a>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div id="mainContent">
+        <!-- Board View -->
+        <div id="boardView" style="display: none;">
             <div class="board-header">
-                <h2>/sp/ - Спорт</h2>
-                <button id="createThreadBtn" class="btn-primary" style="display: none;">Создать новый тред</button>
+                <h2 id="boardTitle"></h2>
+                <button id="newThreadBtn" class="btn-primary" data-i18n="createThread">Create Thread</button>
             </div>
 
-            <!-- Thread list -->
-            <div id="threadList" class="thread-list"></div>
+            <div id="threadsList"></div>
+        </div>
+
+        <!-- Thread View -->
+        <div id="threadView" style="display: none;">
+            <button id="backToBoard" class="btn-secondary">← <span data-i18n="backToBoard">Back to board</span></button>
+            <div id="threadContent"></div>
+            <div id="replyForm" class="reply-form">
+                <h3 data-i18n="reply">Reply</h3>
+                <div class="form-group" id="anonToggleContainer" style="display: none;">
+                    <label>
+                        <input type="checkbox" id="postAnon">
+                        <span data-i18n="postAnonymously">Post anonymously</span>
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label for="replyImage" data-i18n="attachImage">Attach image (optional)</label>
+                    <input type="file" id="replyImage" accept="image/*">
+                </div>
+                <textarea id="replyText" data-i18n-placeholder="yourReply" placeholder="Your reply..." rows="4"></textarea>
+                <button id="submitReply" class="btn-primary" data-i18n="submit">Submit</button>
+            </div>
+            <div id="repliesList"></div>
+        </div>
+
+        <!-- Profile View -->
+        <div id="profileView" style="display: none;">
+            <button id="backToHome" class="btn-secondary">← <span data-i18n="backToHome">Back to home</span></button>
+            <div id="profileContent"></div>
         </div>
     </main>
 
-    <!-- Settings Modal -->
-    <div id="settingsModal" class="modal">
+    <!-- New Thread Modal -->
+    <div id="newThreadModal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3>Настройки</h3>
-                <button class="close-btn">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="setting-group">
-                    <label>Размер шрифта</label>
-                    <select id="fontSizeSetting">
-                        <option value="small">Маленький</option>
-                        <option value="medium" selected>Средний</option>
-                        <option value="large">Большой</option>
-                    </select>
-                </div>
-                <div class="setting-group">
-                    <label>Плотность контента</label>
-                    <select id="densitySetting">
-                        <option value="compact">Компактный</option>
-                        <option value="normal" selected>Обычный</option>
-                    </select>
-                </div>
-                <div class="setting-group">
+            <span class="close">&times;</span>
+            <h2 data-i18n="createNewThread">Create New Thread</h2>
+            <form id="newThreadForm" novalidate>
+                <div class="form-group" id="threadAnonToggleContainer" style="display: none;">
                     <label>
-                        <input type="checkbox" id="animationsSetting" checked>
-                        Включить анимации
+                        <input type="checkbox" id="threadPostAnon">
+                        <span data-i18n="postAnonymously">Post anonymously</span>
                     </label>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Changelog Modal -->
-    <div id="changelogModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Что нового?</h3>
-                <button class="close-btn">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="changelog">
-                    <div class="version-block">
-                        <h4>Версия 2.1.0 <span class="badge">Текущая</span></h4>
-                        <p class="version-date">30 января 2026</p>
-                        <ul>
-                            <li><strong>Исправлен баг создания тредов</strong> - теперь валидация формы работает корректно</li>
-                            <li><strong>Добавлены глобальные настройки сайта</strong> - управление темой, шрифтом и анимациями</li>
-                            <li>Переключатель темы (Light / Dark / Mono)</li>
-                            <li>Панель настроек пользователя</li>
-                            <li>История обновлений</li>
-                        </ul>
-                    </div>
-                    <div class="version-block">
-                        <h4>Версия 2.0.0</h4>
-                        <p class="version-date">Январь 2026</p>
-                        <ul>
-                            <li>Базовая функциональность имиджборда</li>
-                            <li>Создание тредов и постов</li>
-                            <li>Система авторизации</li>
-                        </ul>
-                    </div>
+                <input type="text" id="threadTitle" data-i18n-placeholder="title" placeholder="Title">
+                <textarea id="threadContent" data-i18n-placeholder="content" placeholder="Content" rows="6"></textarea>
+                <div class="form-group">
+                    <label for="threadImage" data-i18n="attachImage">Attach image (optional)</label>
+                    <input type="file" id="threadImage" accept="image/*">
                 </div>
-            </div>
+                <button type="submit" class="btn-primary" data-i18n="create">Create</button>
+            </form>
         </div>
     </div>
 
-    <!-- Create Thread Modal -->
-    <div id="createThreadModal" class="modal">
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3>Создать новый тред</h3>
-                <button class="close-btn">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="createThreadForm">
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" id="postAnonymously">
-                            Опубликовать анонимно
-                        </label>
-                    </div>
-                    <div class="form-group">
-                        <input type="text" id="threadTitle" placeholder="Заголовок" required>
-                    </div>
-                    <div class="form-group">
-                        <textarea id="threadContent" placeholder="Текст" rows="8" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Прикрепить изображение (опционально)</label>
-                        <input type="file" id="threadImage" accept="image/*">
-                    </div>
-                    <div id="threadMessage" class="message"></div>
-                    <div class="form-actions">
-                        <button type="submit" class="btn-primary">Создать</button>
-                        <button type="button" class="btn-secondary cancel-thread">Отмена</button>
-                    </div>
-                </form>
-            </div>
+            <span class="close">&times;</span>
+            <h2 data-i18n="login">Login</h2>
+            <form id="loginForm" novalidate>
+                <input type="text" id="loginNickname" data-i18n-placeholder="nickname" placeholder="Nickname">
+                <input type="password" id="loginPassword" data-i18n-placeholder="password" placeholder="Password">
+                <button type="submit" class="btn-primary" data-i18n="login">Login</button>
+            </form>
         </div>
     </div>
 
-    <!-- Thread View Modal -->
-    <div id="threadModal" class="modal">
-        <div class="modal-content large">
-            <div class="modal-header">
-                <h3 id="threadModalTitle">Тред</h3>
-                <button class="close-btn">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div id="threadView"></div>
-                <div id="replySection" style="display: none;">
-                    <h4>Ответить</h4>
-                    <form id="replyForm">
-                        <textarea id="replyContent" placeholder="Ваш ответ" rows="4" required></textarea>
-                        <div id="replyMessage" class="message"></div>
-                        <button type="submit" class="btn-primary">Отправить</button>
-                    </form>
+    <!-- Register Modal -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 data-i18n="register">Register</h2>
+            <form id="registerForm" novalidate>
+                <input type="text" id="registerNickname" data-i18n-placeholder="nickname" placeholder="Nickname">
+                <input type="password" id="registerPassword" data-i18n-placeholder="password" placeholder="Password">
+                <input type="password" id="registerPasswordConfirm" data-i18n-placeholder="confirmPassword" placeholder="Confirm Password">
+                <div class="form-group">
+                    <label for="registerAvatar" data-i18n="avatar">Avatar (optional)</label>
+                    <input type="file" id="registerAvatar" accept="image/*">
                 </div>
-            </div>
+                <input type="text" id="registerStatus" data-i18n-placeholder="status" placeholder="Status (optional)" maxlength="100">
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="registerAlwaysAnon">
+                        <span data-i18n="alwaysPostAnon">Always post anonymously by default</span>
+                    </label>
+                </div>
+                <button type="submit" class="btn-primary" data-i18n="register">Register</button>
+            </form>
         </div>
     </div>
 
-    <script src="config.js"></script>
-    <script src="app.js"></script>
+    <!-- Edit Profile Modal -->
+    <div id="editProfileModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 data-i18n="editProfile">Edit Profile</h2>
+            <form id="editProfileForm" novalidate>
+                <div class="form-group">
+                    <label for="editAvatar" data-i18n="changeAvatar">Change Avatar</label>
+                    <input type="file" id="editAvatar" accept="image/*">
+                    <div id="currentAvatar" style="margin-top: 10px;"></div>
+                </div>
+                <div class="form-group">
+                    <label for="editStatus" data-i18n="status">Status</label>
+                    <input type="text" id="editStatus" data-i18n-placeholder="status" placeholder="Status (optional)" maxlength="100">
+                </div>
+                <button type="submit" class="btn-primary" data-i18n="save">Save</button>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 Femfur - <span data-i18n="footerTagline">Anonymous Imageboard</span></p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="js/i18n.js"></script>
+    <script type="module" src="js/supabaseClient.js"></script>
+    <script type="module" src="js/auth.js"></script>
+    <script type="module" src="js/boards.js"></script>
+    <script type="module" src="js/threads.js"></script>
+    <script type="module" src="js/widgets.js"></script>
+    <script type="module" src="js/profile.js"></script>
+    <script type="module" src="js/app.js"></script>
 </body>
 </html>
