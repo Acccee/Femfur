@@ -356,44 +356,35 @@ function openNewThreadModal() {
 }
 
 // Обработка создания треда
-// Исправленная обработка редактирования профиля
-async function handleEditProfileSubmit(e) {
+async function handleNewThreadSubmit(e) {
     e.preventDefault();
     
-    // Получаем элементы
-    const avatarInput = document.getElementById('editAvatar');
-    const statusInput = document.getElementById('editStatus');
+    if (!currentBoard) {
+        alert(t('error_empty_fields'));
+        return;
+    }
     
-    // Проверяем наличие файла и текста (безопасно)
-    const avatarFile = (avatarInput && avatarInput.files) ? avatarInput.files[0] : null;
-    const status = statusInput ? statusInput.value.trim() : "";
+    const title = document.getElementById('threadTitle').value.trim();
+    const content = document.getElementById('threadContent').value.trim();
+    const imageFile = document.getElementById('threadImage').files[0];
+    const isAnon = document.getElementById('threadPostAnon').checked;
     
-    // Если вообще ничего не введено - тогда ругаемся
-    if (!avatarFile && status === "") {
-        alert(t('error_empty_fields', 'Please fill at least one field'));
+    if (!title || !content) {
+        alert(t('error_empty_fields'));
         return;
     }
     
     try {
-        // Вызываем обновление. 
-        // Важно: updateProfile должна уметь принимать null вместо аватара или пустую строку
-        await updateProfile(avatarFile, status);
+        await createThread(currentBoard, title, content, imageFile, isAnon);
+        newThreadModal.style.display = 'none';
         
-        if (editProfileModal) {
-            editProfileModal.style.display = 'none';
-        }
+        // Перезагрузка тредов борды
+        const threads = await loadBoardThreads(currentBoard);
+        renderThreads(threads);
         
-        alert(t('success_profile_update', 'Profile updated successfully!'));
-        
-        // Получаем свежие данные и обновляем страницу
-        const currentUser = await getCurrentUser();
-        if (currentUser) {
-            // Чтобы страница реально обновилась и показала новый статус/аватар
-            window.location.reload();
-        }
+        alert(t('success_thread'));
     } catch (error) {
-        console.error("Profile update error:", error);
-        alert(t('error_profile_update', 'Error updating profile: ') + error.message);
+        alert(t('error_thread_create') + ': ' + error.message);
     }
 }
 
