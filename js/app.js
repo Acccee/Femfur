@@ -175,30 +175,40 @@ async function showHome() {
 }
 
 // Показать борду
-async function showBoard(boardId) {
-    currentBoard = boardId;
-    currentThread = null;
-    
-    homeView.style.display = 'none';
-    boardView.style.display = 'block';
-    threadView.style.display = 'none';
-    profileView.style.display = 'none';
-    
-    const boardInfo = getBoardInfo(boardId);
-    boardTitle.textContent = `${boardInfo.name} - ${boardInfo.title}`;
-    
-    updateActiveNav(boardId);
-    
-    // Загрузка тредов
-    threadsList.innerHTML = `<div class="loading">${t('loading', 'Loading...')}</div>`;
-    
+async function handleNewThreadSubmit(e) {
+    e.preventDefault();
+
+    // 🔥 ПОЛУЧАЕМ БОРДУ НАПРЯМУЮ ИЗ URL
+    const boardId = window.location.hash.replace('#', '');
+
+    if (!boardId) {
+        alert('Ошибка: борда не определена');
+        return;
+    }
+
+    const title = document.getElementById('threadTitle').value.trim();
+    const content = document.getElementById('threadContent').value.trim();
+    const imageFile = document.getElementById('threadImage').files[0];
+    const isAnon = document.getElementById('threadPostAnon').checked;
+
+    if (!title || !content) {
+        alert('Заполните все поля');
+        return;
+    }
+
     try {
+        await createThread(boardId, title, content, imageFile, isAnon);
+        newThreadModal.style.display = 'none';
+
         const threads = await loadBoardThreads(boardId);
         renderThreads(threads);
+
+        alert('Тред создан');
     } catch (error) {
-        threadsList.innerHTML = `<div class="error">${t('error_load')}</div>`;
+        alert('Ошибка создания треда: ' + error.message);
     }
 }
+
 
 // Рендер тредов
 function renderThreads(threads) {
