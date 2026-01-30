@@ -3,241 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Femfur - Imageboard</title>
+    <title>Femfur - Anonymous Imageboard</title>
+    <link rel="icon" type="image/png" href="assets/fav.png">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <header>
         <div class="container">
-            <div class="header-content">
-                <h1 class="logo">Femfur</h1>
-                <nav id="boardNav"></nav>
+            <div class="header-top">
+                <h1><a href="/" id="logo">Femfur</a></h1>
+                <div class="header-controls">
+                    <div class="language-switcher">
+                        <select id="langSelect">
+                            <option value="en">English</option>
+                            <option value="uk">Українська</option>
+                            <option value="ru">Русский</option>
+                        </select>
+                    </div>
+                    <div class="user-controls">
+                        <button id="loginBtn" class="btn-secondary" data-i18n="login">Login</button>
+                        <button id="registerBtn" class="btn-secondary" data-i18n="register">Register</button>
+                        <div id="userMenu" style="display: none;">
+                            <a href="#profile" id="profileLink"></a>
+                            <button id="logoutBtn" class="btn-secondary" data-i18n="logout">Logout</button>
+                        </div>
+                    </div>
+                </div>
             </div>
+            <nav id="boardNav"></nav>
         </div>
     </header>
 
     <main class="container">
         <!-- Home View -->
         <div id="homeView">
-            <div class="welcome-section">
-                <h2>Welcome to Femfur</h2>
-                <p>Select a board to start browsing or create a new thread</p>
+            <h2 data-i18n="welcome">Welcome to Femfur</h2>
+            <p data-i18n="selectBoard">Select a board from the menu above</p>
+            
+            <!-- Thread of the Day Widget -->
+            <div class="widget thread-of-day">
+                <h3 data-i18n="threadOfDay">Thread of the Day</h3>
+                <div id="threadOfDayContent" class="loading"></div>
+            </div>
+
+            <!-- Thread of the Week Widget -->
+            <div class="widget thread-of-week">
+                <h3 data-i18n="threadOfWeek">Thread of the Week</h3>
+                <div id="threadOfWeekContent" class="loading"></div>
+            </div>
+
+            <!-- Recent Threads Widget -->
+            <div class="widget recent-threads">
+                <h3 data-i18n="recentThreads">Recent Threads</h3>
+                <div id="recentThreadsContent" class="loading"></div>
             </div>
             
-            <div class="board-list">
-                <div class="board-category">
-                    <h3>Art & Creative</h3>
-                    <div class="boards">
-                        <a href="#art" class="board-link">
-                            <span class="board-name">/art/</span>
-                            <span class="board-desc">Artwork & Drawings</span>
-                        </a>
-                        <a href="#lit" class="board-link">
-                            <span class="board-name">/lit/</span>
-                            <span class="board-desc">Literature & Stories</span>
-                        </a>
-                        <a href="#po" class="board-link">
-                            <span class="board-name">/po/</span>
-                            <span class="board-desc">Poetry</span>
-                        </a>
-                        <a href="#mu" class="board-link">
-                            <span class="board-name">/mu/</span>
-                            <span class="board-desc">Music</span>
-                        </a>
-                        <a href="#diy" class="board-link">
-                            <span class="board-name">/diy/</span>
-                            <span class="board-desc">DIY & Crafts</span>
-                        </a>
-                        <a href="#ph" class="board-link">
-                            <span class="board-name">/ph/</span>
-                            <span class="board-desc">Photography</span>
-                        </a>
+            <div class="board-categories">
+                <div class="category">
+                    <h3>Art</h3>
+                    <div class="board-links">
+                        <a href="#art">/art/ - <span data-i18n="board_art">Art</span></a>
+                        <a href="#lit">/lit/ - <span data-i18n="board_lit">Literature</span></a>
+                        <a href="#po">/po/ - <span data-i18n="board_po">Poetry</span></a>
+                        <a href="#mu">/mu/ - <span data-i18n="board_mu">Music</span></a>
+                        <a href="#diy">/diy/ - DIY</a>
+                        <a href="#ph">/ph/ - <span data-i18n="board_ph">Photography</span></a>
                     </div>
                 </div>
 
-                <div class="board-category">
-                    <h3>Discussion</h3>
-                    <div class="boards">
-                        <a href="#b" class="board-link">
-                            <span class="board-name">/b/</span>
-                            <span class="board-desc">Random</span>
-                        </a>
-                        <a href="#soc" class="board-link">
-                            <span class="board-name">/soc/</span>
-                            <span class="board-desc">Social</span>
-                        </a>
-                        <a href="#chat" class="board-link">
-                            <span class="board-name">/chat/</span>
-                            <span class="board-desc">General Chat</span>
-                        </a>
-                        <a href="#news" class="board-link">
-                            <span class="board-name">/news/</span>
-                            <span class="board-desc">News & Current Events</span>
-                        </a>
-                        <a href="#int" class="board-link">
-                            <span class="board-name">/int/</span>
-                            <span class="board-desc">International</span>
-                        </a>
-                        <a href="#r9k" class="board-link">
-                            <span class="board-name">/r9k/</span>
-                            <span class="board-desc">Robot9000</span>
-                        </a>
+                <div class="category">
+                    <h3>Chat</h3>
+                    <div class="board-links">
+                        <a href="#b">/b/ - Random</a>
+                        <a href="#soc">/soc/ - <span data-i18n="board_soc">Social</span></a>
+                        <a href="#chat">/chat/ - <span data-i18n="board_chat">Chat</span></a>
+                        <a href="#news">/news/ - <span data-i18n="board_news">News</span></a>
+                        <a href="#int">/int/ - <span data-i18n="board_int">International</span></a>
+                        <a href="#r9k">/r9k/ - Robot9000</a>
                     </div>
                 </div>
 
-                <div class="board-category">
-                    <h3>Furry & Anime</h3>
-                    <div class="boards">
-                        <a href="#fur" class="board-link">
-                            <span class="board-name">/fur/</span>
-                            <span class="board-desc">Furry</span>
-                        </a>
-                        <a href="#a" class="board-link">
-                            <span class="board-name">/a/</span>
-                            <span class="board-desc">Anime & Manga</span>
-                        </a>
-                        <a href="#vn" class="board-link">
-                            <span class="board-name">/vn/</span>
-                            <span class="board-desc">Visual Novels</span>
-                        </a>
-                        <a href="#cm" class="board-link">
-                            <span class="board-name">/cm/</span>
-                            <span class="board-desc">Cute Male</span>
-                        </a>
-                        <a href="#c" class="board-link">
-                            <span class="board-name">/c/</span>
-                            <span class="board-desc">Cute</span>
-                        </a>
+                <div class="category">
+                    <h3>Furry/Anime</h3>
+                    <div class="board-links">
+                        <a href="#fur">/fur/ - Furry</a>
+                        <a href="#a">/a/ - <span data-i18n="board_a">Anime</span></a>
+                        <a href="#vn">/vn/ - <span data-i18n="board_vn">Visual Novels</span></a>
+                        <a href="#cm">/cm/ - Cute Male</a>
+                        <a href="#c">/c/ - Cute</a>
                     </div>
                 </div>
 
-                <div class="board-category">
-                    <h3>Games & Entertainment</h3>
-                    <div class="boards">
-                        <a href="#vg" class="board-link">
-                            <span class="board-name">/vg/</span>
-                            <span class="board-desc">Video Games</span>
-                        </a>
-                        <a href="#tg" class="board-link">
-                            <span class="board-name">/tg/</span>
-                            <span class="board-desc">Tabletop Games</span>
-                        </a>
-                        <a href="#vr" class="board-link">
-                            <span class="board-name">/vr/</span>
-                            <span class="board-desc">Virtual Reality</span>
-                        </a>
-                        <a href="#vm" class="board-link">
-                            <span class="board-name">/vm/</span>
-                            <span class="board-desc">Retro Games</span>
-                        </a>
-                        <a href="#tv" class="board-link">
-                            <span class="board-name">/tv/</span>
-                            <span class="board-desc">TV & Film</span>
-                        </a>
-                        <a href="#co" class="board-link">
-                            <span class="board-name">/co/</span>
-                            <span class="board-desc">Comics & Cartoons</span>
-                        </a>
+                <div class="category">
+                    <h3>Games</h3>
+                    <div class="board-links">
+                        <a href="#vg">/vg/ - <span data-i18n="board_vg">Video Games</span></a>
+                        <a href="#tg">/tg/ - <span data-i18n="board_tg">Board Games</span></a>
+                        <a href="#vr">/vr/ - VR</a>
+                        <a href="#vm">/vm/ - <span data-i18n="board_vm">Retro Games</span></a>
+                        <a href="#tv">/tv/ - <span data-i18n="board_tv">TV & Movies</span></a>
+                        <a href="#co">/co/ - <span data-i18n="board_co">Comics</span></a>
                     </div>
                 </div>
 
-                <div class="board-category">
-                    <h3>Technology</h3>
-                    <div class="boards">
-                        <a href="#g" class="board-link">
-                            <span class="board-name">/g/</span>
-                            <span class="board-desc">Technology</span>
-                        </a>
-                        <a href="#pr" class="board-link">
-                            <span class="board-name">/pr/</span>
-                            <span class="board-desc">Programming</span>
-                        </a>
-                        <a href="#sci" class="board-link">
-                            <span class="board-name">/sci/</span>
-                            <span class="board-desc">Science</span>
-                        </a>
-                        <a href="#wsr" class="board-link">
-                            <span class="board-name">/wsr/</span>
-                            <span class="board-desc">Tech Support</span>
-                        </a>
-                        <a href="#3" class="board-link">
-                            <span class="board-name">/3/</span>
-                            <span class="board-desc">3D Printing</span>
-                        </a>
+                <div class="category">
+                    <h3>IT</h3>
+                    <div class="board-links">
+                        <a href="#g">/g/ - <span data-i18n="board_g">Technology</span></a>
+                        <a href="#pr">/pr/ - <span data-i18n="board_pr">Programming</span></a>
+                        <a href="#sci">/sci/ - <span data-i18n="board_sci">Science</span></a>
+                        <a href="#wsr">/wsr/ - <span data-i18n="board_wsr">Help</span></a>
+                        <a href="#3">/3/ - <span data-i18n="board_3">3D Printing</span></a>
                     </div>
                 </div>
 
-                <div class="board-category">
-                    <h3>Lifestyle</h3>
-                    <div class="boards">
-                        <a href="#fit" class="board-link">
-                            <span class="board-name">/fit/</span>
-                            <span class="board-desc">Fitness & Health</span>
-                        </a>
-                        <a href="#ck" class="board-link">
-                            <span class="board-name">/ck/</span>
-                            <span class="board-desc">Food & Cooking</span>
-                        </a>
-                        <a href="#fa" class="board-link">
-                            <span class="board-name">/fa/</span>
-                            <span class="board-desc">Fashion</span>
-                        </a>
-                        <a href="#adv" class="board-link">
-                            <span class="board-name">/adv/</span>
-                            <span class="board-desc">Advice</span>
-                        </a>
-                        <a href="#trv" class="board-link">
-                            <span class="board-name">/trv/</span>
-                            <span class="board-desc">Travel</span>
-                        </a>
-                        <a href="#out" class="board-link">
-                            <span class="board-name">/out/</span>
-                            <span class="board-desc">Outdoors</span>
-                        </a>
+                <div class="category">
+                    <h3 data-i18n="cat_life">About Life</h3>
+                    <div class="board-links">
+                        <a href="#fit">/fit/ - <span data-i18n="board_fit">Fitness</span></a>
+                        <a href="#ck">/ck/ - <span data-i18n="board_ck">Cooking</span></a>
+                        <a href="#fa">/fa/ - <span data-i18n="board_fa">Fashion</span></a>
+                        <a href="#adv">/adv/ - <span data-i18n="board_adv">Advice</span></a>
+                        <a href="#trv">/trv/ - <span data-i18n="board_trv">Travel</span></a>
+                        <a href="#out">/out/ - <span data-i18n="board_out">Outdoors</span></a>
                     </div>
                 </div>
 
-                <div class="board-category">
-                    <h3>Hobbies</h3>
-                    <div class="boards">
-                        <a href="#sp" class="board-link">
-                            <span class="board-name">/sp/</span>
-                            <span class="board-desc">Sports</span>
-                        </a>
-                        <a href="#auto" class="board-link">
-                            <span class="board-name">/auto/</span>
-                            <span class="board-desc">Automobiles</span>
-                        </a>
-                        <a href="#an" class="board-link">
-                            <span class="board-name">/an/</span>
-                            <span class="board-desc">Animals & Nature</span>
-                        </a>
-                        <a href="#his" class="board-link">
-                            <span class="board-name">/his/</span>
-                            <span class="board-desc">History</span>
-                        </a>
-                        <a href="#p" class="board-link">
-                            <span class="board-name">/p/</span>
-                            <span class="board-desc">Photography</span>
-                        </a>
+                <div class="category">
+                    <h3 data-i18n="cat_hobby">Hobby</h3>
+                    <div class="board-links">
+                        <a href="#sp">/sp/ - <span data-i18n="board_sp">Sports</span></a>
+                        <a href="#auto">/auto/ - <span data-i18n="board_auto">Automobiles</span></a>
+                        <a href="#an">/an/ - <span data-i18n="board_an">Animals</span></a>
+                        <a href="#his">/his/ - <span data-i18n="board_his">History</span></a>
+                        <a href="#p">/p/ - <span data-i18n="board_p">Photography</span></a>
                     </div>
                 </div>
 
-                <div class="board-category nsfw">
+                <div class="category">
                     <h3>Adult (18+)</h3>
-                    <div class="boards">
-                        <a href="#e" class="board-link">
-                            <span class="board-name">/e/</span>
-                            <span class="board-desc">Ecchi</span>
-                        </a>
-                        <a href="#h" class="board-link">
-                            <span class="board-name">/h/</span>
-                            <span class="board-desc">Hentai</span>
-                        </a>
-                        <a href="#gif" class="board-link">
-                            <span class="board-name">/gif/</span>
-                            <span class="board-desc">Adult GIF</span>
-                        </a>
+                    <div class="board-links">
+                        <a href="#e">/e/ - Ecchi</a>
+                        <a href="#h">/h/ - Hentai</a>
+                        <a href="#gif">/gif/ - Adult GIF</a>
                     </div>
                 </div>
             </div>
@@ -246,82 +154,117 @@
         <!-- Board View -->
         <div id="boardView" style="display: none;">
             <div class="board-header">
-                <div class="board-info">
-                    <h2 id="boardTitle"></h2>
-                    <p id="boardDescription"></p>
-                </div>
-                <button id="newThreadBtn" class="btn-primary">[Start a New Thread]</button>
+                <h2 id="boardTitle"></h2>
+                <button id="newThreadBtn" class="btn-primary" data-i18n="createThread">Create Thread</button>
             </div>
-
-            <div id="newThreadFormContainer" class="new-thread-form" style="display: none;">
-                <form id="newThreadForm">
-                    <div class="form-row">
-                        <input type="text" id="threadSubject" placeholder="Subject" maxlength="100">
-                    </div>
-                    <div class="form-row">
-                        <textarea id="threadComment" placeholder="Comment" rows="5" required></textarea>
-                    </div>
-                    <div class="form-row">
-                        <label class="file-input-label">
-                            <span>Choose File</span>
-                            <input type="file" id="threadFile" accept="image/*">
-                        </label>
-                        <span id="fileName" class="file-name"></span>
-                    </div>
-                    <div class="form-row">
-                        <button type="submit" class="btn-submit">Post</button>
-                        <button type="button" id="cancelThread" class="btn-cancel">Cancel</button>
-                    </div>
-                </form>
-            </div>
-
-            <hr>
 
             <div id="threadsList"></div>
         </div>
 
         <!-- Thread View -->
         <div id="threadView" style="display: none;">
-            <div class="thread-header">
-                <button id="backToBoard" class="btn-back">[Return]</button>
-                <button id="showReplyForm" class="btn-primary">[Post a Reply]</button>
-            </div>
-
-            <div id="replyFormContainer" class="reply-form-container" style="display: none;">
-                <form id="replyForm">
-                    <div class="form-row">
-                        <textarea id="replyComment" placeholder="Comment" rows="5" required></textarea>
-                    </div>
-                    <div class="form-row">
-                        <label class="file-input-label">
-                            <span>Choose File</span>
-                            <input type="file" id="replyFile" accept="image/*">
-                        </label>
-                        <span id="replyFileName" class="file-name"></span>
-                    </div>
-                    <div class="form-row">
-                        <button type="submit" class="btn-submit">Post</button>
-                        <button type="button" id="cancelReply" class="btn-cancel">Cancel</button>
-                    </div>
-                </form>
-            </div>
-
-            <hr>
-
+            <button id="backToBoard" class="btn-secondary">← <span data-i18n="backToBoard">Back to board</span></button>
             <div id="threadContent"></div>
+            <div id="replyForm" class="reply-form">
+                <h3 data-i18n="reply">Reply</h3>
+                <div class="form-group" id="anonToggleContainer" style="display: none;">
+                    <label>
+                        <input type="checkbox" id="postAnon">
+                        <span data-i18n="postAnonymously">Post anonymously</span>
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label for="replyImage" data-i18n="attachImage">Attach image (optional)</label>
+                    <input type="file" id="replyImage" accept="image/*">
+                </div>
+                <textarea id="replyText" data-i18n-placeholder="yourReply" placeholder="Your reply..." rows="4"></textarea>
+                <button id="submitReply" class="btn-primary" data-i18n="submit">Submit</button>
+            </div>
+            <div id="repliesList"></div>
+        </div>
+
+        <!-- Profile View -->
+        <div id="profileView" style="display: none;">
+            <button id="backToHome" class="btn-secondary">← <span data-i18n="backToHome">Back to home</span></button>
+            <div id="profileContent"></div>
         </div>
     </main>
 
+    <!-- New Thread Modal -->
+    <div id="newThreadModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 data-i18n="createNewThread">Create New Thread</h2>
+            <form id="newThreadForm">
+                <div class="form-group" id="threadAnonToggleContainer" style="display: none;">
+                    <label>
+                        <input type="checkbox" id="threadPostAnon">
+                        <span data-i18n="postAnonymously">Post anonymously</span>
+                    </label>
+                </div>
+                <input type="text" id="threadTitle" data-i18n-placeholder="title" placeholder="Title" required>
+                <textarea id="threadContent" data-i18n-placeholder="content" placeholder="Content" rows="6" required></textarea>
+                <div class="form-group">
+                    <label for="threadImage" data-i18n="attachImage">Attach image (optional)</label>
+                    <input type="file" id="threadImage" accept="image/*">
+                </div>
+                <button type="submit" class="btn-primary" data-i18n="create">Create</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 data-i18n="login">Login</h2>
+            <form id="loginForm">
+                <input type="text" id="loginNickname" data-i18n-placeholder="nickname" placeholder="Nickname" required>
+                <input type="password" id="loginPassword" data-i18n-placeholder="password" placeholder="Password" required>
+                <button type="submit" class="btn-primary" data-i18n="login">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 data-i18n="register">Register</h2>
+            <form id="registerForm">
+                <input type="text" id="registerNickname" data-i18n-placeholder="nickname" placeholder="Nickname" required>
+                <input type="password" id="registerPassword" data-i18n-placeholder="password" placeholder="Password" required>
+                <input type="password" id="registerPasswordConfirm" data-i18n-placeholder="confirmPassword" placeholder="Confirm Password" required>
+                <div class="form-group">
+                    <label for="registerAvatar" data-i18n="avatar">Avatar (optional)</label>
+                    <input type="file" id="registerAvatar" accept="image/*">
+                </div>
+                <input type="text" id="registerStatus" data-i18n-placeholder="status" placeholder="Status (optional)" maxlength="100">
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="registerAlwaysAnon">
+                        <span data-i18n="alwaysPostAnon">Always post anonymously by default</span>
+                    </label>
+                </div>
+                <button type="submit" class="btn-primary" data-i18n="register">Register</button>
+            </form>
+        </div>
+    </div>
+
     <footer>
         <div class="container">
-            <p>Femfur Imageboard - All trademarks and copyrights on this page are owned by their respective parties.</p>
+            <p>&copy; 2026 Femfur - <span data-i18n="footerTagline">Anonymous Imageboard</span></p>
         </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="js/i18n.js"></script>
     <script type="module" src="js/supabaseClient.js"></script>
+    <script type="module" src="js/auth.js"></script>
     <script type="module" src="js/boards.js"></script>
     <script type="module" src="js/threads.js"></script>
+    <script type="module" src="js/widgets.js"></script>
+    <script type="module" src="js/profile.js"></script>
     <script type="module" src="js/app.js"></script>
 </body>
 </html>

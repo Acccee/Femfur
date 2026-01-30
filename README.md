@@ -1,339 +1,271 @@
-# Femfur Imageboard
+# Femfur - Anonymous Imageboard
 
-A fully functional imageboard similar to 4chan, built for GitHub Pages with Supabase backend. All threads and replies are visible to all users globally in real-time.
+**Femfur** is a modern, minimalist anonymous imageboard built with vanilla JavaScript and Supabase. It follows the philosophy of classic imageboards like 4chan and 2ch while providing modern features.
 
 ## 🎯 Features
 
-- ✅ 40+ boards across different categories
-- ✅ Image upload support (PNG, JPG, GIF, WEBP)
-- ✅ Create threads with subject, comment, and image
-- ✅ Reply to threads with comments and images
-- ✅ All data stored in Supabase (NO localStorage)
-- ✅ Hash-based navigation (#b, #art, etc.)
-- ✅ 4chan-style design and layout
-- ✅ Works on GitHub Pages (frontend only)
-- ✅ Responsive design
-- ✅ Real-time data visible to all users
+### Core Features
+- ✅ **Anonymous posting** - Post without registration
+- ✅ **User accounts** - Optional registration with hash-based profile URLs
+- ✅ **Multiple boards** - 40+ boards across different categories
+- ✅ **Thread creation** - Create discussions with text and images
+- ✅ **Image uploads** - Upload images to threads and replies
+- ✅ **View counter** - Track unique views per thread
+- ✅ **Reply system** - Comment on threads with quote support
+- ✅ **Quote linking** - Click >>number to quote posts
+- ✅ **Auto-bump** - New replies bump threads to top
 
-## 📁 Project Structure
+### Advanced Features
+- 🌍 **Multi-language support** (i18n) - English, Ukrainian, Russian
+- 👤 **Hash-based profiles** - Public profile URLs like `/u/<hash>`
+- 📌 **Sticky threads** - Pin important threads to top
+- 🏆 **Thread of the Day/Week** - Automated popular thread widgets
+- 📊 **Recent threads widget** - Homepage activity feed
+- 🔒 **Anonymous mode** - Post anonymously even when logged in
+- 🎨 **Classic imageboard design** - Minimal, clean interface
+- 📱 **Responsive design** - Works on mobile and desktop
+
+## 🏗️ Project Structure
 
 ```
 femfur/
-├── index.html              # Main HTML page
+├── index.html              # Main HTML file
 ├── css/
-│   └── style.css          # 4chan-inspired styles
-└── js/
-    ├── supabaseClient.js  # Supabase client (CONFIGURE THIS!)
-    ├── boards.js          # Board management
-    ├── threads.js         # Thread and reply management
-    └── app.js             # Main application logic
+│   └── style.css          # All styles
+├── js/
+│   ├── app.js             # Main application logic
+│   ├── auth.js            # Authentication & user management
+│   ├── boards.js          # Board management
+│   ├── threads.js         # Thread & reply logic
+│   ├── widgets.js         # Homepage widgets
+│   ├── profile.js         # User profile system
+│   ├── i18n.js            # Internationalization
+│   └── supabaseClient.js  # Supabase configuration
+├── locales/
+│   ├── en.json            # English translations
+│   ├── uk.json            # Ukrainian translations
+│   └── ru.json            # Russian translations
+├── assets/
+│   └── fav.png            # Favicon
+└── README.md              # This file
 ```
 
-## 🚀 Setup Instructions
+## 🗄️ Database Schema
 
-### Step 1: Create Supabase Project
+### Required Tables in Supabase
 
-1. Go to https://supabase.com
-2. Create a new project
-3. Wait for the project to be ready
-4. Note your project URL and anon key from Settings → API
-
-### Step 2: Create Database Tables
-
-Go to your Supabase project → SQL Editor and run this SQL:
-
+#### 1. `users` table
 ```sql
--- Create threads table
+CREATE TABLE users (
+    id BIGSERIAL PRIMARY KEY,
+    nickname VARCHAR(50) UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    avatar_url TEXT,
+    status VARCHAR(100),
+    always_anonymous BOOLEAN DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Index for faster lookups
+CREATE INDEX idx_users_nickname ON users(nickname);
+```
+
+#### 2. `threads` table
+```sql
 CREATE TABLE threads (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    board TEXT NOT NULL,
-    subject TEXT,
-    comment TEXT NOT NULL,
+    id BIGSERIAL PRIMARY KEY,
+    board VARCHAR(20) NOT NULL,
+    title VARCHAR(200) NOT NULL,
+    content TEXT NOT NULL,
     image_url TEXT,
+    user_id BIGINT REFERENCES users(id) ON DELETE SET NULL,
+    is_anonymous BOOLEAN DEFAULT false,
+    is_sticky BOOLEAN DEFAULT false,
+    views INTEGER DEFAULT 0,
+    bumped_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create replies table
-CREATE TABLE replies (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    thread_id UUID NOT NULL REFERENCES threads(id) ON DELETE CASCADE,
-    comment TEXT NOT NULL,
-    image_url TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Create indexes for better performance
+-- Indexes for performance
 CREATE INDEX idx_threads_board ON threads(board);
-CREATE INDEX idx_threads_created_at ON threads(created_at DESC);
-CREATE INDEX idx_replies_thread_id ON replies(thread_id);
-CREATE INDEX idx_replies_created_at ON replies(created_at);
-
--- Enable Row Level Security
-ALTER TABLE threads ENABLE ROW LEVEL SECURITY;
-ALTER TABLE replies ENABLE ROW LEVEL SECURITY;
-
--- Create policies (allow everyone to read and write)
-CREATE POLICY "Anyone can read threads"
-    ON threads FOR SELECT
-    USING (true);
-
-CREATE POLICY "Anyone can create threads"
-    ON threads FOR INSERT
-    WITH CHECK (true);
-
-CREATE POLICY "Anyone can read replies"
-    ON replies FOR SELECT
-    USING (true);
-
-CREATE POLICY "Anyone can create replies"
-    ON replies FOR INSERT
-    WITH CHECK (true);
+CREATE INDEX idx_threads_bumped ON threads(bumped_at DESC);
+CREATE INDEX idx_threads_sticky ON threads(is_sticky, bumped_at DESC);
+CREATE INDEX idx_threads_user ON threads(user_id) WHERE user_id IS NOT NULL;
 ```
 
-### Step 3: Create Storage Bucket
-
-1. Go to Storage in your Supabase dashboard
-2. Create a new bucket called `images`
-3. Make it **public** (toggle the public option)
-4. Set the following policies for the bucket:
-
-**SELECT policy:**
+#### 3. `replies` table
 ```sql
-CREATE POLICY "Anyone can view images"
-ON storage.objects FOR SELECT
-USING (bucket_id = 'images');
+CREATE TABLE replies (
+    id BIGSERIAL PRIMARY KEY,
+    thread_id BIGINT NOT NULL REFERENCES threads(id) ON DELETE CASCADE,
+    content TEXT NOT NULL,
+    image_url TEXT,
+    user_id BIGINT REFERENCES users(id) ON DELETE SET NULL,
+    is_anonymous BOOLEAN DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Indexes for performance
+CREATE INDEX idx_replies_thread ON replies(thread_id);
+CREATE INDEX idx_replies_created ON replies(created_at DESC);
+CREATE INDEX idx_replies_user ON replies(user_id) WHERE user_id IS NOT NULL;
 ```
 
-**INSERT policy:**
+### Storage Bucket
+
+Create a bucket named `image` with the following policies:
+
+**SELECT Policy (Public Read):**
 ```sql
-CREATE POLICY "Anyone can upload images"
-ON storage.objects FOR INSERT
-WITH CHECK (bucket_id = 'images');
+(bucket_id = 'image'::text)
 ```
 
-Or simply click "New Policy" → "Custom policy" → Select "Allow all" for both SELECT and INSERT.
+**INSERT Policy (Public Upload):**
+```sql
+(bucket_id = 'image'::text)
+```
 
-### Step 4: Configure Supabase Client
+## ⚙️ Setup Instructions
 
-Open `js/supabaseClient.js` and replace:
+### 1. Create Supabase Project
+
+1. Go to [supabase.com](https://supabase.com)
+2. Create a new project
+3. Copy your project URL and anon key
+
+### 2. Set Up Database
+
+Run the SQL commands above in Supabase SQL Editor to create all tables.
+
+### 3. Configure Storage
+
+1. Go to Storage in Supabase dashboard
+2. Create a new bucket named `image`
+3. Make it public
+4. Add the policies mentioned above
+
+### 4. Configure the App
+
+Edit `js/supabaseClient.js`:
 
 ```javascript
 const SUPABASE_URL = 'YOUR_SUPABASE_URL';
 const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
 ```
 
-With your actual credentials:
+Replace with your actual Supabase credentials.
 
-```javascript
-const SUPABASE_URL = 'https://your-project.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
-```
+### 5. Deploy to GitHub Pages
 
-You can find these in: Supabase Dashboard → Settings → API
+1. Create a new GitHub repository
+2. Push all files to the repository
+3. Go to Settings > Pages
+4. Select your branch (usually `main`)
+5. Save and wait for deployment
 
-### Step 5: Deploy to GitHub Pages
+Your imageboard will be live at `https://yourusername.github.io/repository-name/`
 
-#### Option A: GitHub Web Interface
+## 🌍 Internationalization (i18n)
 
-1. Create a new repository on GitHub
-2. Upload all files from the `femfur` folder
-3. Go to Settings → Pages
-4. Source: Deploy from a branch
-5. Branch: Select `main` and `/ (root)` folder
-6. Click Save
-7. Your site will be available at: `https://yourusername.github.io/repository-name/`
+The app supports multiple languages out of the box:
 
-#### Option B: Git Command Line
+- **English** (default)
+- **Ukrainian** (Українська)
+- **Russian** (Русский)
+
+Users can switch languages using the dropdown in the header. The preference is saved in `localStorage`.
+
+To add a new language:
+
+1. Create a new JSON file in `locales/` (e.g., `locales/de.json`)
+2. Copy the structure from `en.json`
+3. Translate all values
+4. Add the language option to the select in `index.html`
+
+## 👤 User System
+
+### Hash-Based Profiles
+
+User profiles use a hash-based system for privacy:
+
+- Profile URLs: `/u/<hash>` (e.g., `/u/3k7j2`)
+- Hash is generated from user ID using a one-way function
+- Same user always gets the same hash
+- Cannot reverse-engineer user ID from hash
+
+### Anonymous Posting
+
+Users can:
+- Post without registration (fully anonymous)
+- Register but post anonymously (checkbox option)
+- Set "always anonymous" in profile settings
+
+## 🎨 Boards
+
+The imageboard includes 40+ boards across 8 categories:
+
+- **Art**: Art, Literature, Poetry, Music, DIY, Photography
+- **Chat**: Random, Social, Chat, News, International, Robot9000
+- **Furry/Anime**: Furry, Anime, Visual Novels, Cute Male, Cute
+- **Games**: Video Games, Board Games, VR, Retro, TV & Movies, Comics
+- **IT**: Technology, Programming, Science, Help, 3D Printing
+- **About Life**: Fitness, Cooking, Fashion, Advice, Travel, Outdoors
+- **Hobby**: Sports, Automobiles, Animals, History, Photography
+- **Adult (18+)**: Ecchi, Hentai, Adult GIF
+
+## 🔧 Development
+
+### Local Development
+
+Simply open `index.html` in a browser. For best results, use a local server:
 
 ```bash
-# Initialize repository
-git init
+# Python 3
+python -m http.server 8000
 
-# Add all files
-git add .
-
-# First commit
-git commit -m "Initial commit - Femfur Imageboard"
-
-# Add remote repository
-git remote add origin https://github.com/yourusername/repository-name.git
-
-# Push to GitHub
-git push -u origin main
+# Node.js (with http-server)
+npx http-server
 ```
 
-Then enable GitHub Pages in repository settings.
+### Code Style
 
-### Step 6: Custom Domain (Optional)
+- Use ES6 modules
+- No external dependencies (except Supabase SDK)
+- Keep functions small and focused
+- Comment complex logic
+- Use semantic HTML
 
-If you want to use your custom domain (femfur.space):
+## 🚀 Performance Optimization
 
-1. Go to your repository Settings → Pages
-2. Enter your custom domain in "Custom domain" field
-3. Add a CNAME file to your repository with your domain name
-4. Configure your DNS settings:
-   - Add a CNAME record pointing to `yourusername.github.io`
-   - Or add A records pointing to GitHub's IPs:
-     ```
-     185.199.108.153
-     185.199.109.153
-     185.199.110.153
-     185.199.111.153
-     ```
+- Lazy load images
+- Use indexes on database queries
+- Minimize DOM manipulation
+- Cache user session in localStorage
+- Use sessionStorage for view tracking
 
-## 📋 Board List
+## 🔒 Security Considerations
 
-### Art & Creative
-- `/art/` - Artwork & Drawings
-- `/lit/` - Literature & Stories
-- `/po/` - Poetry
-- `/mu/` - Music
-- `/diy/` - DIY & Crafts
-- `/ph/` - Photography
+⚠️ **IMPORTANT**: This is a client-side only implementation. For production:
 
-### Discussion
-- `/b/` - Random
-- `/soc/` - Social
-- `/chat/` - General Chat
-- `/news/` - News & Current Events
-- `/int/` - International
-- `/r9k/` - Robot9000
+1. **Password Hashing**: Implement proper server-side hashing (Argon2, bcrypt)
+2. **Rate Limiting**: Add server-side rate limiting to prevent spam
+3. **Input Validation**: Add comprehensive server-side validation
+4. **File Upload**: Validate file types and sizes on server
+5. **Shadow Banning**: Implement server-side shadow ban logic
+6. **Moderation**: Add admin panel for content moderation
 
-### Furry & Anime
-- `/fur/` - Furry
-- `/a/` - Anime & Manga
-- `/vn/` - Visual Novels
-- `/cm/` - Cute Male
-- `/c/` - Cute
+## 📝 License
 
-### Games & Entertainment
-- `/vg/` - Video Games
-- `/tg/` - Tabletop Games
-- `/vr/` - Virtual Reality
-- `/vm/` - Retro Games
-- `/tv/` - TV & Film
-- `/co/` - Comics & Cartoons
+This project is open source and available for educational purposes.
 
-### Technology
-- `/g/` - Technology
-- `/pr/` - Programming
-- `/sci/` - Science
-- `/wsr/` - Tech Support
-- `/3/` - 3D Printing
+## 🤝 Contributing
 
-### Lifestyle
-- `/fit/` - Fitness & Health
-- `/ck/` - Food & Cooking
-- `/fa/` - Fashion
-- `/adv/` - Advice
-- `/trv/` - Travel
-- `/out/` - Outdoors
+Feel free to fork, modify, and improve this project!
 
-### Hobbies
-- `/sp/` - Sports
-- `/auto/` - Automobiles
-- `/an/` - Animals & Nature
-- `/his/` - History
-- `/p/` - Photography
+## 📧 Support
 
-### Adult (18+)
-- `/e/` - Ecchi
-- `/h/` - Hentai
-- `/gif/` - Adult GIF
-
-## 🔧 How It Works
-
-1. **Supabase Client**: Single instance created in `supabaseClient.js` and imported everywhere
-2. **Hash Navigation**: Uses URL hash (#) for routing without page reloads
-3. **Boards**: Clicking a board loads its threads from Supabase `threads` table filtered by `board` field
-4. **Threads**: Clicking a thread loads the original post and all replies from `replies` table
-5. **Image Upload**: Images are uploaded to Supabase Storage and URLs are stored in database
-6. **Global Visibility**: All posts are immediately visible to all users worldwide
-
-## 🐛 Troubleshooting
-
-### "Error loading threads"
-- Check if SUPABASE_URL and SUPABASE_ANON_KEY are correct
-- Verify tables are created in Supabase
-- Check if Row Level Security policies are set up
-
-### "Error uploading image"
-- Make sure the `images` bucket exists in Supabase Storage
-- Verify the bucket is set to **public**
-- Check storage policies allow INSERT and SELECT
-
-### Hash navigation not working
-- Make sure you're not clicking regular links
-- All board links should use hash format: `#b`, `#art`, etc.
-- Thread links should be: `#b-uuid`, `#art-uuid`, etc.
-
-### Doesn't work locally
-- ES6 modules require an HTTP server
-- Use a local server (VS Code Live Server extension)
-- Or deploy directly to GitHub Pages
-
-### Images not showing
-- Check if Supabase Storage bucket is public
-- Verify the image URL in database is valid
-- Check browser console for CORS errors
-
-## 📱 Usage
-
-1. Open the site (femfur.space or your GitHub Pages URL)
-2. Select a board from the homepage or top navigation
-3. Click "[Start a New Thread]" to create a thread
-4. Fill in optional subject, required comment, and optional image
-5. Click "Post" to publish
-6. Click on any thread to view and reply
-7. All posts are visible to everyone globally in real-time!
-
-## 🔒 Security Notes
-
-Current implementation:
-- Anonymous posting (no authentication)
-- No moderation system
-- No post deletion from UI
-- Anyone can post threads and replies
-
-For production use, consider adding:
-- User authentication
-- CAPTCHA to prevent spam
-- Moderation tools
-- Rate limiting
-- Content filtering
-- Ability to delete/report posts
-
-## 💾 Database Schema
-
-### threads table
-- `id` (UUID, primary key)
-- `board` (TEXT) - Board identifier (b, art, fur, etc.)
-- `subject` (TEXT, optional) - Thread subject
-- `comment` (TEXT, required) - Thread content
-- `image_url` (TEXT, optional) - URL to uploaded image
-- `created_at` (TIMESTAMP) - Creation timestamp
-
-### replies table
-- `id` (UUID, primary key)
-- `thread_id` (UUID, foreign key) - References threads.id
-- `comment` (TEXT, required) - Reply content
-- `image_url` (TEXT, optional) - URL to uploaded image
-- `created_at` (TIMESTAMP) - Creation timestamp
-
-## 📄 License
-
-Free to use and modify
-
-## 🤝 Support
-
-If you encounter issues:
-1. Check browser console for errors
-2. Verify Supabase configuration
-3. Check if all tables and policies are set up correctly
-4. Make sure storage bucket is public and has proper policies
+For issues or questions, create an issue in the GitHub repository.
 
 ---
 
-Enjoy your imageboard! 🎉
-
-**Important**: This is a basic implementation. For a production site, implement proper moderation, spam protection, and content policies.
+**Built with ❤️ for the imageboard community**
