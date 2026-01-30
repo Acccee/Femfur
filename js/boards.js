@@ -1,77 +1,77 @@
 import { supabaseClient } from './supabaseClient.js';
 
-// Определение всех бордов
+// Board definitions
 const BOARDS = {
-    // Art
-    art: { name: '/art/', title: 'Искусство', category: 'Art' },
-    lit: { name: '/lit/', title: 'Литература', category: 'Art' },
-    po: { name: '/po/', title: 'Поэзия', category: 'Art' },
-    mu: { name: '/mu/', title: 'Музыка', category: 'Art' },
-    diy: { name: '/diy/', title: 'DIY', category: 'Art' },
-    ph: { name: '/ph/', title: 'Фотография', category: 'Art' },
+    // Art & Creative
+    art: { name: '/art/', title: 'Artwork & Drawings', desc: 'Share and discuss artwork' },
+    lit: { name: '/lit/', title: 'Literature & Stories', desc: 'Books, stories, and creative writing' },
+    po: { name: '/po/', title: 'Poetry', desc: 'Poetry and poetic discussion' },
+    mu: { name: '/mu/', title: 'Music', desc: 'Music discussion and sharing' },
+    diy: { name: '/diy/', title: 'DIY & Crafts', desc: 'Do it yourself projects' },
+    ph: { name: '/ph/', title: 'Photography', desc: 'Photography and techniques' },
     
-    // Chat
-    b: { name: '/b/', title: 'Random', category: 'Chat' },
-    soc: { name: '/soc/', title: 'Общение', category: 'Chat' },
-    chat: { name: '/chat/', title: 'Чат', category: 'Chat' },
-    news: { name: '/news/', title: 'Новости', category: 'Chat' },
-    int: { name: '/int/', title: 'Международное', category: 'Chat' },
-    r9k: { name: '/r9k/', title: 'Robot9000', category: 'Chat' },
+    // Discussion
+    b: { name: '/b/', title: 'Random', desc: 'Random discussions' },
+    soc: { name: '/soc/', title: 'Social', desc: 'Social discussion' },
+    chat: { name: '/chat/', title: 'General Chat', desc: 'General discussion' },
+    news: { name: '/news/', title: 'News & Current Events', desc: 'News and current events' },
+    int: { name: '/int/', title: 'International', desc: 'International discussion' },
+    r9k: { name: '/r9k/', title: 'Robot9000', desc: 'Original content only' },
     
-    // Furry/Anime
-    fur: { name: '/fur/', title: 'Furry', category: 'Furry/Anime' },
-    a: { name: '/a/', title: 'Аниме', category: 'Furry/Anime' },
-    vn: { name: '/vn/', title: 'Визуальные новеллы', category: 'Furry/Anime' },
-    cm: { name: '/cm/', title: 'Cute Male', category: 'Furry/Anime' },
-    c: { name: '/c/', title: 'Cute', category: 'Furry/Anime' },
+    // Furry & Anime
+    fur: { name: '/fur/', title: 'Furry', desc: 'Furry art and discussion' },
+    a: { name: '/a/', title: 'Anime & Manga', desc: 'Anime and manga discussion' },
+    vn: { name: '/vn/', title: 'Visual Novels', desc: 'Visual novel discussion' },
+    cm: { name: '/cm/', title: 'Cute Male', desc: 'Cute male characters' },
+    c: { name: '/c/', title: 'Cute', desc: 'Cute characters and art' },
     
-    // Games
-    vg: { name: '/vg/', title: 'Видеоигры', category: 'Games' },
-    tg: { name: '/tg/', title: 'Настольные игры', category: 'Games' },
-    vr: { name: '/vr/', title: 'VR', category: 'Games' },
-    vm: { name: '/vm/', title: 'Ретро игры', category: 'Games' },
-    tv: { name: '/tv/', title: 'ТВ и фильмы', category: 'Games' },
-    co: { name: '/co/', title: 'Комиксы', category: 'Games' },
+    // Games & Entertainment
+    vg: { name: '/vg/', title: 'Video Games', desc: 'Video game discussion' },
+    tg: { name: '/tg/', title: 'Tabletop Games', desc: 'Board games and RPGs' },
+    vr: { name: '/vr/', title: 'Virtual Reality', desc: 'VR discussion' },
+    vm: { name: '/vm/', title: 'Retro Games', desc: 'Retro gaming' },
+    tv: { name: '/tv/', title: 'TV & Film', desc: 'Television and movies' },
+    co: { name: '/co/', title: 'Comics & Cartoons', desc: 'Comics and animated content' },
     
-    // IT
-    g: { name: '/g/', title: 'Технологии', category: 'IT' },
-    pr: { name: '/pr/', title: 'Программирование', category: 'IT' },
-    sci: { name: '/sci/', title: 'Наука', category: 'IT' },
-    wsr: { name: '/wsr/', title: 'Помощь', category: 'IT' },
-    3: { name: '/3/', title: '3D печать', category: 'IT' },
+    // Technology
+    g: { name: '/g/', title: 'Technology', desc: 'Technology discussion' },
+    pr: { name: '/pr/', title: 'Programming', desc: 'Programming and development' },
+    sci: { name: '/sci/', title: 'Science', desc: 'Science and mathematics' },
+    wsr: { name: '/wsr/', title: 'Tech Support', desc: 'Tech support and help' },
+    3: { name: '/3/', title: '3D Printing', desc: '3D printing discussion' },
     
-    // About live
-    fit: { name: '/fit/', title: 'Фитнес', category: 'About live' },
-    ck: { name: '/ck/', title: 'Кулинария', category: 'About live' },
-    fa: { name: '/fa/', title: 'Мода', category: 'About live' },
-    adv: { name: '/adv/', title: 'Советы', category: 'About live' },
-    trv: { name: '/trv/', title: 'Путешествия', category: 'About live' },
-    out: { name: '/out/', title: 'Природа', category: 'About live' },
+    // Lifestyle
+    fit: { name: '/fit/', title: 'Fitness & Health', desc: 'Fitness and health discussion' },
+    ck: { name: '/ck/', title: 'Food & Cooking', desc: 'Food and cooking' },
+    fa: { name: '/fa/', title: 'Fashion', desc: 'Fashion discussion' },
+    adv: { name: '/adv/', title: 'Advice', desc: 'Advice and support' },
+    trv: { name: '/trv/', title: 'Travel', desc: 'Travel discussion' },
+    out: { name: '/out/', title: 'Outdoors', desc: 'Outdoor activities' },
     
-    // Hobby
-    sp: { name: '/sp/', title: 'Спорт', category: 'Hobby' },
-    auto: { name: '/auto/', title: 'Автомобили', category: 'Hobby' },
-    an: { name: '/an/', title: 'Животные', category: 'Hobby' },
-    his: { name: '/his/', title: 'История', category: 'Hobby' },
-    p: { name: '/p/', title: 'Фотография', category: 'Hobby' },
+    // Hobbies
+    sp: { name: '/sp/', title: 'Sports', desc: 'Sports discussion' },
+    auto: { name: '/auto/', title: 'Automobiles', desc: 'Cars and vehicles' },
+    an: { name: '/an/', title: 'Animals & Nature', desc: 'Animals and nature' },
+    his: { name: '/his/', title: 'History', desc: 'History discussion' },
+    p: { name: '/p/', title: 'Photography', desc: 'Photography' },
     
-    // Adult
-    e: { name: '/e/', title: 'Ecchi (18+)', category: 'Adult' },
-    h: { name: '/h/', title: 'Hentai (18+)', category: 'Adult' },
-    gif: { name: '/gif/', title: 'Adult GIF (18+)', category: 'Adult' }
+    // Adult (18+)
+    e: { name: '/e/', title: 'Ecchi (18+)', desc: 'Ecchi content' },
+    h: { name: '/h/', title: 'Hentai (18+)', desc: 'Hentai content' },
+    gif: { name: '/gif/', title: 'Adult GIF (18+)', desc: 'Adult animated content' }
 };
 
-// Получить информацию о борде
+// Get board info
 function getBoardInfo(boardId) {
     return BOARDS[boardId] || null;
 }
 
-// Получить все борды
+// Get all boards
 function getAllBoards() {
     return BOARDS;
 }
 
-// Загрузить треды борды из Supabase
+// Load threads from board
 async function loadBoardThreads(boardId) {
     try {
         const { data, error } = await supabaseClient
@@ -80,38 +80,33 @@ async function loadBoardThreads(boardId) {
             .eq('board', boardId)
             .order('created_at', { ascending: false });
         
-        if (error) {
-            throw error;
-        }
+        if (error) throw error;
         
         return data || [];
     } catch (error) {
-        console.error('Ошибка загрузки тредов:', error);
+        console.error('Error loading threads:', error);
         throw error;
     }
 }
 
-// Создать новый тред
-async function createThread(boardId, title, content) {
+// Create new thread
+async function createThread(boardId, subject, comment, imageUrl) {
     try {
         const { data, error } = await supabaseClient
             .from('threads')
-            .insert([
-                {
-                    board: boardId,
-                    title: title,
-                    content: content
-                }
-            ])
+            .insert([{
+                board: boardId,
+                subject: subject || '',
+                comment: comment,
+                image_url: imageUrl || null
+            }])
             .select();
         
-        if (error) {
-            throw error;
-        }
+        if (error) throw error;
         
         return data[0];
     } catch (error) {
-        console.error('Ошибка создания треда:', error);
+        console.error('Error creating thread:', error);
         throw error;
     }
 }

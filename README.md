@@ -1,258 +1,339 @@
-# Imageboard - Полнофункциональный имиджборд для GitHub Pages
+# Femfur Imageboard
 
-Это полностью рабочий имиджборд с использованием Supabase в качестве базы данных. Все треды и ответы видны всем пользователям в реальном времени.
+A fully functional imageboard similar to 4chan, built for GitHub Pages with Supabase backend. All threads and replies are visible to all users globally in real-time.
 
-## 🚀 Возможности
+## 🎯 Features
 
-- ✅ 40+ бордов по разным категориям
-- ✅ Создание тредов
-- ✅ Ответы в тредах
-- ✅ Все данные хранятся в Supabase (НЕ localStorage)
-- ✅ Работает на GitHub Pages (только frontend)
-- ✅ Навигация через hash (#b, #art и т.д.)
-- ✅ Адаптивный дизайн
+- ✅ 40+ boards across different categories
+- ✅ Image upload support (PNG, JPG, GIF, WEBP)
+- ✅ Create threads with subject, comment, and image
+- ✅ Reply to threads with comments and images
+- ✅ All data stored in Supabase (NO localStorage)
+- ✅ Hash-based navigation (#b, #art, etc.)
+- ✅ 4chan-style design and layout
+- ✅ Works on GitHub Pages (frontend only)
+- ✅ Responsive design
+- ✅ Real-time data visible to all users
 
-## 📋 Структура проекта
+## 📁 Project Structure
 
 ```
-imageboard/
-├── index.html              # Главная страница
+femfur/
+├── index.html              # Main HTML page
 ├── css/
-│   └── style.css          # Стили
+│   └── style.css          # 4chan-inspired styles
 └── js/
-    ├── supabaseClient.js  # Клиент Supabase (НАСТРОИТЬ!)
-    ├── boards.js          # Логика бордов
-    ├── threads.js         # Логика тредов и ответов
-    └── app.js             # Главный файл приложения
+    ├── supabaseClient.js  # Supabase client (CONFIGURE THIS!)
+    ├── boards.js          # Board management
+    ├── threads.js         # Thread and reply management
+    └── app.js             # Main application logic
 ```
 
-## ⚙️ Настройка Supabase
+## 🚀 Setup Instructions
 
-### Шаг 1: Создание проекта в Supabase
+### Step 1: Create Supabase Project
 
-1. Зайдите на https://supabase.com
-2. Создайте новый проект
-3. Запомните URL и Anon Key вашего проекта
+1. Go to https://supabase.com
+2. Create a new project
+3. Wait for the project to be ready
+4. Note your project URL and anon key from Settings → API
 
-### Шаг 2: Создание таблиц
+### Step 2: Create Database Tables
 
-Выполните следующий SQL в SQL Editor вашего Supabase проекта:
+Go to your Supabase project → SQL Editor and run this SQL:
 
 ```sql
--- Таблица для тредов
+-- Create threads table
 CREATE TABLE threads (
-    id BIGSERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     board TEXT NOT NULL,
-    title TEXT NOT NULL,
-    content TEXT NOT NULL,
+    subject TEXT,
+    comment TEXT NOT NULL,
+    image_url TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Таблица для ответов
+-- Create replies table
 CREATE TABLE replies (
-    id BIGSERIAL PRIMARY KEY,
-    thread_id BIGINT NOT NULL REFERENCES threads(id) ON DELETE CASCADE,
-    content TEXT NOT NULL,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    thread_id UUID NOT NULL REFERENCES threads(id) ON DELETE CASCADE,
+    comment TEXT NOT NULL,
+    image_url TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Индексы для быстрого поиска
+-- Create indexes for better performance
 CREATE INDEX idx_threads_board ON threads(board);
 CREATE INDEX idx_threads_created_at ON threads(created_at DESC);
 CREATE INDEX idx_replies_thread_id ON replies(thread_id);
 CREATE INDEX idx_replies_created_at ON replies(created_at);
 
--- Включаем Row Level Security
+-- Enable Row Level Security
 ALTER TABLE threads ENABLE ROW LEVEL SECURITY;
 ALTER TABLE replies ENABLE ROW LEVEL SECURITY;
 
--- Политики доступа (все могут читать и писать)
-CREATE POLICY "Все могут читать треды"
+-- Create policies (allow everyone to read and write)
+CREATE POLICY "Anyone can read threads"
     ON threads FOR SELECT
     USING (true);
 
-CREATE POLICY "Все могут создавать треды"
+CREATE POLICY "Anyone can create threads"
     ON threads FOR INSERT
     WITH CHECK (true);
 
-CREATE POLICY "Все могут читать ответы"
+CREATE POLICY "Anyone can read replies"
     ON replies FOR SELECT
     USING (true);
 
-CREATE POLICY "Все могут создавать ответы"
+CREATE POLICY "Anyone can create replies"
     ON replies FOR INSERT
     WITH CHECK (true);
 ```
 
-### Шаг 3: Настройка клиента
+### Step 3: Create Storage Bucket
 
-Откройте файл `js/supabaseClient.js` и замените:
+1. Go to Storage in your Supabase dashboard
+2. Create a new bucket called `images`
+3. Make it **public** (toggle the public option)
+4. Set the following policies for the bucket:
+
+**SELECT policy:**
+```sql
+CREATE POLICY "Anyone can view images"
+ON storage.objects FOR SELECT
+USING (bucket_id = 'images');
+```
+
+**INSERT policy:**
+```sql
+CREATE POLICY "Anyone can upload images"
+ON storage.objects FOR INSERT
+WITH CHECK (bucket_id = 'images');
+```
+
+Or simply click "New Policy" → "Custom policy" → Select "Allow all" for both SELECT and INSERT.
+
+### Step 4: Configure Supabase Client
+
+Open `js/supabaseClient.js` and replace:
 
 ```javascript
 const SUPABASE_URL = 'YOUR_SUPABASE_URL';
 const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
 ```
 
-На ваши реальные данные из Supabase (Settings → API).
+With your actual credentials:
 
-Пример:
 ```javascript
-const SUPABASE_URL = 'https://abcdefgh12345678.supabase.co';
+const SUPABASE_URL = 'https://your-project.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
 ```
 
-## 🌐 Деплой на GitHub Pages
+You can find these in: Supabase Dashboard → Settings → API
 
-### Вариант 1: Через интерфейс GitHub
+### Step 5: Deploy to GitHub Pages
 
-1. Создайте новый репозиторий на GitHub
-2. Загрузите все файлы проекта
-3. Зайдите в Settings → Pages
-4. Source: выберите "Deploy from a branch"
-5. Branch: выберите `main` и папку `/ (root)`
-6. Нажмите Save
-7. Через несколько минут сайт будет доступен по адресу: `https://username.github.io/repository-name/`
+#### Option A: GitHub Web Interface
 
-### Вариант 2: Через Git командную строку
+1. Create a new repository on GitHub
+2. Upload all files from the `femfur` folder
+3. Go to Settings → Pages
+4. Source: Deploy from a branch
+5. Branch: Select `main` and `/ (root)` folder
+6. Click Save
+7. Your site will be available at: `https://yourusername.github.io/repository-name/`
+
+#### Option B: Git Command Line
 
 ```bash
-# Инициализируйте репозиторий
+# Initialize repository
 git init
 
-# Добавьте все файлы
+# Add all files
 git add .
 
-# Сделайте первый коммит
-git commit -m "Initial commit"
+# First commit
+git commit -m "Initial commit - Femfur Imageboard"
 
-# Подключите удалённый репозиторий
-git remote add origin https://github.com/username/repository-name.git
+# Add remote repository
+git remote add origin https://github.com/yourusername/repository-name.git
 
-# Отправьте на GitHub
+# Push to GitHub
 git push -u origin main
 ```
 
-Затем включите GitHub Pages в настройках репозитория.
+Then enable GitHub Pages in repository settings.
 
-## 📝 Список бордов
+### Step 6: Custom Domain (Optional)
 
-### Art
-- `/art/` - Искусство
-- `/lit/` - Литература
-- `/po/` - Поэзия
-- `/mu/` - Музыка
-- `/diy/` - DIY
-- `/ph/` - Фотография
+If you want to use your custom domain (femfur.space):
 
-### Chat
+1. Go to your repository Settings → Pages
+2. Enter your custom domain in "Custom domain" field
+3. Add a CNAME file to your repository with your domain name
+4. Configure your DNS settings:
+   - Add a CNAME record pointing to `yourusername.github.io`
+   - Or add A records pointing to GitHub's IPs:
+     ```
+     185.199.108.153
+     185.199.109.153
+     185.199.110.153
+     185.199.111.153
+     ```
+
+## 📋 Board List
+
+### Art & Creative
+- `/art/` - Artwork & Drawings
+- `/lit/` - Literature & Stories
+- `/po/` - Poetry
+- `/mu/` - Music
+- `/diy/` - DIY & Crafts
+- `/ph/` - Photography
+
+### Discussion
 - `/b/` - Random
-- `/soc/` - Общение
-- `/chat/` - Чат
-- `/news/` - Новости
-- `/int/` - Международное
+- `/soc/` - Social
+- `/chat/` - General Chat
+- `/news/` - News & Current Events
+- `/int/` - International
 - `/r9k/` - Robot9000
 
-### Furry/Anime
+### Furry & Anime
 - `/fur/` - Furry
-- `/a/` - Аниме
-- `/vn/` - Визуальные новеллы
+- `/a/` - Anime & Manga
+- `/vn/` - Visual Novels
 - `/cm/` - Cute Male
 - `/c/` - Cute
 
-### Games
-- `/vg/` - Видеоигры
-- `/tg/` - Настольные игры
-- `/vr/` - VR
-- `/vm/` - Ретро игры
-- `/tv/` - ТВ и фильмы
-- `/co/` - Комиксы
+### Games & Entertainment
+- `/vg/` - Video Games
+- `/tg/` - Tabletop Games
+- `/vr/` - Virtual Reality
+- `/vm/` - Retro Games
+- `/tv/` - TV & Film
+- `/co/` - Comics & Cartoons
 
-### IT
-- `/g/` - Технологии
-- `/pr/` - Программирование
-- `/sci/` - Наука
-- `/wsr/` - Помощь
-- `/3/` - 3D печать
+### Technology
+- `/g/` - Technology
+- `/pr/` - Programming
+- `/sci/` - Science
+- `/wsr/` - Tech Support
+- `/3/` - 3D Printing
 
-### About live
-- `/fit/` - Фитнес
-- `/ck/` - Кулинария
-- `/fa/` - Мода
-- `/adv/` - Советы
-- `/trv/` - Путешествия
-- `/out/` - Природа
+### Lifestyle
+- `/fit/` - Fitness & Health
+- `/ck/` - Food & Cooking
+- `/fa/` - Fashion
+- `/adv/` - Advice
+- `/trv/` - Travel
+- `/out/` - Outdoors
 
-### Hobby
-- `/sp/` - Спорт
-- `/auto/` - Автомобили
-- `/an/` - Животные
-- `/his/` - История
-- `/p/` - Фотография
+### Hobbies
+- `/sp/` - Sports
+- `/auto/` - Automobiles
+- `/an/` - Animals & Nature
+- `/his/` - History
+- `/p/` - Photography
 
 ### Adult (18+)
 - `/e/` - Ecchi
 - `/h/` - Hentai
 - `/gif/` - Adult GIF
 
-## 🔧 Как это работает
+## 🔧 How It Works
 
-1. **Supabase Client** - Единственный экземпляр клиента создаётся в `supabaseClient.js` и импортируется во всех остальных файлах
-2. **Роутинг** - Навигация работает через hash (#), без перезагрузки страницы
-3. **Борды** - При выборе борды загружаются её треды из Supabase
-4. **Треды** - При клике на тред загружается его содержимое и все ответы
-5. **Создание контента** - Все новые треды и ответы сохраняются в Supabase и видны всем пользователям
+1. **Supabase Client**: Single instance created in `supabaseClient.js` and imported everywhere
+2. **Hash Navigation**: Uses URL hash (#) for routing without page reloads
+3. **Boards**: Clicking a board loads its threads from Supabase `threads` table filtered by `board` field
+4. **Threads**: Clicking a thread loads the original post and all replies from `replies` table
+5. **Image Upload**: Images are uploaded to Supabase Storage and URLs are stored in database
+6. **Global Visibility**: All posts are immediately visible to all users worldwide
 
-## 🐛 Устранение проблем
+## 🐛 Troubleshooting
 
-### Ошибка "Identifier 'supabase' has already been declared"
-- **Причина**: Дублирование создания клиента Supabase
-- **Решение**: Клиент создаётся только один раз в `supabaseClient.js`
+### "Error loading threads"
+- Check if SUPABASE_URL and SUPABASE_ANON_KEY are correct
+- Verify tables are created in Supabase
+- Check if Row Level Security policies are set up
 
-### Ошибка "showBoard is not defined"
-- **Причина**: Неправильные импорты модулей
-- **Решение**: Все функции правильно экспортированы/импортированы через ES6 модули
+### "Error uploading image"
+- Make sure the `images` bucket exists in Supabase Storage
+- Verify the bucket is set to **public**
+- Check storage policies allow INSERT and SELECT
 
-### Треды не загружаются
-- **Проверьте**: Правильно ли указаны SUPABASE_URL и SUPABASE_ANON_KEY
-- **Проверьте**: Созданы ли таблицы в Supabase
-- **Проверьте**: Включены ли Row Level Security политики
+### Hash navigation not working
+- Make sure you're not clicking regular links
+- All board links should use hash format: `#b`, `#art`, etc.
+- Thread links should be: `#b-uuid`, `#art-uuid`, etc.
 
-### Не работает на локальном компьютере
-- **Причина**: ES6 модули требуют HTTP сервер
-- **Решение**: Используйте локальный сервер (например, Live Server в VS Code) или сразу деплойте на GitHub Pages
+### Doesn't work locally
+- ES6 modules require an HTTP server
+- Use a local server (VS Code Live Server extension)
+- Or deploy directly to GitHub Pages
 
-## 📱 Использование
+### Images not showing
+- Check if Supabase Storage bucket is public
+- Verify the image URL in database is valid
+- Check browser console for CORS errors
 
-1. Откройте сайт
-2. Выберите борду из списка или верхнего меню
-3. Создайте новый тред или откройте существующий
-4. Пишите ответы в тредах
-5. Все данные видны всем пользователям в реальном времени!
+## 📱 Usage
 
-## 🔒 Безопасность
+1. Open the site (femfur.space or your GitHub Pages URL)
+2. Select a board from the homepage or top navigation
+3. Click "[Start a New Thread]" to create a thread
+4. Fill in optional subject, required comment, and optional image
+5. Click "Post" to publish
+6. Click on any thread to view and reply
+7. All posts are visible to everyone globally in real-time!
 
-В текущей версии:
-- Любой может создавать треды и ответы (анонимно)
-- Нет модерации
-- Нет удаления контента через интерфейс
+## 🔒 Security Notes
 
-Для продакшн использования рекомендуется добавить:
-- Капчу
-- Модерацию
-- Бан пользователей
-- Ограничение частоты постинга
+Current implementation:
+- Anonymous posting (no authentication)
+- No moderation system
+- No post deletion from UI
+- Anyone can post threads and replies
 
-## 📄 Лицензия
+For production use, consider adding:
+- User authentication
+- CAPTCHA to prevent spam
+- Moderation tools
+- Rate limiting
+- Content filtering
+- Ability to delete/report posts
 
-Свободное использование
+## 💾 Database Schema
 
-## 🤝 Поддержка
+### threads table
+- `id` (UUID, primary key)
+- `board` (TEXT) - Board identifier (b, art, fur, etc.)
+- `subject` (TEXT, optional) - Thread subject
+- `comment` (TEXT, required) - Thread content
+- `image_url` (TEXT, optional) - URL to uploaded image
+- `created_at` (TIMESTAMP) - Creation timestamp
 
-При возникновении проблем проверьте:
-1. Консоль браузера на наличие ошибок
-2. Настройки Supabase
-3. Правильность URL и ключей
+### replies table
+- `id` (UUID, primary key)
+- `thread_id` (UUID, foreign key) - References threads.id
+- `comment` (TEXT, required) - Reply content
+- `image_url` (TEXT, optional) - URL to uploaded image
+- `created_at` (TIMESTAMP) - Creation timestamp
+
+## 📄 License
+
+Free to use and modify
+
+## 🤝 Support
+
+If you encounter issues:
+1. Check browser console for errors
+2. Verify Supabase configuration
+3. Check if all tables and policies are set up correctly
+4. Make sure storage bucket is public and has proper policies
 
 ---
 
-Успешного деплоя! 🚀
+Enjoy your imageboard! 🎉
+
+**Important**: This is a basic implementation. For a production site, implement proper moderation, spam protection, and content policies.

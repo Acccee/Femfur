@@ -1,6 +1,6 @@
 import { supabaseClient } from './supabaseClient.js';
 
-// Получить тред по ID
+// Get thread by ID
 async function getThread(threadId) {
     try {
         const { data, error } = await supabaseClient
@@ -9,18 +9,16 @@ async function getThread(threadId) {
             .eq('id', threadId)
             .single();
         
-        if (error) {
-            throw error;
-        }
+        if (error) throw error;
         
         return data;
     } catch (error) {
-        console.error('Ошибка загрузки треда:', error);
+        console.error('Error loading thread:', error);
         throw error;
     }
 }
 
-// Получить все ответы треда
+// Get all replies for a thread
 async function getThreadReplies(threadId) {
     try {
         const { data, error } = await supabaseClient
@@ -29,83 +27,100 @@ async function getThreadReplies(threadId) {
             .eq('thread_id', threadId)
             .order('created_at', { ascending: true });
         
-        if (error) {
-            throw error;
-        }
+        if (error) throw error;
         
         return data || [];
     } catch (error) {
-        console.error('Ошибка загрузки ответов:', error);
+        console.error('Error loading replies:', error);
         throw error;
     }
 }
 
-// Создать ответ в треде
-async function createReply(threadId, content) {
+// Create reply
+async function createReply(threadId, comment, imageUrl) {
     try {
         const { data, error } = await supabaseClient
             .from('replies')
-            .insert([
-                {
-                    thread_id: threadId,
-                    content: content
-                }
-            ])
+            .insert([{
+                thread_id: threadId,
+                comment: comment,
+                image_url: imageUrl || null
+            }])
             .select();
         
-        if (error) {
-            throw error;
-        }
+        if (error) throw error;
         
         return data[0];
     } catch (error) {
-        console.error('Ошибка создания ответа:', error);
+        console.error('Error creating reply:', error);
         throw error;
     }
 }
 
-// Форматировать дату
+// Upload image to Supabase Storage
+async function uploadImage(file, bucket = 'images') {
+    try {
+        // Generate unique filename
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = fileName;
+
+        // Upload file
+        const { data, error } = await supabaseClient.storage
+            .from(bucket)
+            .upload(filePath, file);
+
+        if (error) throw error;
+
+        // Get public URL
+        const { data: urlData } = supabaseClient.storage
+            .from(bucket)
+            .getPublicUrl(filePath);
+
+        return urlData.publicUrl;
+    } catch (error) {
+        console.error('Error uploading image:', error);
+        throw error;
+    }
+}
+
+// Format date
 function formatDate(dateString) {
     const date = new Date(dateString);
-    const now = new Date();
-    const diff = now - date;
     
-    // Меньше минуты
-    if (diff < 60000) {
-        return 'только что';
-    }
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const year = String(date.getFullYear()).slice(-2);
     
-    // Меньше часа
-    if (diff < 3600000) {
-        const minutes = Math.floor(diff / 60000);
-        return `${minutes} мин. назад`;
-    }
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
     
-    // Меньше дня
-    if (diff < 86400000) {
-        const hours = Math.floor(diff / 3600000);
-        return `${hours} ч. назад`;
-    }
+    return `${month}/${day}/${year}(${getDayName(date)})${hours}:${minutes}:${seconds}`;
+}
+
+// Get day name
+function getDayName(date) {
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    return days[date.getDay()];
+}
+
+// Format file size
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
     
-    // Меньше недели
-    if (diff < 604800000) {
-        const days = Math.floor(diff / 86400000);
-        return `${days} дн. назад`;
-    }
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
     
-    // Полная дата
-    return date.toLocaleDateString('ru-RU', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
 }
 
 export {
     getThread,
     getThreadReplies,
     createReply,
-    formatDate
+    uploadImage,
+    formatDate,
+    formatFileSize
 };

@@ -1,149 +1,322 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Imageboard</title>
+    <title>Femfur - Imageboard</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <header>
         <div class="container">
-            <h1>Imageboard</h1>
-            <nav id="boardNav"></nav>
+            <div class="header-content">
+                <h1 class="logo">Femfur</h1>
+                <nav id="boardNav"></nav>
+            </div>
         </div>
     </header>
 
     <main class="container">
+        <!-- Home View -->
         <div id="homeView">
-            <h2>Добро пожаловать</h2>
-            <p>Выберите борду из меню выше</p>
+            <div class="welcome-section">
+                <h2>Welcome to Femfur</h2>
+                <p>Select a board to start browsing or create a new thread</p>
+            </div>
             
-            <div class="board-categories">
-                <div class="category">
-                    <h3>Art</h3>
-                    <div class="board-links">
-                        <a href="#art">/art/ - Искусство</a>
-                        <a href="#lit">/lit/ - Литература</a>
-                        <a href="#po">/po/ - Поэзия</a>
-                        <a href="#mu">/mu/ - Музыка</a>
-                        <a href="#diy">/diy/ - DIY</a>
-                        <a href="#ph">/ph/ - Фотография</a>
+            <div class="board-list">
+                <div class="board-category">
+                    <h3>Art & Creative</h3>
+                    <div class="boards">
+                        <a href="#art" class="board-link">
+                            <span class="board-name">/art/</span>
+                            <span class="board-desc">Artwork & Drawings</span>
+                        </a>
+                        <a href="#lit" class="board-link">
+                            <span class="board-name">/lit/</span>
+                            <span class="board-desc">Literature & Stories</span>
+                        </a>
+                        <a href="#po" class="board-link">
+                            <span class="board-name">/po/</span>
+                            <span class="board-desc">Poetry</span>
+                        </a>
+                        <a href="#mu" class="board-link">
+                            <span class="board-name">/mu/</span>
+                            <span class="board-desc">Music</span>
+                        </a>
+                        <a href="#diy" class="board-link">
+                            <span class="board-name">/diy/</span>
+                            <span class="board-desc">DIY & Crafts</span>
+                        </a>
+                        <a href="#ph" class="board-link">
+                            <span class="board-name">/ph/</span>
+                            <span class="board-desc">Photography</span>
+                        </a>
                     </div>
                 </div>
 
-                <div class="category">
-                    <h3>Chat</h3>
-                    <div class="board-links">
-                        <a href="#b">/b/ - Random</a>
-                        <a href="#soc">/soc/ - Общение</a>
-                        <a href="#chat">/chat/ - Чат</a>
-                        <a href="#news">/news/ - Новости</a>
-                        <a href="#int">/int/ - Международное</a>
-                        <a href="#r9k">/r9k/ - Robot9000</a>
+                <div class="board-category">
+                    <h3>Discussion</h3>
+                    <div class="boards">
+                        <a href="#b" class="board-link">
+                            <span class="board-name">/b/</span>
+                            <span class="board-desc">Random</span>
+                        </a>
+                        <a href="#soc" class="board-link">
+                            <span class="board-name">/soc/</span>
+                            <span class="board-desc">Social</span>
+                        </a>
+                        <a href="#chat" class="board-link">
+                            <span class="board-name">/chat/</span>
+                            <span class="board-desc">General Chat</span>
+                        </a>
+                        <a href="#news" class="board-link">
+                            <span class="board-name">/news/</span>
+                            <span class="board-desc">News & Current Events</span>
+                        </a>
+                        <a href="#int" class="board-link">
+                            <span class="board-name">/int/</span>
+                            <span class="board-desc">International</span>
+                        </a>
+                        <a href="#r9k" class="board-link">
+                            <span class="board-name">/r9k/</span>
+                            <span class="board-desc">Robot9000</span>
+                        </a>
                     </div>
                 </div>
 
-                <div class="category">
-                    <h3>Furry/Anime</h3>
-                    <div class="board-links">
-                        <a href="#fur">/fur/ - Furry</a>
-                        <a href="#a">/a/ - Аниме</a>
-                        <a href="#vn">/vn/ - Визуальные новеллы</a>
-                        <a href="#cm">/cm/ - Cute Male</a>
-                        <a href="#c">/c/ - Cute</a>
+                <div class="board-category">
+                    <h3>Furry & Anime</h3>
+                    <div class="boards">
+                        <a href="#fur" class="board-link">
+                            <span class="board-name">/fur/</span>
+                            <span class="board-desc">Furry</span>
+                        </a>
+                        <a href="#a" class="board-link">
+                            <span class="board-name">/a/</span>
+                            <span class="board-desc">Anime & Manga</span>
+                        </a>
+                        <a href="#vn" class="board-link">
+                            <span class="board-name">/vn/</span>
+                            <span class="board-desc">Visual Novels</span>
+                        </a>
+                        <a href="#cm" class="board-link">
+                            <span class="board-name">/cm/</span>
+                            <span class="board-desc">Cute Male</span>
+                        </a>
+                        <a href="#c" class="board-link">
+                            <span class="board-name">/c/</span>
+                            <span class="board-desc">Cute</span>
+                        </a>
                     </div>
                 </div>
 
-                <div class="category">
-                    <h3>Games</h3>
-                    <div class="board-links">
-                        <a href="#vg">/vg/ - Видеоигры</a>
-                        <a href="#tg">/tg/ - Настольные игры</a>
-                        <a href="#vr">/vr/ - VR</a>
-                        <a href="#vm">/vm/ - Ретро игры</a>
-                        <a href="#tv">/tv/ - ТВ и фильмы</a>
-                        <a href="#co">/co/ - Комиксы</a>
+                <div class="board-category">
+                    <h3>Games & Entertainment</h3>
+                    <div class="boards">
+                        <a href="#vg" class="board-link">
+                            <span class="board-name">/vg/</span>
+                            <span class="board-desc">Video Games</span>
+                        </a>
+                        <a href="#tg" class="board-link">
+                            <span class="board-name">/tg/</span>
+                            <span class="board-desc">Tabletop Games</span>
+                        </a>
+                        <a href="#vr" class="board-link">
+                            <span class="board-name">/vr/</span>
+                            <span class="board-desc">Virtual Reality</span>
+                        </a>
+                        <a href="#vm" class="board-link">
+                            <span class="board-name">/vm/</span>
+                            <span class="board-desc">Retro Games</span>
+                        </a>
+                        <a href="#tv" class="board-link">
+                            <span class="board-name">/tv/</span>
+                            <span class="board-desc">TV & Film</span>
+                        </a>
+                        <a href="#co" class="board-link">
+                            <span class="board-name">/co/</span>
+                            <span class="board-desc">Comics & Cartoons</span>
+                        </a>
                     </div>
                 </div>
 
-                <div class="category">
-                    <h3>IT</h3>
-                    <div class="board-links">
-                        <a href="#g">/g/ - Технологии</a>
-                        <a href="#pr">/pr/ - Программирование</a>
-                        <a href="#sci">/sci/ - Наука</a>
-                        <a href="#wsr">/wsr/ - Помощь</a>
-                        <a href="#3">/3/ - 3D печать</a>
+                <div class="board-category">
+                    <h3>Technology</h3>
+                    <div class="boards">
+                        <a href="#g" class="board-link">
+                            <span class="board-name">/g/</span>
+                            <span class="board-desc">Technology</span>
+                        </a>
+                        <a href="#pr" class="board-link">
+                            <span class="board-name">/pr/</span>
+                            <span class="board-desc">Programming</span>
+                        </a>
+                        <a href="#sci" class="board-link">
+                            <span class="board-name">/sci/</span>
+                            <span class="board-desc">Science</span>
+                        </a>
+                        <a href="#wsr" class="board-link">
+                            <span class="board-name">/wsr/</span>
+                            <span class="board-desc">Tech Support</span>
+                        </a>
+                        <a href="#3" class="board-link">
+                            <span class="board-name">/3/</span>
+                            <span class="board-desc">3D Printing</span>
+                        </a>
                     </div>
                 </div>
 
-                <div class="category">
-                    <h3>About live</h3>
-                    <div class="board-links">
-                        <a href="#fit">/fit/ - Фитнес</a>
-                        <a href="#ck">/ck/ - Кулинария</a>
-                        <a href="#fa">/fa/ - Мода</a>
-                        <a href="#adv">/adv/ - Советы</a>
-                        <a href="#trv">/trv/ - Путешествия</a>
-                        <a href="#out">/out/ - Природа</a>
+                <div class="board-category">
+                    <h3>Lifestyle</h3>
+                    <div class="boards">
+                        <a href="#fit" class="board-link">
+                            <span class="board-name">/fit/</span>
+                            <span class="board-desc">Fitness & Health</span>
+                        </a>
+                        <a href="#ck" class="board-link">
+                            <span class="board-name">/ck/</span>
+                            <span class="board-desc">Food & Cooking</span>
+                        </a>
+                        <a href="#fa" class="board-link">
+                            <span class="board-name">/fa/</span>
+                            <span class="board-desc">Fashion</span>
+                        </a>
+                        <a href="#adv" class="board-link">
+                            <span class="board-name">/adv/</span>
+                            <span class="board-desc">Advice</span>
+                        </a>
+                        <a href="#trv" class="board-link">
+                            <span class="board-name">/trv/</span>
+                            <span class="board-desc">Travel</span>
+                        </a>
+                        <a href="#out" class="board-link">
+                            <span class="board-name">/out/</span>
+                            <span class="board-desc">Outdoors</span>
+                        </a>
                     </div>
                 </div>
 
-                <div class="category">
-                    <h3>Hobby</h3>
-                    <div class="board-links">
-                        <a href="#sp">/sp/ - Спорт</a>
-                        <a href="#auto">/auto/ - Автомобили</a>
-                        <a href="#an">/an/ - Животные</a>
-                        <a href="#his">/his/ - История</a>
-                        <a href="#p">/p/ - Фотография</a>
+                <div class="board-category">
+                    <h3>Hobbies</h3>
+                    <div class="boards">
+                        <a href="#sp" class="board-link">
+                            <span class="board-name">/sp/</span>
+                            <span class="board-desc">Sports</span>
+                        </a>
+                        <a href="#auto" class="board-link">
+                            <span class="board-name">/auto/</span>
+                            <span class="board-desc">Automobiles</span>
+                        </a>
+                        <a href="#an" class="board-link">
+                            <span class="board-name">/an/</span>
+                            <span class="board-desc">Animals & Nature</span>
+                        </a>
+                        <a href="#his" class="board-link">
+                            <span class="board-name">/his/</span>
+                            <span class="board-desc">History</span>
+                        </a>
+                        <a href="#p" class="board-link">
+                            <span class="board-name">/p/</span>
+                            <span class="board-desc">Photography</span>
+                        </a>
                     </div>
                 </div>
 
-                <div class="category">
+                <div class="board-category nsfw">
                     <h3>Adult (18+)</h3>
-                    <div class="board-links">
-                        <a href="#e">/e/ - Ecchi</a>
-                        <a href="#h">/h/ - Hentai</a>
-                        <a href="#gif">/gif/ - Adult GIF</a>
+                    <div class="boards">
+                        <a href="#e" class="board-link">
+                            <span class="board-name">/e/</span>
+                            <span class="board-desc">Ecchi</span>
+                        </a>
+                        <a href="#h" class="board-link">
+                            <span class="board-name">/h/</span>
+                            <span class="board-desc">Hentai</span>
+                        </a>
+                        <a href="#gif" class="board-link">
+                            <span class="board-name">/gif/</span>
+                            <span class="board-desc">Adult GIF</span>
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- Board View -->
         <div id="boardView" style="display: none;">
             <div class="board-header">
-                <h2 id="boardTitle"></h2>
-                <button id="newThreadBtn" class="btn-primary">Создать тред</button>
+                <div class="board-info">
+                    <h2 id="boardTitle"></h2>
+                    <p id="boardDescription"></p>
+                </div>
+                <button id="newThreadBtn" class="btn-primary">[Start a New Thread]</button>
             </div>
+
+            <div id="newThreadFormContainer" class="new-thread-form" style="display: none;">
+                <form id="newThreadForm">
+                    <div class="form-row">
+                        <input type="text" id="threadSubject" placeholder="Subject" maxlength="100">
+                    </div>
+                    <div class="form-row">
+                        <textarea id="threadComment" placeholder="Comment" rows="5" required></textarea>
+                    </div>
+                    <div class="form-row">
+                        <label class="file-input-label">
+                            <span>Choose File</span>
+                            <input type="file" id="threadFile" accept="image/*">
+                        </label>
+                        <span id="fileName" class="file-name"></span>
+                    </div>
+                    <div class="form-row">
+                        <button type="submit" class="btn-submit">Post</button>
+                        <button type="button" id="cancelThread" class="btn-cancel">Cancel</button>
+                    </div>
+                </form>
+            </div>
+
+            <hr>
 
             <div id="threadsList"></div>
         </div>
 
+        <!-- Thread View -->
         <div id="threadView" style="display: none;">
-            <button id="backToBoard" class="btn-secondary">← Вернуться к борде</button>
-            <div id="threadContent"></div>
-            <div id="replyForm" class="reply-form">
-                <h3>Ответить</h3>
-                <textarea id="replyText" placeholder="Ваш ответ..." rows="4"></textarea>
-                <button id="submitReply" class="btn-primary">Отправить</button>
+            <div class="thread-header">
+                <button id="backToBoard" class="btn-back">[Return]</button>
+                <button id="showReplyForm" class="btn-primary">[Post a Reply]</button>
             </div>
-            <div id="repliesList"></div>
+
+            <div id="replyFormContainer" class="reply-form-container" style="display: none;">
+                <form id="replyForm">
+                    <div class="form-row">
+                        <textarea id="replyComment" placeholder="Comment" rows="5" required></textarea>
+                    </div>
+                    <div class="form-row">
+                        <label class="file-input-label">
+                            <span>Choose File</span>
+                            <input type="file" id="replyFile" accept="image/*">
+                        </label>
+                        <span id="replyFileName" class="file-name"></span>
+                    </div>
+                    <div class="form-row">
+                        <button type="submit" class="btn-submit">Post</button>
+                        <button type="button" id="cancelReply" class="btn-cancel">Cancel</button>
+                    </div>
+                </form>
+            </div>
+
+            <hr>
+
+            <div id="threadContent"></div>
         </div>
     </main>
 
-    <div id="newThreadModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Создать новый тред</h2>
-            <form id="newThreadForm">
-                <input type="text" id="threadTitle" placeholder="Заголовок" required>
-                <textarea id="threadContent" placeholder="Содержание" rows="6" required></textarea>
-                <button type="submit" class="btn-primary">Создать</button>
-            </form>
+    <footer>
+        <div class="container">
+            <p>Femfur Imageboard - All trademarks and copyrights on this page are owned by their respective parties.</p>
         </div>
-    </div>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script type="module" src="js/supabaseClient.js"></script>

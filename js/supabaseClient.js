@@ -1,9 +1,10 @@
-// ВАЖНО: Замените эти значения на свои из Supabase проекта
-const SUPABASE_URL = 'https://httzzyjltrfzagkipojv.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_H1VbXmNHlctHBFoAPqoHxQ_3Fz_b1u5';
+// IMPORTANT: Replace these values with your Supabase project credentials
+// You can find these in your Supabase project settings: Settings > API
+const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
 
-// Создаём единственный экземпляр клиента Supabase
+// Create single Supabase client instance
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Экспортируем клиент для использования в других файлах
+// Export for use in other modules
 export { supabaseClient };
