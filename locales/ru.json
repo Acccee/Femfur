@@ -95,5 +95,15 @@
   "editProfile": "Редактировать профиль",
   "changeAvatar": "Изменить аватар",
   "save": "Сохранить",
-  "error_profile_update": "Ошибка обновления профиля"
+  "error_profile_update": "Ошибка обновления профиля",
+  
+  "search": "Поиск",
+  "searchPlaceholder": "Поиск тредов и ответов...",
+  "no_search_results": "Ничего не найдено",
+  "search_hint": "Попробуйте другие ключевые слова или проверьте правописание",
+  "threads_found": "Треды",
+  "replies_found": "Ответы",
+  "search_empty": "Введите ключевые слова для поиска",
+  "error_search": "Ошибка поиска",
+  "justNow": "только что"
 }

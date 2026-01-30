@@ -6,6 +6,8 @@ import { getThread, getThreadReplies, createReply, formatDate, formatQuotes, add
 import { register, login, logout, getCurrentUser, updateAuthUI, updateProfile } from './auth.js';
 import { initializeWidgets } from './widgets.js';
 import { loadUserProfile, renderUserProfile } from './profile.js';
+import { searchContent, renderSearchResults } from './search.js';
+import { getReactions, renderReactions } from './reactions.js';
 
 // Состояние приложения
 let currentBoard = null;
@@ -33,6 +35,10 @@ const backToBoard = document.getElementById('backToBoard');
 const backToHome = document.getElementById('backToHome');
 const submitReply = document.getElementById('submitReply');
 const replyText = document.getElementById('replyText');
+const searchView = document.getElementById('searchView');
+const searchForm = document.getElementById('searchForm');
+const searchInput = document.getElementById('searchInput');
+const searchResults = document.getElementById('searchResults');
 
 // Инициализация приложения
 async function init() {
@@ -115,6 +121,16 @@ function setupEventListeners() {
     // Навигация по hash
     window.addEventListener('hashchange', handleRoute);
     
+    // Кнопка поиска
+    document.getElementById('searchBtn').addEventListener('click', () => {
+        window.location.hash = 'search';
+    });
+    
+    // Форма поиска
+    if (searchForm) {
+        searchForm.addEventListener('submit', handleSearchSubmit);
+    }
+    
     // Переключатель темы
     document.getElementById('themeToggle').addEventListener('click', toggleTheme);
     
@@ -182,6 +198,12 @@ function handleRoute() {
         return;
     }
     
+    // Check for search
+    if (hash === 'search' || hash.startsWith('search?')) {
+        showSearch();
+        return;
+    }
+    
     // Check for user profile (format: u/hash)
     if (hash.startsWith('u/')) {
         const userHash = hash.substring(2);
@@ -211,6 +233,7 @@ async function showHome() {
     boardView.style.display = 'none';
     threadView.style.display = 'none';
     profileView.style.display = 'none';
+    searchView.style.display = 'none';
     currentBoard = null;
     currentThread = null;
     updateActiveNav(null);
@@ -228,14 +251,15 @@ async function showBoard(boardId) {
     boardView.style.display = 'block';
     threadView.style.display = 'none';
     profileView.style.display = 'none';
+    searchView.style.display = 'none';
     
     const boardInfo = getBoardInfo(boardId);
     boardTitle.textContent = `${boardInfo.name} - ${boardInfo.title}`;
     
     updateActiveNav(boardId);
     
-    // Загрузка тредов
-    threadsList.innerHTML = `<div class="loading">${t('loading', 'Loading...')}</div>`;
+    // Загрузка тредов с skeleton
+    threadsList.innerHTML = renderSkeletonThreads(10);
     
     try {
         const threads = await loadBoardThreads(boardId);
@@ -246,7 +270,7 @@ async function showBoard(boardId) {
 }
 
 // Рендер тредов
-function renderThreads(threads) {
+async function renderThreads(threads) {
     threadsList.innerHTML = '';
     
     if (threads.length === 0) {
@@ -254,11 +278,15 @@ function renderThreads(threads) {
         return;
     }
     
-    threads.forEach(thread => {
+    for (const thread of threads) {
         const threadItem = document.createElement('div');
-        threadItem.className = 'thread-item' + (thread.is_sticky ? ' sticky' : '');
+        threadItem.className = 'thread-item fade-in-up' + (thread.is_sticky ? ' sticky' : '');
         
         const author = thread.is_anonymous ? t('anonymous') : (thread.user ? thread.user.nickname : t('anonymous'));
+        
+        // Get reactions for thread
+        const reactions = await getReactions('thread', thread.id);
+        const reactionsHtml = renderInlineReactionsHtml(reactions);
         
         threadItem.innerHTML = `
             <h3>${escapeHtml(thread.title)}</h3>
@@ -270,6 +298,7 @@ function renderThreads(threads) {
                 <span>💬 ${thread.reply_count || 0} ${t('replies')}</span>
                 <span class="view-counter">${thread.views || 0}</span>
                 <span>ID: ${thread.id}</span>
+                ${reactionsHtml}
             </div>
         `;
         
@@ -278,7 +307,38 @@ function renderThreads(threads) {
         });
         
         threadsList.appendChild(threadItem);
+    }
+}
+
+// Helper to render inline reactions HTML
+function renderInlineReactionsHtml(reactions) {
+    if (!reactions) return '';
+    
+    const REACTION_EMOJIS = {
+        skull: '💀',
+        clown: '🤡',
+        based: 'based',
+        cringe: 'cringe',
+        schizo: 'schizo'
+    };
+    
+    let html = '<div class="reactions-inline">';
+    let hasReactions = false;
+    
+    Object.entries(reactions).forEach(([type, data]) => {
+        if (data && data.count > 0) {
+            hasReactions = true;
+            const activeClass = data.userReacted ? 'active' : '';
+            html += `
+                <span class="reaction-inline ${activeClass}">
+                    ${REACTION_EMOJIS[type]} ${data.count}
+                </span>
+            `;
+        }
     });
+    
+    html += '</div>';
+    return hasReactions ? html : '';
 }
 
 // Показать тред
@@ -290,11 +350,12 @@ async function showThread(boardId, threadId) {
     boardView.style.display = 'none';
     threadView.style.display = 'block';
     profileView.style.display = 'none';
+    searchView.style.display = 'none';
     
     updateActiveNav(boardId);
     
-    threadContent.innerHTML = `<div class="loading">${t('loading', 'Loading...')}</div>`;
-    repliesList.innerHTML = '';
+    threadContent.innerHTML = renderSkeletonThreads(1);
+    repliesList.innerHTML = renderSkeletonReplies(3);
     replyText.value = '';
     
     try {
@@ -306,6 +367,9 @@ async function showThread(boardId, threadId) {
         
         const author = thread.is_anonymous ? t('anonymous') : (thread.user ? thread.user.nickname : t('anonymous'));
         
+        // Create container for thread reactions
+        const threadReactionsId = `thread-reactions-${threadId}`;
+        
         threadContent.innerHTML = `
             <h2>${escapeHtml(thread.title)}</h2>
             <div class="thread-text">${escapeHtml(thread.content)}</div>
@@ -316,11 +380,15 @@ async function showThread(boardId, threadId) {
                 <span class="view-counter">${thread.views || 0}</span>
                 <span>ID: ${thread.id}</span>
             </div>
+            <div id="${threadReactionsId}"></div>
         `;
+        
+        // Render reactions for thread
+        await renderReactions('thread', threadId, threadReactionsId);
         
         // Загрузка ответов
         const replies = await getThreadReplies(threadId);
-        renderReplies(replies);
+        await renderReplies(replies);
         
     } catch (error) {
         threadContent.innerHTML = `<div class="error">${t('error_load')}</div>`;
@@ -328,7 +396,7 @@ async function showThread(boardId, threadId) {
 }
 
 // Рендер ответов
-function renderReplies(replies) {
+async function renderReplies(replies) {
     repliesList.innerHTML = '';
     
     if (replies.length === 0) {
@@ -336,12 +404,16 @@ function renderReplies(replies) {
         return;
     }
     
-    replies.forEach((reply, index) => {
+    for (let index = 0; index < replies.length; index++) {
+        const reply = replies[index];
         const replyItem = document.createElement('div');
-        replyItem.className = 'reply-item';
+        replyItem.className = 'reply-item fade-in-up';
         replyItem.dataset.replyId = reply.id;
         
         const author = reply.is_anonymous ? t('anonymous') : (reply.user ? reply.user.nickname : t('anonymous'));
+        
+        // Create container for reply reactions
+        const replyReactionsId = `reply-reactions-${reply.id}`;
         
         replyItem.innerHTML = `
             <div class="reply-number">##${index + 1}</div>
@@ -352,6 +424,7 @@ function renderReplies(replies) {
                 <span>${formatDate(reply.created_at)}</span>
                 <span class="thread-quote" data-reply-num="${index + 1}">&gt;&gt;${index + 1}</span>
             </div>
+            <div id="${replyReactionsId}"></div>
         `;
         
         // Add click handler for quotes
@@ -364,7 +437,10 @@ function renderReplies(replies) {
         });
         
         repliesList.appendChild(replyItem);
-    });
+        
+        // Render reactions for reply
+        await renderReactions('reply', reply.id, replyReactionsId);
+    }
 }
 
 // Show user profile
@@ -373,12 +449,97 @@ async function showProfile(userHash) {
     boardView.style.display = 'none';
     threadView.style.display = 'none';
     profileView.style.display = 'block';
+    searchView.style.display = 'none';
     
     const profileContent = document.getElementById('profileContent');
     profileContent.innerHTML = `<div class="loading">${t('loading', 'Loading...')}</div>`;
     
     const profileData = await loadUserProfile(userHash);
     renderUserProfile(profileData);
+}
+
+// Show search page
+function showSearch() {
+    homeView.style.display = 'none';
+    boardView.style.display = 'none';
+    threadView.style.display = 'none';
+    profileView.style.display = 'none';
+    searchView.style.display = 'block';
+    
+    // Check if there's a search query in URL
+    const urlParams = new URLSearchParams(window.location.hash.slice(1).split('?')[1]);
+    const query = urlParams.get('q');
+    
+    if (query) {
+        searchInput.value = query;
+        performSearch(query);
+    } else {
+        searchResults.innerHTML = `
+            <div class="empty-state">
+                <p>${t('search_empty', 'Enter keywords to search threads and replies')}</p>
+            </div>
+        `;
+    }
+}
+
+// Perform search
+async function performSearch(query) {
+    searchResults.innerHTML = renderSkeletonThreads(5);
+    
+    try {
+        const results = await searchContent(query);
+        renderSearchResults(results, 'searchResults');
+    } catch (error) {
+        searchResults.innerHTML = `<div class="error">${t('error_search', 'Search failed')}</div>`;
+    }
+}
+
+// Handle search form submit
+function handleSearchSubmit(e) {
+    e.preventDefault();
+    const query = searchInput.value.trim();
+    
+    if (query) {
+        window.location.hash = `search?q=${encodeURIComponent(query)}`;
+    }
+}
+
+// Render skeleton loading for threads
+function renderSkeletonThreads(count = 5) {
+    let html = '';
+    for (let i = 0; i < count; i++) {
+        html += `
+            <div class="skeleton-thread fade-in">
+                <div class="skeleton skeleton-thread-title"></div>
+                <div class="skeleton skeleton-thread-content"></div>
+                <div class="skeleton skeleton-thread-content"></div>
+                <div class="skeleton-thread-meta">
+                    <div class="skeleton skeleton-meta-item"></div>
+                    <div class="skeleton skeleton-meta-item"></div>
+                    <div class="skeleton skeleton-meta-item"></div>
+                </div>
+            </div>
+        `;
+    }
+    return html;
+}
+
+// Render skeleton loading for replies
+function renderSkeletonReplies(count = 5) {
+    let html = '';
+    for (let i = 0; i < count; i++) {
+        html += `
+            <div class="skeleton-reply fade-in">
+                <div class="skeleton skeleton-reply-content"></div>
+                <div class="skeleton skeleton-reply-content"></div>
+                <div class="skeleton-thread-meta">
+                    <div class="skeleton skeleton-meta-item"></div>
+                    <div class="skeleton skeleton-meta-item"></div>
+                </div>
+            </div>
+        `;
+    }
+    return html;
 }
 
 // Обновить активную борду в навигации
@@ -485,13 +646,19 @@ async function handleReplySubmit() {
     const isAnon = document.getElementById('postAnon').checked;
     
     try {
+        // Добавить skeleton в конец списка ответов
+        repliesList.innerHTML += renderSkeletonReplies(1);
+        
         await createReply(currentThread, content, imageFile, isAnon);
         replyText.value = '';
         document.getElementById('replyImage').value = '';
         
-        // Перезагрузка ответов
+        // Мгновенная перезагрузка ответов
         const replies = await getThreadReplies(currentThread);
-        renderReplies(replies);
+        await renderReplies(replies);
+        
+        // Scroll to the new reply
+        repliesList.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         
     } catch (error) {
         alert(t('error_reply_create') + ': ' + error.message);

@@ -71,6 +71,9 @@ CREATE INDEX IF NOT EXISTS idx_threads_user ON threads(user_id) WHERE user_id IS
 -- Index for thread of the day queries
 CREATE INDEX IF NOT EXISTS idx_threads_views ON threads(views DESC, created_at DESC);
 
+-- Full-text search index for threads
+CREATE INDEX IF NOT EXISTS idx_threads_search ON threads USING GIN(to_tsvector('english', title || ' ' || content));
+
 COMMENT ON TABLE threads IS 'Discussion threads on various boards';
 COMMENT ON COLUMN threads.board IS 'Board ID (e.g., "b", "fur", "a")';
 COMMENT ON COLUMN threads.title IS 'Thread title/subject';
@@ -107,6 +110,9 @@ CREATE INDEX IF NOT EXISTS idx_replies_user ON replies(user_id) WHERE user_id IS
 -- Index for recent replies
 CREATE INDEX IF NOT EXISTS idx_replies_created ON replies(created_at DESC);
 
+-- Full-text search index for replies
+CREATE INDEX IF NOT EXISTS idx_replies_search ON replies USING GIN(to_tsvector('english', content));
+
 COMMENT ON TABLE replies IS 'Replies/comments to threads';
 COMMENT ON COLUMN replies.thread_id IS 'Parent thread ID';
 COMMENT ON COLUMN replies.content IS 'Reply text content';
@@ -116,7 +122,38 @@ COMMENT ON COLUMN replies.is_anonymous IS 'If true, hide user identity even if l
 
 
 -- ============================================
--- 4. TRIGGERS
+-- 4. REACTIONS TABLE
+-- ============================================
+-- Stores user reactions to threads and replies
+
+CREATE TABLE IF NOT EXISTS reactions (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
+    target_type VARCHAR(10) NOT NULL CHECK (target_type IN ('thread', 'reply')),
+    target_id BIGINT NOT NULL,
+    reaction_type VARCHAR(20) NOT NULL CHECK (reaction_type IN ('skull', 'clown', 'based', 'cringe', 'schizo')),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(user_id, target_type, target_id, reaction_type)
+);
+
+-- Index for fast reaction lookups by target
+CREATE INDEX IF NOT EXISTS idx_reactions_target ON reactions(target_type, target_id);
+
+-- Index for user's reactions
+CREATE INDEX IF NOT EXISTS idx_reactions_user ON reactions(user_id);
+
+-- Index for reaction type statistics
+CREATE INDEX IF NOT EXISTS idx_reactions_type ON reactions(reaction_type);
+
+COMMENT ON TABLE reactions IS 'User reactions to threads and replies';
+COMMENT ON COLUMN reactions.user_id IS 'User who reacted (required)';
+COMMENT ON COLUMN reactions.target_type IS 'Type of target: thread or reply';
+COMMENT ON COLUMN reactions.target_id IS 'ID of thread or reply';
+COMMENT ON COLUMN reactions.reaction_type IS 'Type of reaction: skull, clown, based, cringe, schizo';
+
+
+-- ============================================
+-- 5. TRIGGERS
 -- ============================================
 -- Automated database actions
 
@@ -197,6 +234,21 @@ CREATE POLICY "Public update thread views"
     ON threads FOR UPDATE
     USING (true)
     WITH CHECK (true);
+
+-- Reactions table policies
+ALTER TABLE reactions ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Public read access on reactions"
+    ON reactions FOR SELECT
+    USING (true);
+
+CREATE POLICY "Users can insert reactions"
+    ON reactions FOR INSERT
+    WITH CHECK (true);
+
+CREATE POLICY "Users can delete own reactions"
+    ON reactions FOR DELETE
+    USING (true);
 
 
 -- ============================================

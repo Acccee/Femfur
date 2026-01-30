@@ -95,5 +95,15 @@
   "editProfile": "Edit Profile",
   "changeAvatar": "Change Avatar",
   "save": "Save",
-  "error_profile_update": "Error updating profile"
+  "error_profile_update": "Error updating profile",
+  
+  "search": "Search",
+  "searchPlaceholder": "Search threads and replies...",
+  "no_search_results": "No results found",
+  "search_hint": "Try different keywords or check your spelling",
+  "threads_found": "Threads",
+  "replies_found": "Replies",
+  "search_empty": "Enter keywords to search threads and replies",
+  "error_search": "Search failed",
+  "justNow": "just now"
 }

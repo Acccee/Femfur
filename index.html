@@ -13,6 +13,7 @@
             <div class="header-top">
                 <h1><a href="/" id="logo">Femfur</a></h1>
                 <div class="header-controls">
+                    <button id="searchBtn" class="btn-secondary" title="Search">🔍</button>
                     <button id="themeToggle" class="btn-secondary theme-toggle" title="Toggle Theme">🌙</button>
                     <div class="language-switcher">
                         <select id="langSelect">
@@ -189,6 +190,26 @@
             <button id="backToHome" class="btn-secondary">← <span data-i18n="backToHome">Back to home</span></button>
             <div id="profileContent"></div>
         </div>
+
+        <!-- Search View -->
+        <div id="searchView" style="display: none;">
+            <div class="search-container">
+                <div class="search-header">
+                    <h2>🔍 <span data-i18n="search">Search</span></h2>
+                </div>
+                <form id="searchForm" class="search-form">
+                    <input 
+                        type="search" 
+                        id="searchInput" 
+                        data-i18n-placeholder="searchPlaceholder" 
+                        placeholder="Search threads and replies..."
+                        autocomplete="off"
+                    >
+                    <button type="submit" data-i18n="search">Search</button>
+                </form>
+                <div id="searchResults"></div>
+            </div>
+        </div>
     </main>
 
     <!-- New Thread Modal -->
@@ -286,6 +307,8 @@
     <script type="module" src="js/threads.js"></script>
     <script type="module" src="js/widgets.js"></script>
     <script type="module" src="js/profile.js"></script>
+    <script type="module" src="js/search.js"></script>
+    <script type="module" src="js/reactions.js"></script>
     <script type="module" src="js/app.js"></script>
 </body>
 </html>

@@ -95,5 +95,15 @@
   "editProfile": "Редагувати профіль",
   "changeAvatar": "Змінити аватар",
   "save": "Зберегти",
-  "error_profile_update": "Помилка оновлення профілю"
+  "error_profile_update": "Помилка оновлення профілю",
+  
+  "search": "Пошук",
+  "searchPlaceholder": "Пошук тредів та відповідей...",
+  "no_search_results": "Нічого не знайдено",
+  "search_hint": "Спробуйте інші ключові слова або перевірте правопис",
+  "threads_found": "Треди",
+  "replies_found": "Відповіді",
+  "search_empty": "Введіть ключові слова для пошуку",
+  "error_search": "Помилка пошуку",
+  "justNow": "щойно"
 }
