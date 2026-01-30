@@ -39,6 +39,9 @@ async function init() {
     // Initialize i18n first
     await initI18n();
     
+    // Initialize theme
+    initTheme();
+    
     // Initialize auth
     await getCurrentUser();
     updateAuthUI();
@@ -46,6 +49,31 @@ async function init() {
     renderBoardNav();
     setupEventListeners();
     handleRoute();
+}
+
+// Инициализация темы
+function initTheme() {
+    const savedTheme = localStorage.getItem('femfur_theme');
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-theme');
+        document.getElementById('themeToggle').textContent = '☀️';
+    }
+}
+
+// Переключение темы
+function toggleTheme() {
+    const body = document.body;
+    const themeToggle = document.getElementById('themeToggle');
+    
+    if (body.classList.contains('dark-theme')) {
+        body.classList.remove('dark-theme');
+        themeToggle.textContent = '🌙';
+        localStorage.setItem('femfur_theme', 'light');
+    } else {
+        body.classList.add('dark-theme');
+        themeToggle.textContent = '☀️';
+        localStorage.setItem('femfur_theme', 'dark');
+    }
 }
 
 // Рендер навигации бордов
@@ -72,6 +100,9 @@ function renderBoardNav() {
 function setupEventListeners() {
     // Навигация по hash
     window.addEventListener('hashchange', handleRoute);
+    
+    // Переключатель темы
+    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
     
     // Кнопка создания треда
     newThreadBtn.addEventListener('click', openNewThreadModal);
@@ -358,37 +389,40 @@ function openNewThreadModal() {
 // Обработка создания треда
 async function handleNewThreadSubmit(e) {
     e.preventDefault();
-
-    // 🔥 ПОЛУЧАЕМ БОРДУ НАПРЯМУЮ ИЗ URL
-    const boardId = window.location.hash.replace('#', '');
-
-    if (!boardId) {
-        alert('Ошибка: борда не определена');
+    
+    if (!currentBoard) {
+        alert(t('error_empty_fields'));
         return;
     }
-
+    
     const title = document.getElementById('threadTitle').value.trim();
     const content = document.getElementById('threadContent').value.trim();
     const imageFile = document.getElementById('threadImage').files[0];
     const isAnon = document.getElementById('threadPostAnon').checked;
-
-    if (!title || !content) {
-        alert('Заполните все поля');
+    
+    // Проверка минимальной длины (минимум 3 символа)
+    if (title.length < 3 || content.length < 3) {
+        alert(t('error_min_length', 'Title and content must be at least 3 characters long'));
         return;
     }
-
+    
     try {
-        await createThread(boardId, title, content, imageFile, isAnon);
+        await createThread(currentBoard, title, content, imageFile, isAnon);
         newThreadModal.style.display = 'none';
-
-        const threads = await loadBoardThreads(boardId);
+        
+        // Перезагрузка тредов борды
+        const threads = await loadBoardThreads(currentBoard);
         renderThreads(threads);
-
-        alert('Тред создан');
+        
+        // Обновляем виджеты на главной странице
+        await initializeWidgets();
+        
+        alert(t('success_thread'));
     } catch (error) {
-        alert('Ошибка создания треда: ' + error.message);
+        alert(t('error_thread_create') + ': ' + error.message);
     }
 }
+
 // Обработка логина
 async function handleLoginSubmit(e) {
     e.preventDefault();
@@ -437,8 +471,9 @@ async function handleReplySubmit() {
     const imageFile = document.getElementById('replyImage').files[0];
     const isAnon = document.getElementById('postAnon').checked;
     
-    if (!content) {
-        alert(t('error_empty_fields'));
+    // Проверка минимальной длины (минимум 3 символа)
+    if (content.length < 3) {
+        alert(t('error_min_length', 'Reply must be at least 3 characters long'));
         return;
     }
     

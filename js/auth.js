@@ -42,6 +42,16 @@ async function register(nickname, password, passwordConfirm, avatar, status, alw
             throw new Error(t('error_empty_fields'));
         }
         
+        // Проверка минимальной длины никнейма (минимум 3 символа)
+        if (nickname.length < 3) {
+            throw new Error(t('error_nickname_short', 'Nickname must be at least 3 characters long'));
+        }
+        
+        // Проверка минимальной длины пароля (минимум 3 символа)
+        if (password.length < 3) {
+            throw new Error(t('error_password_short', 'Password must be at least 3 characters long'));
+        }
+        
         if (password !== passwordConfirm) {
             throw new Error(t('error_password_mismatch'));
         }
