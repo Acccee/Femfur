@@ -201,6 +201,49 @@ function updateAuthUI() {
     }
 }
 
+// Update user profile
+async function updateProfile(avatarFile, status) {
+    try {
+        const user = await getCurrentUser();
+        if (!user) {
+            throw new Error(t('error_login'));
+        }
+
+        let updates = {};
+
+        // Upload new avatar if provided
+        if (avatarFile) {
+            const avatarUrl = await uploadImage(avatarFile, 'avatars');
+            updates.avatar_url = avatarUrl;
+        }
+
+        // Update status
+        if (status !== undefined) {
+            updates.status = status || null;
+        }
+
+        // Update in database
+        const { data, error } = await supabaseClient
+            .from('users')
+            .update(updates)
+            .eq('id', user.id)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        // Update current user
+        data.profile_hash = generateUserHash(data.id);
+        currentUser = data;
+        localStorage.setItem('femfur_user', JSON.stringify(data));
+
+        return data;
+    } catch (error) {
+        console.error('Profile update error:', error);
+        throw error;
+    }
+}
+
 export { 
     register, 
     login, 
@@ -209,5 +252,6 @@ export {
     getUserByHash, 
     generateUserHash,
     updateAuthUI,
+    updateProfile,
     currentUser
 };

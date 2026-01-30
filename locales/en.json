@@ -86,8 +86,14 @@
   "success_login": "Login successful!",
   "success_thread": "Thread created successfully!",
   "success_reply": "Reply posted successfully!",
+  "success_profile_update": "Profile updated successfully!",
   
   "no_threads": "No threads yet. Create the first one!",
   "no_replies": "No replies yet. Be the first!",
-  "no_activity": "No activity yet."
+  "no_activity": "No activity yet.",
+  
+  "editProfile": "Edit Profile",
+  "changeAvatar": "Change Avatar",
+  "save": "Save",
+  "error_profile_update": "Error updating profile"
 }

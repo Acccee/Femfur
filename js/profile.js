@@ -62,6 +62,10 @@ function renderUserProfile(profileData) {
     
     const avatarUrl = user.avatar_url || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23ddd" width="100" height="100"/%3E%3Ctext x="50" y="55" font-size="40" text-anchor="middle" fill="%23999"%3E?%3C/text%3E%3C/svg%3E';
     
+    // Check if this is the current user's profile
+    const currentUserData = JSON.parse(localStorage.getItem('femfur_user') || 'null');
+    const isOwnProfile = currentUserData && currentUserData.id === user.id;
+    
     const html = `
         <div class="profile-header">
             <img src="${avatarUrl}" alt="${escapeHtml(user.nickname)}" class="profile-avatar">
@@ -74,6 +78,7 @@ function renderUserProfile(profileData) {
                 <div class="profile-meta">
                     ${t('threads')}: ${threads.length} | ${t('posts')}: ${replies.length}
                 </div>
+                ${isOwnProfile ? '<button id="editProfileBtn" class="btn-primary" style="margin-top: 10px;" data-i18n="editProfile">Edit Profile</button>' : ''}
             </div>
         </div>
         
@@ -90,6 +95,16 @@ function renderUserProfile(profileData) {
     
     profileContent.innerHTML = html;
     
+    // Add edit profile button handler if it's the user's own profile
+    if (isOwnProfile) {
+        const editBtn = document.getElementById('editProfileBtn');
+        if (editBtn) {
+            editBtn.addEventListener('click', () => {
+                openEditProfileModal(user);
+            });
+        }
+    }
+    
     // Set up tab switching
     const tabs = profileContent.querySelectorAll('.profile-tabs button');
     tabs.forEach(tab => {
@@ -104,6 +119,25 @@ function renderUserProfile(profileData) {
     
     // Show all activity by default
     renderProfileTab('all', threads, replies);
+}
+
+// Open edit profile modal
+function openEditProfileModal(user) {
+    const modal = document.getElementById('editProfileModal');
+    const editStatus = document.getElementById('editStatus');
+    const currentAvatarDiv = document.getElementById('currentAvatar');
+    
+    // Set current values
+    editStatus.value = user.status || '';
+    
+    // Show current avatar
+    if (user.avatar_url) {
+        currentAvatarDiv.innerHTML = `<img src="${user.avatar_url}" alt="Current avatar" style="max-width: 100px; border-radius: 50%;">`;
+    } else {
+        currentAvatarDiv.innerHTML = '<p>No avatar set</p>';
+    }
+    
+    modal.style.display = 'block';
 }
 
 // Render profile tab content
@@ -197,4 +231,4 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-export { loadUserProfile, renderUserProfile };
+export { loadUserProfile, renderUserProfile, openEditProfileModal };

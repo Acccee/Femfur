@@ -202,8 +202,8 @@
                         <span data-i18n="postAnonymously">Post anonymously</span>
                     </label>
                 </div>
-                <input type="text" id="threadTitle" data-i18n-placeholder="title" placeholder="Title" required>
-                <textarea id="threadContent" data-i18n-placeholder="content" placeholder="Content" rows="6" required></textarea>
+                <input type="text" id="threadTitle" data-i18n-placeholder="title" placeholder="Title">
+                <textarea id="threadContent" data-i18n-placeholder="content" placeholder="Content" rows="6"></textarea>
                 <div class="form-group">
                     <label for="threadImage" data-i18n="attachImage">Attach image (optional)</label>
                     <input type="file" id="threadImage" accept="image/*">
@@ -219,8 +219,8 @@
             <span class="close">&times;</span>
             <h2 data-i18n="login">Login</h2>
             <form id="loginForm">
-                <input type="text" id="loginNickname" data-i18n-placeholder="nickname" placeholder="Nickname" required>
-                <input type="password" id="loginPassword" data-i18n-placeholder="password" placeholder="Password" required>
+                <input type="text" id="loginNickname" data-i18n-placeholder="nickname" placeholder="Nickname">
+                <input type="password" id="loginPassword" data-i18n-placeholder="password" placeholder="Password">
                 <button type="submit" class="btn-primary" data-i18n="login">Login</button>
             </form>
         </div>
@@ -232,9 +232,9 @@
             <span class="close">&times;</span>
             <h2 data-i18n="register">Register</h2>
             <form id="registerForm">
-                <input type="text" id="registerNickname" data-i18n-placeholder="nickname" placeholder="Nickname" required>
-                <input type="password" id="registerPassword" data-i18n-placeholder="password" placeholder="Password" required>
-                <input type="password" id="registerPasswordConfirm" data-i18n-placeholder="confirmPassword" placeholder="Confirm Password" required>
+                <input type="text" id="registerNickname" data-i18n-placeholder="nickname" placeholder="Nickname">
+                <input type="password" id="registerPassword" data-i18n-placeholder="password" placeholder="Password">
+                <input type="password" id="registerPasswordConfirm" data-i18n-placeholder="confirmPassword" placeholder="Confirm Password">
                 <div class="form-group">
                     <label for="registerAvatar" data-i18n="avatar">Avatar (optional)</label>
                     <input type="file" id="registerAvatar" accept="image/*">
@@ -247,6 +247,26 @@
                     </label>
                 </div>
                 <button type="submit" class="btn-primary" data-i18n="register">Register</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div id="editProfileModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 data-i18n="editProfile">Edit Profile</h2>
+            <form id="editProfileForm">
+                <div class="form-group">
+                    <label for="editAvatar" data-i18n="changeAvatar">Change Avatar</label>
+                    <input type="file" id="editAvatar" accept="image/*">
+                    <div id="currentAvatar" style="margin-top: 10px;"></div>
+                </div>
+                <div class="form-group">
+                    <label for="editStatus" data-i18n="status">Status</label>
+                    <input type="text" id="editStatus" data-i18n-placeholder="status" placeholder="Status (optional)" maxlength="100">
+                </div>
+                <button type="submit" class="btn-primary" data-i18n="save">Save</button>
             </form>
         </div>
     </div>

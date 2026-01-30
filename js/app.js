@@ -3,7 +3,7 @@
 import { initI18n, t } from './i18n.js';
 import { getBoardInfo, getAllBoards, loadBoardThreads, createThread, incrementViewCount } from './boards.js';
 import { getThread, getThreadReplies, createReply, formatDate, formatQuotes, addQuote } from './threads.js';
-import { register, login, logout, getCurrentUser, updateAuthUI } from './auth.js';
+import { register, login, logout, getCurrentUser, updateAuthUI, updateProfile } from './auth.js';
 import { initializeWidgets } from './widgets.js';
 import { loadUserProfile, renderUserProfile } from './profile.js';
 
@@ -23,6 +23,7 @@ const newThreadBtn = document.getElementById('newThreadBtn');
 const newThreadModal = document.getElementById('newThreadModal');
 const loginModal = document.getElementById('loginModal');
 const registerModal = document.getElementById('registerModal');
+const editProfileModal = document.getElementById('editProfileModal');
 const newThreadForm = document.getElementById('newThreadForm');
 const loginForm = document.getElementById('loginForm');
 const registerForm = document.getElementById('registerForm');
@@ -105,6 +106,11 @@ function setupEventListeners() {
     newThreadForm.addEventListener('submit', handleNewThreadSubmit);
     loginForm.addEventListener('submit', handleLoginSubmit);
     registerForm.addEventListener('submit', handleRegisterSubmit);
+    
+    const editProfileForm = document.getElementById('editProfileForm');
+    if (editProfileForm) {
+        editProfileForm.addEventListener('submit', handleEditProfileSubmit);
+    }
     
     // Кнопка возврата к борде
     backToBoard.addEventListener('click', () => {
@@ -446,6 +452,29 @@ async function handleReplySubmit() {
         
     } catch (error) {
         alert(t('error_reply_create') + ': ' + error.message);
+    }
+}
+
+// Обработка редактирования профиля
+async function handleEditProfileSubmit(e) {
+    e.preventDefault();
+    
+    const avatarFile = document.getElementById('editAvatar').files[0];
+    const status = document.getElementById('editStatus').value.trim();
+    
+    try {
+        await updateProfile(avatarFile, status);
+        editProfileModal.style.display = 'none';
+        alert(t('success_profile_update', 'Profile updated successfully!'));
+        
+        // Reload current page to show updated profile
+        const currentUser = await getCurrentUser();
+        if (currentUser) {
+            window.location.hash = `u/${currentUser.profile_hash}`;
+            window.location.reload();
+        }
+    } catch (error) {
+        alert(t('error_profile_update', 'Error updating profile: ') + error.message);
     }
 }
 
