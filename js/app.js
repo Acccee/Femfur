@@ -392,6 +392,7 @@ async function handleNewThreadSubmit(e) {
 }
 
 
+
 // Обработка логина
 async function handleLoginSubmit(e) {
     e.preventDefault();
