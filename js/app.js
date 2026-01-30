@@ -39,24 +39,33 @@ async function init() {
     // Initialize i18n first
     await initI18n();
     
-    // Initialize theme
-    initTheme();
-    
     // Initialize auth
     await getCurrentUser();
     updateAuthUI();
     
     renderBoardNav();
     setupEventListeners();
+    
+    // Initialize theme AFTER elements are ready
+    initTheme();
+    
     handleRoute();
 }
 
 // Инициализация темы
 function initTheme() {
+    const themeToggle = document.getElementById('themeToggle');
+    if (!themeToggle) {
+        console.error('Theme toggle button not found');
+        return;
+    }
+    
     const savedTheme = localStorage.getItem('femfur_theme');
     if (savedTheme === 'dark') {
         document.body.classList.add('dark-theme');
-        document.getElementById('themeToggle').textContent = '☀️';
+        themeToggle.textContent = '☀️';
+    } else {
+        themeToggle.textContent = '🌙';
     }
 }
 
@@ -64,6 +73,11 @@ function initTheme() {
 function toggleTheme() {
     const body = document.body;
     const themeToggle = document.getElementById('themeToggle');
+    
+    if (!themeToggle) {
+        console.error('Theme toggle button not found');
+        return;
+    }
     
     if (body.classList.contains('dark-theme')) {
         body.classList.remove('dark-theme');
@@ -400,15 +414,14 @@ async function handleNewThreadSubmit(e) {
     const imageFile = document.getElementById('threadImage').files[0];
     const isAnon = document.getElementById('threadPostAnon').checked;
     
-    // Проверка минимальной длины (минимум 3 символа)
-    if (title.length < 3 || content.length < 3) {
-        alert(t('error_min_length', 'Title and content must be at least 3 characters long'));
-        return;
-    }
-    
     try {
         await createThread(currentBoard, title, content, imageFile, isAnon);
         newThreadModal.style.display = 'none';
+        
+        // Очистка формы
+        document.getElementById('threadTitle').value = '';
+        document.getElementById('threadContent').value = '';
+        document.getElementById('threadImage').value = '';
         
         // Перезагрузка тредов борды
         const threads = await loadBoardThreads(currentBoard);
@@ -470,12 +483,6 @@ async function handleReplySubmit() {
     const content = replyText.value.trim();
     const imageFile = document.getElementById('replyImage').files[0];
     const isAnon = document.getElementById('postAnon').checked;
-    
-    // Проверка минимальной длины (минимум 3 символа)
-    if (content.length < 3) {
-        alert(t('error_min_length', 'Reply must be at least 3 characters long'));
-        return;
-    }
     
     try {
         await createReply(currentThread, content, imageFile, isAnon);
