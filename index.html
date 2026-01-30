@@ -195,7 +195,7 @@
         <div class="modal-content">
             <span class="close">&times;</span>
             <h2 data-i18n="createNewThread">Create New Thread</h2>
-            <form id="newThreadForm">
+            <form id="newThreadForm" novalidate>
                 <div class="form-group" id="threadAnonToggleContainer" style="display: none;">
                     <label>
                         <input type="checkbox" id="threadPostAnon">
@@ -218,7 +218,7 @@
         <div class="modal-content">
             <span class="close">&times;</span>
             <h2 data-i18n="login">Login</h2>
-            <form id="loginForm">
+            <form id="loginForm" novalidate>
                 <input type="text" id="loginNickname" data-i18n-placeholder="nickname" placeholder="Nickname">
                 <input type="password" id="loginPassword" data-i18n-placeholder="password" placeholder="Password">
                 <button type="submit" class="btn-primary" data-i18n="login">Login</button>
@@ -231,7 +231,7 @@
         <div class="modal-content">
             <span class="close">&times;</span>
             <h2 data-i18n="register">Register</h2>
-            <form id="registerForm">
+            <form id="registerForm" novalidate>
                 <input type="text" id="registerNickname" data-i18n-placeholder="nickname" placeholder="Nickname">
                 <input type="password" id="registerPassword" data-i18n-placeholder="password" placeholder="Password">
                 <input type="password" id="registerPasswordConfirm" data-i18n-placeholder="confirmPassword" placeholder="Confirm Password">
@@ -256,7 +256,7 @@
         <div class="modal-content">
             <span class="close">&times;</span>
             <h2 data-i18n="editProfile">Edit Profile</h2>
-            <form id="editProfileForm">
+            <form id="editProfileForm" novalidate>
                 <div class="form-group">
                     <label for="editAvatar" data-i18n="changeAvatar">Change Avatar</label>
                     <input type="file" id="editAvatar" accept="image/*">
