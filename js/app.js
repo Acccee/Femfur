@@ -356,35 +356,44 @@ function openNewThreadModal() {
 }
 
 // Обработка создания треда
-async function handleNewThreadSubmit(e) {
+// Исправленная обработка редактирования профиля
+async function handleEditProfileSubmit(e) {
     e.preventDefault();
     
-    if (!currentBoard) {
-        alert(t('error_empty_fields'));
-        return;
-    }
+    // Получаем элементы
+    const avatarInput = document.getElementById('editAvatar');
+    const statusInput = document.getElementById('editStatus');
     
-    const title = document.getElementById('threadTitle').value.trim();
-    const content = document.getElementById('threadContent').value.trim();
-    const imageFile = document.getElementById('threadImage').files[0];
-    const isAnon = document.getElementById('threadPostAnon').checked;
+    // Проверяем наличие файла и текста (безопасно)
+    const avatarFile = (avatarInput && avatarInput.files) ? avatarInput.files[0] : null;
+    const status = statusInput ? statusInput.value.trim() : "";
     
-    if (!title || !content) {
-        alert(t('error_empty_fields'));
+    // Если вообще ничего не введено - тогда ругаемся
+    if (!avatarFile && status === "") {
+        alert(t('error_empty_fields', 'Please fill at least one field'));
         return;
     }
     
     try {
-        await createThread(currentBoard, title, content, imageFile, isAnon);
-        newThreadModal.style.display = 'none';
+        // Вызываем обновление. 
+        // Важно: updateProfile должна уметь принимать null вместо аватара или пустую строку
+        await updateProfile(avatarFile, status);
         
-        // Перезагрузка тредов борды
-        const threads = await loadBoardThreads(currentBoard);
-        renderThreads(threads);
+        if (editProfileModal) {
+            editProfileModal.style.display = 'none';
+        }
         
-        alert(t('success_thread'));
+        alert(t('success_profile_update', 'Profile updated successfully!'));
+        
+        // Получаем свежие данные и обновляем страницу
+        const currentUser = await getCurrentUser();
+        if (currentUser) {
+            // Чтобы страница реально обновилась и показала новый статус/аватар
+            window.location.reload();
+        }
     } catch (error) {
-        alert(t('error_thread_create') + ': ' + error.message);
+        console.error("Profile update error:", error);
+        alert(t('error_profile_update', 'Error updating profile: ') + error.message);
     }
 }
 
