@@ -358,30 +358,33 @@ function openNewThreadModal() {
 // Обработка создания треда
 async function handleNewThreadSubmit(e) {
     e.preventDefault();
-    
-    if (!currentBoard) {
-        alert(t('error_empty_fields'));
+
+    // 🔥 получаем борду напрямую (а не через currentBoard)
+    const boardId = window.location.hash.replace('#', '');
+
+    if (!boardId) {
+        alert('Ошибка: борда не определена');
         return;
     }
-    
+
     const title = document.getElementById('threadTitle').value.trim();
     const content = document.getElementById('threadContent').value.trim();
     const imageFile = document.getElementById('threadImage').files[0];
     const isAnon = document.getElementById('threadPostAnon').checked;
-    
+
     if (!title || !content) {
         alert(t('error_empty_fields'));
         return;
     }
-    
+
     try {
-        await createThread(currentBoard, title, content, imageFile, isAnon);
+        await createThread(boardId, title, content, imageFile, isAnon);
         newThreadModal.style.display = 'none';
-        
-        // Перезагрузка тредов борды
-        const threads = await loadBoardThreads(currentBoard);
+
+        // перезагрузка тредов
+        const threads = await loadBoardThreads(boardId);
         renderThreads(threads);
-        
+
         alert(t('success_thread'));
     } catch (error) {
         alert(t('error_thread_create') + ': ' + error.message);
