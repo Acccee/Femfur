@@ -465,17 +465,42 @@ async function handleReplySubmit() {
 async function handleEditProfileSubmit(e) {
     e.preventDefault();
     
-    const avatarFile = document.getElementById('editAvatar').files[0];
-    const status = document.getElementById('editStatus').value.trim();
+    // Получаем форму, на которой произошло событие
+    const form = e.target;
     
+    // Ищем элементы ВНУТРИ этой конкретной формы, а не по всей странице
+    const avatarInput = form.querySelector('#editAvatar');
+    const statusInput = form.querySelector('#editStatus');
+
+    // Проверяем, нашли ли мы элементы вообще (для отладки)
+    if (!avatarInput || !statusInput) {
+        console.error("Поля формы не найдены! Проверь ID в HTML.");
+        return;
+    }
+
+    const avatarFile = avatarInput.files[0];
+    const status = statusInput.value.trim();
+    
+    // Если статус обязателен и он пустой — вот тут сработает твоя "ошибка"
+    if (!status && !avatarFile) {
+        alert("Заполните хотя бы одно поле");
+        return;
+    }
+
     try {
         await updateProfile(avatarFile, status);
-        editProfileModal.style.display = 'none';
+        
+        // Закрываем модалку (убедись, что editProfileModal определена выше)
+        if (typeof editProfileModal !== 'undefined') {
+            editProfileModal.style.display = 'none';
+        }
+
         alert(t('success_profile_update', 'Profile updated successfully!'));
         
-        // Reload current page to show updated profile
         const currentUser = await getCurrentUser();
         if (currentUser) {
+            // Если мы уже на этой странице, reload может быть избыточен, 
+            // но для обновления аватара — это самый простой путь
             window.location.hash = `u/${currentUser.profile_hash}`;
             window.location.reload();
         }
