@@ -1,113 +1,200 @@
-import { supabaseClient } from './supabaseClient.js';
+// boards.js - Boards Management Module
 
-// Board definitions
+import { supabaseClient, uploadImage } from './supabaseClient.js';
+import { getCurrentUser } from './auth.js';
+import { t } from './i18n.js';
+
+// Определение всех бордов
 const BOARDS = {
-    // Art & Creative
-    art: { name: '/art/', title: 'Artwork & Drawings', desc: 'Share and discuss artwork' },
-    lit: { name: '/lit/', title: 'Literature & Stories', desc: 'Books, stories, and creative writing' },
-    po: { name: '/po/', title: 'Poetry', desc: 'Poetry and poetic discussion' },
-    mu: { name: '/mu/', title: 'Music', desc: 'Music discussion and sharing' },
-    diy: { name: '/diy/', title: 'DIY & Crafts', desc: 'Do it yourself projects' },
-    ph: { name: '/ph/', title: 'Photography', desc: 'Photography and techniques' },
+    // Art
+    art: { name: '/art/', title: 'Art', category: 'Art' },
+    lit: { name: '/lit/', title: 'Literature', category: 'Art' },
+    po: { name: '/po/', title: 'Poetry', category: 'Art' },
+    mu: { name: '/mu/', title: 'Music', category: 'Art' },
+    diy: { name: '/diy/', title: 'DIY', category: 'Art' },
+    ph: { name: '/ph/', title: 'Photography', category: 'Art' },
     
-    // Discussion
-    b: { name: '/b/', title: 'Random', desc: 'Random discussions' },
-    soc: { name: '/soc/', title: 'Social', desc: 'Social discussion' },
-    chat: { name: '/chat/', title: 'General Chat', desc: 'General discussion' },
-    news: { name: '/news/', title: 'News & Current Events', desc: 'News and current events' },
-    int: { name: '/int/', title: 'International', desc: 'International discussion' },
-    r9k: { name: '/r9k/', title: 'Robot9000', desc: 'Original content only' },
+    // Chat
+    b: { name: '/b/', title: 'Random', category: 'Chat' },
+    soc: { name: '/soc/', title: 'Social', category: 'Chat' },
+    chat: { name: '/chat/', title: 'Chat', category: 'Chat' },
+    news: { name: '/news/', title: 'News', category: 'Chat' },
+    int: { name: '/int/', title: 'International', category: 'Chat' },
+    r9k: { name: '/r9k/', title: 'Robot9000', category: 'Chat' },
     
-    // Furry & Anime
-    fur: { name: '/fur/', title: 'Furry', desc: 'Furry art and discussion' },
-    a: { name: '/a/', title: 'Anime & Manga', desc: 'Anime and manga discussion' },
-    vn: { name: '/vn/', title: 'Visual Novels', desc: 'Visual novel discussion' },
-    cm: { name: '/cm/', title: 'Cute Male', desc: 'Cute male characters' },
-    c: { name: '/c/', title: 'Cute', desc: 'Cute characters and art' },
+    // Furry/Anime
+    fur: { name: '/fur/', title: 'Furry', category: 'Furry/Anime' },
+    a: { name: '/a/', title: 'Anime', category: 'Furry/Anime' },
+    vn: { name: '/vn/', title: 'Visual Novels', category: 'Furry/Anime' },
+    cm: { name: '/cm/', title: 'Cute Male', category: 'Furry/Anime' },
+    c: { name: '/c/', title: 'Cute', category: 'Furry/Anime' },
     
-    // Games & Entertainment
-    vg: { name: '/vg/', title: 'Video Games', desc: 'Video game discussion' },
-    tg: { name: '/tg/', title: 'Tabletop Games', desc: 'Board games and RPGs' },
-    vr: { name: '/vr/', title: 'Virtual Reality', desc: 'VR discussion' },
-    vm: { name: '/vm/', title: 'Retro Games', desc: 'Retro gaming' },
-    tv: { name: '/tv/', title: 'TV & Film', desc: 'Television and movies' },
-    co: { name: '/co/', title: 'Comics & Cartoons', desc: 'Comics and animated content' },
+    // Games
+    vg: { name: '/vg/', title: 'Video Games', category: 'Games' },
+    tg: { name: '/tg/', title: 'Board Games', category: 'Games' },
+    vr: { name: '/vr/', title: 'VR', category: 'Games' },
+    vm: { name: '/vm/', title: 'Retro Games', category: 'Games' },
+    tv: { name: '/tv/', title: 'TV & Movies', category: 'Games' },
+    co: { name: '/co/', title: 'Comics', category: 'Games' },
     
-    // Technology
-    g: { name: '/g/', title: 'Technology', desc: 'Technology discussion' },
-    pr: { name: '/pr/', title: 'Programming', desc: 'Programming and development' },
-    sci: { name: '/sci/', title: 'Science', desc: 'Science and mathematics' },
-    wsr: { name: '/wsr/', title: 'Tech Support', desc: 'Tech support and help' },
-    3: { name: '/3/', title: '3D Printing', desc: '3D printing discussion' },
+    // IT
+    g: { name: '/g/', title: 'Technology', category: 'IT' },
+    pr: { name: '/pr/', title: 'Programming', category: 'IT' },
+    sci: { name: '/sci/', title: 'Science', category: 'IT' },
+    wsr: { name: '/wsr/', title: 'Help', category: 'IT' },
+    3: { name: '/3/', title: '3D Printing', category: 'IT' },
     
-    // Lifestyle
-    fit: { name: '/fit/', title: 'Fitness & Health', desc: 'Fitness and health discussion' },
-    ck: { name: '/ck/', title: 'Food & Cooking', desc: 'Food and cooking' },
-    fa: { name: '/fa/', title: 'Fashion', desc: 'Fashion discussion' },
-    adv: { name: '/adv/', title: 'Advice', desc: 'Advice and support' },
-    trv: { name: '/trv/', title: 'Travel', desc: 'Travel discussion' },
-    out: { name: '/out/', title: 'Outdoors', desc: 'Outdoor activities' },
+    // About live
+    fit: { name: '/fit/', title: 'Fitness', category: 'About live' },
+    ck: { name: '/ck/', title: 'Cooking', category: 'About live' },
+    fa: { name: '/fa/', title: 'Fashion', category: 'About live' },
+    adv: { name: '/adv/', title: 'Advice', category: 'About live' },
+    trv: { name: '/trv/', title: 'Travel', category: 'About live' },
+    out: { name: '/out/', title: 'Outdoors', category: 'About live' },
     
-    // Hobbies
-    sp: { name: '/sp/', title: 'Sports', desc: 'Sports discussion' },
-    auto: { name: '/auto/', title: 'Automobiles', desc: 'Cars and vehicles' },
-    an: { name: '/an/', title: 'Animals & Nature', desc: 'Animals and nature' },
-    his: { name: '/his/', title: 'History', desc: 'History discussion' },
-    p: { name: '/p/', title: 'Photography', desc: 'Photography' },
+    // Hobby
+    sp: { name: '/sp/', title: 'Sports', category: 'Hobby' },
+    auto: { name: '/auto/', title: 'Automobiles', category: 'Hobby' },
+    an: { name: '/an/', title: 'Animals', category: 'Hobby' },
+    his: { name: '/his/', title: 'History', category: 'Hobby' },
+    p: { name: '/p/', title: 'Photography', category: 'Hobby' },
     
-    // Adult (18+)
-    e: { name: '/e/', title: 'Ecchi (18+)', desc: 'Ecchi content' },
-    h: { name: '/h/', title: 'Hentai (18+)', desc: 'Hentai content' },
-    gif: { name: '/gif/', title: 'Adult GIF (18+)', desc: 'Adult animated content' }
+    // Adult
+    e: { name: '/e/', title: 'Ecchi (18+)', category: 'Adult' },
+    h: { name: '/h/', title: 'Hentai (18+)', category: 'Adult' },
+    gif: { name: '/gif/', title: 'Adult GIF (18+)', category: 'Adult' }
 };
 
-// Get board info
+// Получить информацию о борде
 function getBoardInfo(boardId) {
     return BOARDS[boardId] || null;
 }
 
-// Get all boards
+// Получить все борды
 function getAllBoards() {
     return BOARDS;
 }
 
-// Load threads from board
+// Загрузить треды борды из Supabase
 async function loadBoardThreads(boardId) {
     try {
         const { data, error } = await supabaseClient
             .from('threads')
-            .select('*')
+            .select(`
+                *,
+                user:user_id (
+                    id,
+                    nickname,
+                    avatar_url
+                )
+            `)
             .eq('board', boardId)
-            .order('created_at', { ascending: false });
+            .order('is_sticky', { ascending: false })
+            .order('bumped_at', { ascending: false });
         
-        if (error) throw error;
+        if (error) {
+            throw error;
+        }
         
-        return data || [];
+        // Get reply counts for each thread
+        const threadsWithCounts = await Promise.all(data.map(async (thread) => {
+            const { count } = await supabaseClient
+                .from('replies')
+                .select('*', { count: 'exact', head: true })
+                .eq('thread_id', thread.id);
+            
+            thread.reply_count = count || 0;
+            return thread;
+        }));
+        
+        return threadsWithCounts || [];
     } catch (error) {
-        console.error('Error loading threads:', error);
+        console.error('Ошибка загрузки тредов:', error);
         throw error;
     }
 }
 
-// Create new thread
-async function createThread(boardId, subject, comment, imageUrl) {
+// Создать новый тред
+async function createThread(boardId, title, content, imageFile, isAnonymous = false) {
     try {
+        const user = await getCurrentUser();
+        
+        // Upload image if provided
+        let imageUrl = null;
+        if (imageFile) {
+            imageUrl = await uploadImage(imageFile, `threads/${boardId}`);
+        }
+        
+        const threadData = {
+            board: boardId,
+            title: title,
+            content: content,
+            image_url: imageUrl,
+            is_anonymous: isAnonymous,
+            user_id: user ? user.id : null,
+            bumped_at: new Date().toISOString()
+        };
+        
         const { data, error } = await supabaseClient
             .from('threads')
-            .insert([{
-                board: boardId,
-                subject: subject || '',
-                comment: comment,
-                image_url: imageUrl || null
-            }])
-            .select();
+            .insert([threadData])
+            .select()
+            .single();
+        
+        if (error) {
+            throw error;
+        }
+        
+        return data;
+    } catch (error) {
+        console.error('Ошибка создания треда:', error);
+        throw error;
+    }
+}
+
+// Increment view counter (based on IP simulation)
+async function incrementViewCount(threadId) {
+    try {
+        // Get current views
+        const { data: thread } = await supabaseClient
+            .from('threads')
+            .select('views')
+            .eq('id', threadId)
+            .single();
+        
+        if (!thread) return;
+        
+        // Check if already viewed (simple sessionStorage check)
+        const viewedKey = `viewed_thread_${threadId}`;
+        if (sessionStorage.getItem(viewedKey)) {
+            return;
+        }
+        
+        // Increment view count
+        const { error } = await supabaseClient
+            .from('threads')
+            .update({ views: (thread.views || 0) + 1 })
+            .eq('id', threadId);
+        
+        if (!error) {
+            sessionStorage.setItem(viewedKey, 'true');
+        }
+    } catch (error) {
+        console.error('Error incrementing view count:', error);
+    }
+}
+
+// Bump thread (move to top)
+async function bumpThread(threadId) {
+    try {
+        const { error } = await supabaseClient
+            .from('threads')
+            .update({ bumped_at: new Date().toISOString() })
+            .eq('id', threadId);
         
         if (error) throw error;
-        
-        return data[0];
     } catch (error) {
-        console.error('Error creating thread:', error);
-        throw error;
+        console.error('Error bumping thread:', error);
     }
 }
 
@@ -116,5 +203,7 @@ export {
     getBoardInfo,
     getAllBoards,
     loadBoardThreads,
-    createThread
+    createThread,
+    incrementViewCount,
+    bumpThread
 };
