@@ -359,7 +359,7 @@ function openNewThreadModal() {
 async function handleNewThreadSubmit(e) {
     e.preventDefault();
 
-    // 🔥 получаем борду напрямую (а не через currentBoard)
+    // 🔥 ПОЛУЧАЕМ БОРДУ НАПРЯМУЮ ИЗ URL
     const boardId = window.location.hash.replace('#', '');
 
     if (!boardId) {
@@ -373,7 +373,7 @@ async function handleNewThreadSubmit(e) {
     const isAnon = document.getElementById('threadPostAnon').checked;
 
     if (!title || !content) {
-        alert(t('error_empty_fields'));
+        alert('Заполните все поля');
         return;
     }
 
@@ -381,18 +381,14 @@ async function handleNewThreadSubmit(e) {
         await createThread(boardId, title, content, imageFile, isAnon);
         newThreadModal.style.display = 'none';
 
-        // перезагрузка тредов
         const threads = await loadBoardThreads(boardId);
         renderThreads(threads);
 
-        alert(t('success_thread'));
+        alert('Тред создан');
     } catch (error) {
-        alert(t('error_thread_create') + ': ' + error.message);
+        alert('Ошибка создания треда: ' + error.message);
     }
 }
-
-
-
 // Обработка логина
 async function handleLoginSubmit(e) {
     e.preventDefault();
