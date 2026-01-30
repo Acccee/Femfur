@@ -359,30 +359,39 @@ function openNewThreadModal() {
 async function handleNewThreadSubmit(e) {
     e.preventDefault();
 
-    // ❗ ЖЁСТКО задаём борду (для теста)
-    const boardId = 'test';
+    // ✅ БЕРЁМ БОРДУ ИЗ #b
+    const boardId = window.location.hash.replace('#', '');
 
-    // ❗ ЖЁСТКО читаем поля
+    if (!boardId) {
+        alert('Ошибка: борда не определена');
+        return;
+    }
+
     const titleEl = document.getElementById('threadTitle');
     const contentEl = document.getElementById('threadContent');
 
-    console.log('TITLE EL:', titleEl);
-    console.log('CONTENT EL:', contentEl);
+    const title = titleEl.value.trim();
+    const content = contentEl.value.trim();
 
-    const title = titleEl ? titleEl.value : '';
-    const content = contentEl ? contentEl.value : '';
+    if (!title || !content) {
+        alert(t('error_empty_fields'));
+        return;
+    }
 
-    console.log('VALUES:', { title, content });
-
-    // ❗ УБИРАЕМ ВСЕ ПРОВЕРКИ
     try {
         await createThread(boardId, title, content, null, false);
-        alert('ПОПЫТКА СОЗДАНИЯ ТРЕДА ВЫПОЛНЕНА');
-    } catch (err) {
-        alert('ОШИБКА: ' + err.message);
-        console.error(err);
+        newThreadModal.style.display = 'none';
+
+        // 🔄 перезагрузка тредов ТЕКУЩЕЙ борды
+        const threads = await loadBoardThreads(boardId);
+        renderThreads(threads);
+
+        alert(t('success_thread'));
+    } catch (error) {
+        alert(t('error_thread_create') + ': ' + error.message);
     }
 }
+
 
 
 // Обработка логина
