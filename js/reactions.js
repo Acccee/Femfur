@@ -59,8 +59,7 @@ async function toggleReaction(targetType, targetId, reactionType) {
         const user = await getCurrentUser();
         
         if (!user) {
-            const { t } = await import('./i18n.js');
-            throw new Error(t('error_login_required', 'You must be logged in to react'));
+            throw new Error('You must be logged in to react');
         }
         
         // Check if user already reacted with this type

@@ -105,16 +105,5 @@
   "replies_found": "Replies",
   "search_empty": "Enter keywords to search threads and replies",
   "error_search": "Search failed",
-  "justNow": "just now",
-  "edit": "Edit",
-  "delete": "Delete",
-  "editThread": "Edit Thread",
-  "confirm_delete_thread": "Are you sure you want to delete this thread? This action cannot be undone.",
-  "success_delete_thread": "Thread deleted successfully",
-  "error_delete_thread": "Failed to delete thread",
-  "success_thread_update": "Thread updated successfully",
-  "error_thread_update": "Failed to update thread",
-  "error_no_permission": "You do not have permission to perform this action",
-  "error_login_required": "You must be logged in to perform this action",
-  "no_content": "No content"
+  "justNow": "just now"
 }

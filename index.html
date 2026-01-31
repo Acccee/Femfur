@@ -5,15 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Femfur - Anonymous Imageboard</title>
     <link rel="icon" type="image/png" href="assets/fav.png">
-    <link rel="shortcut icon" type="image/png" href="assets/fav.png">
-    <link rel="apple-touch-icon" href="assets/fav.png">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <header>
         <div class="container">
             <div class="header-top">
-                <h1><a href="/" id="logo"><img src="assets/fav.png" alt="" style="width: 32px; height: 32px; vertical-align: middle; margin-right: 10px;">Femfur</a></h1>
+                <h1><a href="/" id="logo">Femfur</a></h1>
                 <div class="header-controls">
                     <button id="searchBtn" class="btn-secondary" title="Search">🔍</button>
                     <button id="themeToggle" class="btn-secondary theme-toggle" title="Toggle Theme">🌙</button>
@@ -295,24 +293,6 @@
         </div>
     </div>
 
-    <!-- Edit Thread Modal -->
-    <div id="editThreadModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2 data-i18n="editThread">Edit Thread</h2>
-            <form id="editThreadForm" novalidate>
-                <input type="hidden" id="editThreadId">
-                <input type="text" id="editThreadTitle" data-i18n-placeholder="title" placeholder="Title" required>
-                <textarea id="editThreadContent" data-i18n-placeholder="content" placeholder="Content" rows="6" required></textarea>
-                <div class="form-group">
-                    <label for="editThreadImage" data-i18n="attachImage">Attach new image (optional)</label>
-                    <input type="file" id="editThreadImage" accept="image/*">
-                </div>
-                <button type="submit" class="btn-primary" data-i18n="save">Save</button>
-            </form>
-        </div>
-    </div>
-
     <footer>
         <div class="container">
             <p>&copy; 2026 Femfur - <span data-i18n="footerTagline">Anonymous Imageboard</span></p>
@@ -329,8 +309,6 @@
     <script type="module" src="js/profile.js"></script>
     <script type="module" src="js/search.js"></script>
     <script type="module" src="js/reactions.js"></script>
-    <script type="module" src="js/thread-actions.js"></script>
-    <script type="module" src="js/text-formatting.js"></script>
     <script type="module" src="js/app.js"></script>
 </body>
 </html>

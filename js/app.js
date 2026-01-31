@@ -8,8 +8,6 @@ import { initializeWidgets } from './widgets.js';
 import { loadUserProfile, renderUserProfile } from './profile.js';
 import { searchContent, renderSearchResults } from './search.js';
 import { getReactions, renderReactions } from './reactions.js';
-import { renderThreadActions } from './thread-actions.js';
-import { formatText, addFormattingToolbar, showFormattingHelp } from './text-formatting.js';
 
 // Состояние приложения
 let currentBoard = null;
@@ -175,12 +173,6 @@ function setupEventListeners() {
         editProfileForm.addEventListener('submit', handleEditProfileSubmit);
     }
     
-    // Edit thread form handler
-    const editThreadForm = document.getElementById('editThreadForm');
-    if (editThreadForm) {
-        editThreadForm.addEventListener('submit', handleEditThreadSubmit);
-    }
-    
     // Кнопка возврата к борде
     backToBoard.addEventListener('click', () => {
         if (currentBoard) {
@@ -296,18 +288,9 @@ async function renderThreads(threads) {
         const reactions = await getReactions('thread', thread.id);
         const reactionsHtml = renderInlineReactionsHtml(reactions);
         
-        // Debug: log thread data
-        if (!thread.content || thread.content.trim() === '') {
-            console.warn('Thread has empty content:', thread);
-        }
-        
-        const contentPreview = thread.content && thread.content.trim() !== '' 
-            ? escapeHtml(thread.content.substring(0, 200)) + (thread.content.length > 200 ? '...' : '')
-            : '<em>' + t('no_content', 'No content') + '</em>';
-        
         threadItem.innerHTML = `
             <h3>${escapeHtml(thread.title)}</h3>
-            <p>${contentPreview}</p>
+            <p>${escapeHtml(thread.content.substring(0, 200))}${thread.content.length > 200 ? '...' : ''}</p>
             ${thread.image_url ? `<img src="${thread.image_url}" alt="Thread image">` : ''}
             <div class="thread-meta">
                 <span class="thread-author ${thread.is_anonymous ? 'anonymous' : ''}">${author}</span>
@@ -386,11 +369,10 @@ async function showThread(boardId, threadId) {
         
         // Create container for thread reactions
         const threadReactionsId = `thread-reactions-${threadId}`;
-        const threadActionsId = `thread-actions-${threadId}`;
         
         threadContent.innerHTML = `
             <h2>${escapeHtml(thread.title)}</h2>
-            <div class="thread-text">${formatText(thread.content)}</div>
+            <div class="thread-text">${escapeHtml(thread.content)}</div>
             ${thread.image_url ? `<img src="${thread.image_url}" alt="Thread image">` : ''}
             <div class="thread-meta">
                 <span class="thread-author ${thread.is_anonymous ? 'anonymous' : ''}">${author}</span>
@@ -399,14 +381,10 @@ async function showThread(boardId, threadId) {
                 <span>ID: ${thread.id}</span>
             </div>
             <div id="${threadReactionsId}"></div>
-            <div id="${threadActionsId}"></div>
         `;
         
         // Render reactions for thread
         await renderReactions('thread', threadId, threadReactionsId);
-        
-        // Render edit/delete buttons if user owns thread
-        renderThreadActions(threadId, threadActionsId);
         
         // Загрузка ответов
         const replies = await getThreadReplies(threadId);
@@ -439,7 +417,7 @@ async function renderReplies(replies) {
         
         replyItem.innerHTML = `
             <div class="reply-number">##${index + 1}</div>
-            <div class="reply-text">${formatText(reply.content)}</div>
+            <div class="reply-text">${formatQuotes(escapeHtml(reply.content))}</div>
             ${reply.image_url ? `<img src="${reply.image_url}" alt="Reply image">` : ''}
             <div class="reply-meta">
                 <span class="reply-author ${reply.is_anonymous ? 'anonymous' : ''}">${author}</span>
@@ -581,12 +559,6 @@ function openNewThreadModal() {
     document.getElementById('threadTitle').value = '';
     document.getElementById('threadContent').value = '';
     document.getElementById('threadImage').value = '';
-    
-    // Add formatting toolbar if not already added
-    const threadContent = document.getElementById('threadContent');
-    if (threadContent && !threadContent.previousElementSibling?.classList.contains('formatting-toolbar')) {
-        addFormattingToolbar('threadContent');
-    }
 }
 
 // Обработка создания треда
@@ -602,16 +574,6 @@ async function handleNewThreadSubmit(e) {
     const content = document.getElementById('threadContent').value.trim();
     const imageFile = document.getElementById('threadImage').files[0];
     const isAnon = document.getElementById('threadPostAnon').checked;
-    
-    // Debug: log what we're sending
-    console.log('Creating thread with data:', {
-        board: currentBoard,
-        title: title,
-        content: content,
-        contentLength: content.length,
-        hasImage: !!imageFile,
-        isAnon: isAnon
-    });
     
     try {
         await createThread(currentBoard, title, content, imageFile, isAnon);
@@ -723,35 +685,6 @@ async function handleEditProfileSubmit(e) {
         }
     } catch (error) {
         alert(t('error_profile_update', 'Error updating profile: ') + error.message);
-    }
-}
-
-// Обработка редактирования треда
-async function handleEditThreadSubmit(e) {
-    e.preventDefault();
-    
-    const { updateThread } = await import('./thread-actions.js');
-    
-    const threadId = document.getElementById('editThreadId').value;
-    const title = document.getElementById('editThreadTitle').value.trim();
-    const content = document.getElementById('editThreadContent').value.trim();
-    const imageFile = document.getElementById('editThreadImage').files[0];
-    
-    console.log('Updating thread:', { threadId, title, content, hasImage: !!imageFile });
-    
-    try {
-        await updateThread(threadId, title, content, imageFile);
-        document.getElementById('editThreadModal').style.display = 'none';
-        alert(t('success_thread_update', 'Thread updated successfully!'));
-        
-        // Reload thread view
-        const hash = window.location.hash;
-        window.location.hash = '';
-        setTimeout(() => {
-            window.location.hash = hash;
-        }, 100);
-    } catch (error) {
-        alert(t('error_thread_update', 'Failed to update thread: ') + error.message);
     }
 }
 
