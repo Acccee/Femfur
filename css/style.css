@@ -1669,22 +1669,7 @@ body.dark-theme .btn-edit:hover {
    FAVICON AND LOGO
    ============================================ */
 
-#logo {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-}
-
-#logo::before {
-    content: '';
-    display: inline-block;
-    width: 32px;
-    height: 32px;
-    background-image: url('../assets/fav.png');
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-}
+/* Убираем ::before так как мы добавим img в HTML */
 
 /* Help button for formatting */
 .formatting-help-btn {

@@ -13,7 +13,7 @@
     <header>
         <div class="container">
             <div class="header-top">
-                <h1><a href="/" id="logo">Femfur</a></h1>
+                <h1><a href="/" id="logo"><img src="assets/fav.png" alt="" style="width: 32px; height: 32px; vertical-align: middle; margin-right: 10px;">Femfur</a></h1>
                 <div class="header-controls">
                     <button id="searchBtn" class="btn-secondary" title="Search">🔍</button>
                     <button id="themeToggle" class="btn-secondary theme-toggle" title="Toggle Theme">🌙</button>
@@ -289,6 +289,24 @@
                 <div class="form-group">
                     <label for="editStatus" data-i18n="status">Status</label>
                     <input type="text" id="editStatus" data-i18n-placeholder="status" placeholder="Status (optional)" maxlength="100">
+                </div>
+                <button type="submit" class="btn-primary" data-i18n="save">Save</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Thread Modal -->
+    <div id="editThreadModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 data-i18n="editThread">Edit Thread</h2>
+            <form id="editThreadForm" novalidate>
+                <input type="hidden" id="editThreadId">
+                <input type="text" id="editThreadTitle" data-i18n-placeholder="title" placeholder="Title" required>
+                <textarea id="editThreadContent" data-i18n-placeholder="content" placeholder="Content" rows="6" required></textarea>
+                <div class="form-group">
+                    <label for="editThreadImage" data-i18n="attachImage">Attach new image (optional)</label>
+                    <input type="file" id="editThreadImage" accept="image/*">
                 </div>
                 <button type="submit" class="btn-primary" data-i18n="save">Save</button>
             </form>

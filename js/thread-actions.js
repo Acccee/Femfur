@@ -83,40 +83,43 @@ async function updateThread(threadId, title, content, imageFile) {
 }
 
 // Render edit/delete buttons for thread
-function renderThreadActions(threadId, containerId) {
-    canModifyThread(threadId).then(canModify => {
-        const container = document.getElementById(containerId);
-        if (!container) return;
+async function renderThreadActions(threadId, containerId) {
+    const canModify = await canModifyThread(threadId);
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    const { t } = await import('./i18n.js');
+    
+    if (canModify) {
+        container.innerHTML = `
+            <div class="thread-actions">
+                <button class="btn-secondary btn-edit" data-thread-id="${threadId}">
+                    ✏️ ${t('edit', 'Edit')}
+                </button>
+                <button class="btn-danger btn-delete" data-thread-id="${threadId}">
+                    🗑️ ${t('delete', 'Delete')}
+                </button>
+            </div>
+        `;
         
-        if (canModify) {
-            container.innerHTML = `
-                <div class="thread-actions">
-                    <button class="btn-secondary btn-edit" data-thread-id="${threadId}">
-                        ✏️ ${t('edit', 'Edit')}
-                    </button>
-                    <button class="btn-danger btn-delete" data-thread-id="${threadId}">
-                        🗑️ ${t('delete', 'Delete')}
-                    </button>
-                </div>
-            `;
-            
-            // Add event listeners
-            container.querySelector('.btn-edit').addEventListener('click', (e) => {
-                e.stopPropagation();
-                openEditThreadModal(threadId);
-            });
-            
-            container.querySelector('.btn-delete').addEventListener('click', (e) => {
-                e.stopPropagation();
-                confirmDeleteThread(threadId);
-            });
-        }
-    });
+        // Add event listeners
+        container.querySelector('.btn-edit').addEventListener('click', (e) => {
+            e.stopPropagation();
+            openEditThreadModal(threadId);
+        });
+        
+        container.querySelector('.btn-delete').addEventListener('click', (e) => {
+            e.stopPropagation();
+            confirmDeleteThread(threadId);
+        });
+    }
 }
 
 // Open edit thread modal
 async function openEditThreadModal(threadId) {
     try {
+        const { t } = await import('./i18n.js');
+        
         // Get thread data
         const { data: thread, error } = await supabaseClient
             .from('threads')
@@ -126,52 +129,25 @@ async function openEditThreadModal(threadId) {
         
         if (error) throw error;
         
-        // Create modal
-        const modal = document.getElementById('editThreadModal');
-        if (!modal) {
-            createEditThreadModal();
-        }
-        
         // Fill form
         document.getElementById('editThreadId').value = threadId;
         document.getElementById('editThreadTitle').value = thread.title;
-        document.getElementById('editThreadContent').value = thread.content;
+        document.getElementById('editThreadContent').value = thread.content || '';
+        
+        // Add formatting toolbar to edit content
+        const editContent = document.getElementById('editThreadContent');
+        if (editContent && !editContent.previousElementSibling?.classList.contains('formatting-toolbar')) {
+            const { addFormattingToolbar } = await import('./text-formatting.js');
+            addFormattingToolbar('editThreadContent');
+        }
         
         // Show modal
         document.getElementById('editThreadModal').style.display = 'block';
     } catch (error) {
         console.error('Error loading thread for edit:', error);
+        const { t } = await import('./i18n.js');
         alert(t('error_load', 'Failed to load thread'));
     }
-}
-
-// Create edit thread modal if it doesn't exist
-function createEditThreadModal() {
-    const modalHtml = `
-        <div id="editThreadModal" class="modal">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <h2 data-i18n="editThread">Edit Thread</h2>
-                <form id="editThreadForm" novalidate>
-                    <input type="hidden" id="editThreadId">
-                    <input type="text" id="editThreadTitle" data-i18n-placeholder="title" placeholder="Title" required>
-                    <textarea id="editThreadContent" data-i18n-placeholder="content" placeholder="Content" rows="6" required></textarea>
-                    <div class="form-group">
-                        <label for="editThreadImage" data-i18n="attachImage">Attach new image (optional)</label>
-                        <input type="file" id="editThreadImage" accept="image/*">
-                    </div>
-                    <button type="submit" class="btn-primary" data-i18n="save">Save</button>
-                </form>
-            </div>
-        </div>
-    `;
-    
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
-    
-    // Add close handler
-    document.querySelector('#editThreadModal .close').addEventListener('click', () => {
-        document.getElementById('editThreadModal').style.display = 'none';
-    });
 }
 
 // Confirm delete thread
