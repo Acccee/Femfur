@@ -105,5 +105,16 @@
   "replies_found": "Відповіді",
   "search_empty": "Введіть ключові слова для пошуку",
   "error_search": "Помилка пошуку",
-  "justNow": "щойно"
+  "justNow": "щойно",
+  "edit": "Редагувати",
+  "delete": "Видалити",
+  "editThread": "Редагувати тред",
+  "confirm_delete_thread": "Ви впевнені що хочете видалити цей тред? Цю дію не можна скасувати.",
+  "success_delete_thread": "Тред успішно видалено",
+  "error_delete_thread": "Не вдалося видалити тред",
+  "success_thread_update": "Тред успішно оновлено",
+  "error_thread_update": "Не вдалося оновити тред",
+  "error_no_permission": "У вас немає прав для виконання цієї дії",
+  "error_login_required": "Ви повинні увійти в систему для виконання цієї дії",
+  "no_content": "Немає опису"
 }

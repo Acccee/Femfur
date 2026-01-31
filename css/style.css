@@ -1483,3 +1483,214 @@ body.dark-theme .skeleton-reply {
 body.dark-theme .search-header h2 {
     color: #e94560;
 }
+
+/* ============================================
+   TEXT FORMATTING STYLES
+   ============================================ */
+
+/* Formatting toolbar */
+.formatting-toolbar {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 10px;
+    padding: 8px;
+    background-color: #f5f5f5;
+    border: 1px solid #b7c5d9;
+    border-radius: 3px;
+    flex-wrap: wrap;
+}
+
+.format-btn {
+    padding: 6px 12px;
+    background-color: #fff;
+    border: 1px solid #b7c5d9;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.format-btn:hover {
+    background-color: #e6e9ff;
+    border-color: #34345c;
+}
+
+.format-btn:active {
+    transform: scale(0.95);
+}
+
+/* Formatted text styles */
+.thread-text code,
+.reply-text code {
+    background-color: #f0f0f0;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+}
+
+.thread-text pre,
+.reply-text pre {
+    background-color: #f0f0f0;
+    padding: 12px;
+    border-radius: 5px;
+    overflow-x: auto;
+    margin: 10px 0;
+}
+
+.thread-text pre code,
+.reply-text pre code {
+    background: none;
+    padding: 0;
+}
+
+.greentext {
+    color: #789922;
+    font-style: italic;
+}
+
+.spoiler {
+    background-color: #000;
+    color: #000;
+    padding: 2px 4px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.spoiler:hover {
+    background-color: transparent;
+    color: inherit;
+}
+
+/* Dark theme formatting */
+body.dark-theme .formatting-toolbar {
+    background-color: #0f3460;
+    border-color: #533483;
+}
+
+body.dark-theme .format-btn {
+    background-color: #16213e;
+    border-color: #533483;
+    color: #eee;
+}
+
+body.dark-theme .format-btn:hover {
+    background-color: #1f2a44;
+    border-color: #e94560;
+}
+
+body.dark-theme .thread-text code,
+body.dark-theme .reply-text code {
+    background-color: #0f3460;
+    color: #eee;
+}
+
+body.dark-theme .thread-text pre,
+body.dark-theme .reply-text pre {
+    background-color: #0f3460;
+    color: #eee;
+}
+
+body.dark-theme .greentext {
+    color: #a8d672;
+}
+
+body.dark-theme .spoiler {
+    background-color: #333;
+    color: #333;
+}
+
+body.dark-theme .spoiler:hover {
+    background-color: transparent;
+    color: #eee;
+}
+
+/* ============================================
+   THREAD ACTIONS (EDIT/DELETE)
+   ============================================ */
+
+.thread-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #b7c5d9;
+}
+
+.btn-danger {
+    padding: 8px 16px;
+    background-color: #dc3545;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+}
+
+.btn-edit {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.btn-edit:hover {
+    background-color: #e0a800;
+}
+
+body.dark-theme .thread-actions {
+    border-top-color: #0f3460;
+}
+
+body.dark-theme .btn-danger {
+    background-color: #e94560;
+}
+
+body.dark-theme .btn-danger:hover {
+    background-color: #ff6b81;
+}
+
+body.dark-theme .btn-edit {
+    background-color: #f39c12;
+    color: #fff;
+}
+
+body.dark-theme .btn-edit:hover {
+    background-color: #e67e22;
+}
+
+/* ============================================
+   FAVICON AND LOGO
+   ============================================ */
+
+/* Убираем ::before так как мы добавим img в HTML */
+
+/* Help button for formatting */
+.formatting-help-btn {
+    margin-left: auto;
+    padding: 6px 12px;
+    background-color: #34345c;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.formatting-help-btn:hover {
+    background-color: #4a4a7a;
+}
+
+body.dark-theme .formatting-help-btn {
+    background-color: #e94560;
+}
+
+body.dark-theme .formatting-help-btn:hover {
+    background-color: #ff6b81;
+}
