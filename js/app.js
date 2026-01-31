@@ -579,13 +579,13 @@ function updateActiveNav(boardId) {
 function openNewThreadModal() {
     newThreadModal.style.display = 'block';
     document.getElementById('threadTitle').value = '';
-    document.getElementById('threadContent').value = '';
+    document.getElementById('newThreadContent').value = '';
     document.getElementById('threadImage').value = '';
     
     // Add formatting toolbar if not already added
-    const threadContent = document.getElementById('threadContent');
+    const threadContent = document.getElementById('newThreadContent');
     if (threadContent && !threadContent.previousElementSibling?.classList.contains('formatting-toolbar')) {
-        addFormattingToolbar('threadContent');
+        addFormattingToolbar('newThreadContent');
     }
 }
 
@@ -599,7 +599,7 @@ async function handleNewThreadSubmit(e) {
     }
     
     const title = document.getElementById('threadTitle').value.trim();
-    const content = document.getElementById('threadContent').value.trim();
+    const content = document.getElementById('newThreadContent').value.trim();
     const imageFile = document.getElementById('threadImage').files[0];
     const isAnon = document.getElementById('threadPostAnon').checked;
     
@@ -619,7 +619,7 @@ async function handleNewThreadSubmit(e) {
         
         // Очистка формы
         document.getElementById('threadTitle').value = '';
-        document.getElementById('threadContent').value = '';
+        document.getElementById('newThreadContent').value = '';
         document.getElementById('threadImage').value = '';
         
         // Перезагрузка тредов борды
