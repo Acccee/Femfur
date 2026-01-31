@@ -8,6 +8,8 @@ import { initializeWidgets } from './widgets.js';
 import { loadUserProfile, renderUserProfile } from './profile.js';
 import { searchContent, renderSearchResults } from './search.js';
 import { getReactions, renderReactions } from './reactions.js';
+import { renderThreadActions } from './thread-actions.js';
+import { formatText, addFormattingToolbar, showFormattingHelp } from './text-formatting.js';
 
 // Состояние приложения
 let currentBoard = null;
@@ -54,6 +56,10 @@ async function init() {
     
     // Initialize theme AFTER elements are ready
     initTheme();
+    
+    // Add formatting toolbars
+    addFormattingToolbar('threadContent');
+    addFormattingToolbar('replyText');
     
     handleRoute();
 }
@@ -369,10 +375,11 @@ async function showThread(boardId, threadId) {
         
         // Create container for thread reactions
         const threadReactionsId = `thread-reactions-${threadId}`;
+        const threadActionsId = `thread-actions-${threadId}`;
         
         threadContent.innerHTML = `
             <h2>${escapeHtml(thread.title)}</h2>
-            <div class="thread-text">${escapeHtml(thread.content)}</div>
+            <div class="thread-text">${formatText(thread.content)}</div>
             ${thread.image_url ? `<img src="${thread.image_url}" alt="Thread image">` : ''}
             <div class="thread-meta">
                 <span class="thread-author ${thread.is_anonymous ? 'anonymous' : ''}">${author}</span>
@@ -381,10 +388,14 @@ async function showThread(boardId, threadId) {
                 <span>ID: ${thread.id}</span>
             </div>
             <div id="${threadReactionsId}"></div>
+            <div id="${threadActionsId}"></div>
         `;
         
         // Render reactions for thread
         await renderReactions('thread', threadId, threadReactionsId);
+        
+        // Render edit/delete buttons if user owns thread
+        renderThreadActions(threadId, threadActionsId);
         
         // Загрузка ответов
         const replies = await getThreadReplies(threadId);
@@ -417,7 +428,7 @@ async function renderReplies(replies) {
         
         replyItem.innerHTML = `
             <div class="reply-number">##${index + 1}</div>
-            <div class="reply-text">${formatQuotes(escapeHtml(reply.content))}</div>
+            <div class="reply-text">${formatText(reply.content)}</div>
             ${reply.image_url ? `<img src="${reply.image_url}" alt="Reply image">` : ''}
             <div class="reply-meta">
                 <span class="reply-author ${reply.is_anonymous ? 'anonymous' : ''}">${author}</span>
