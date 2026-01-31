@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Правила Femfur.space</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a; /* Темный фон с твоего скрина */
+            --accent-color: #ff3b47; /* Красный цвет текста Femfur */
+            --text-color: #e2e8f0;
+            --card-bg: rgba(30, 41, 59, 0.7);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            gap: 40px;
+        }
+
+        /* Левая часть с картинкой */
+        .image-side {
+            flex: 1;
+            position: sticky;
+            top: 40px;
+            height: fit-content;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .image-side img {
+            max-width: 100%;
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(255, 59, 71, 0.2);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        /* Правая часть с текстом */
+        .content-side {
+            flex: 1.5;
+        }
+
+        h1 {
+            color: var(--accent-color);
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+        }
+
+        .intro {
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+            padding: 20px;
+            border-left: 4px solid var(--accent-color);
+            background: var(--card-bg);
+        }
+
+        section {
+            margin-bottom: 30px;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        section.visible {
+            opacity: 1;
+            transform: translateY(0);
+            transition: all 0.6s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+        }
+
+        section:hover {
+            border-color: var(--accent-color);
+            transform: scale(1.02);
+        }
+
+        h2 {
+            color: var(--accent-color);
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        h2::before {
+            content: "•";
+            margin-right: 10px;
+        }
+
+        p, li {
+            margin-bottom: 10px;
+            list-style: none;
+            font-weight: 300;
+        }
+
+        .highlight {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        /* Анимации */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                flex-direction: column;
+            }
+            .image-side {
+                position: relative;
+                top: 0;
+            }
+            h1 { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="image-side">
+        <img src="rule.png" alt="Femfur Rules Mascot">
+    </div>
+
+    <div class="content-side">
+        <h1>Femfur.space</h1>
+        <div class="intro">
+            Femfur.space является частной платформой. Используя сайт, вы соглашаетесь с правилами ниже. 
+            <br><strong>Незнание правил не освобождает от ответственности.</strong>
+        </div>
+
+        <section>
+            <h2>1. Общие положения</h2>
+            <p>1.1 Femfur.space предназначен для общения и обмена контентом в формате имиджборда.</p>
+            <p>1.2 Администрация может изменять правила без уведомления.</p>
+            <p>1.3 Окончательное слово всегда за администрацией.</p>
+        </section>
+
+        <section>
+            <h2>2. Аккаунты</h2>
+            <p>2.1 Только латиница и цифры.</p>
+            <p>2.4 Один пользователь — один аккаунт.</p>
+            <p>2.5 Обход банов через новые аккаунты запрещен.</p>
+        </section>
+
+        <section>
+            <h2>3. Карма и ограничения</h2>
+            <p>3.2 Карма отражает уровень доверия к пользователю.</p>
+            <p>3.3 Низкая карма ограничивает функции, высокая — открывает создание групп.</p>
+        </section>
+
+        <section>
+            <h2>4. Контент и поведение</h2>
+            <p class="highlight">Запрещено:</p>
+            <ul>
+                <li>4.1 Спам, флуд, реклама.</li>
+                <li>4.3 Нарушение законов и угрозы.</li>
+                <li>4.7 Деанонимизация без согласия.</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>8. Shadowban и баны</h2>
+            <p>8.1 Платформа использует shadowban как меру модерации.</p>
+            <p>8.3 Возможны блокировки по IP и диапазонам.</p>
+        </section>
+
+        <section>
+            <h2>11. Заключение</h2>
+            <p>Использование сайта означает полное согласие. Если правила вам не подходят — просто покиньте ресурс.</p>
+        </section>
+    </div>
+</div>
+
+<script>
+    // Скрипт для появления блоков при скролле
+    const sections = document.querySelectorAll('section');
+    
+    const observerOptions = {
+        threshold: 0.1
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, observerOptions);
+
+    sections.forEach(section => {
+        observer.observe(section);
+    });
+</script>
+
+</body>
+</html>
