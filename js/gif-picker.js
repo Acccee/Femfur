@@ -1,19 +1,16 @@
-// gif-picker.js – Tenor GIF Picker Integration
+// gif-picker.js – GIPHY GIF Picker Integration
 
-// ⚠️  Replace with your own Tenor API key:
-// https://developers.tenor.com/
-const TENOR_API_KEY = 'YOUR_TENOR_API_KEY_HERE';
-
-const TENOR_BASE = 'https://api.tenor.com/v2';
+// API-ключ GIPHY
+const GIPHY_API_KEY = 'klPbJhZNWOjGSvJBKXA43BVR6c61wRSh';
+const GIPHY_BASE = 'https://api.giphy.com/v1/gifs';
 
 // ─── Initialize on DOM ready ─────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
     const gifBtn    = document.getElementById('gifPickerBtn');
     const gifPanel  = document.getElementById('gifPickerPanel');
     const gifSearch = document.getElementById('gifSearchInput');
-    const gifResults= document.getElementById('gifResults');
 
-    if (!gifBtn) return; // not on a page with the GIF picker
+    if (!gifBtn) return;
 
     // Toggle panel
     gifBtn.addEventListener('click', (e) => {
@@ -25,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Close when clicking outside
     document.addEventListener('click', (e) => {
-        if (!gifPanel.contains(e.target) && e.target !== gifBtn) {
+        if (gifPanel && !gifPanel.contains(e.target) && e.target !== gifBtn) {
             gifPanel.style.display = 'none';
         }
     });
@@ -50,31 +47,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// ─── Search Tenor ────────────────────────────────────────────────
+// ─── Search GIPHY ────────────────────────────────────────────────
 async function searchGifs(query) {
     const gifResults = document.getElementById('gifResults');
     if (!gifResults) return;
 
     gifResults.innerHTML = '<div class="gif-loading">Searching…</div>';
 
-    // If key is placeholder, show message
-    if (TENOR_API_KEY === 'YOUR_TENOR_API_KEY_HERE') {
-        gifResults.innerHTML = `
-            <div class="gif-no-key">
-                <p>🔑 Tenor API key not configured.</p>
-                <p>Open <code>js/gif-picker.js</code> and replace <code>YOUR_TENOR_API_KEY_HERE</code> with your key from <a href="https://developers.tenor.com/" target="_blank">developers.tenor.com</a></p>
-            </div>`;
-        return;
-    }
-
     try {
-        const url = `${TENOR_BASE}/search?q=${encodeURIComponent(query)}&key=${TENOR_API_KEY}&limit=12`;
+        // У GIPHY параметры: api_key, q, limit
+        const url = `${GIPHY_BASE}/search?api_key=${GIPHY_API_KEY}&q=${encodeURIComponent(query)}&limit=12&rating=g`;
         const res = await fetch(url);
-        if (!res.ok) throw new Error(`Tenor API ${res.status}`);
+        
+        if (!res.ok) throw new Error(`GIPHY API ${res.status}`);
+        
         const json = await res.json();
-        renderGifs(json.results || []);
+        // Данные GIPHY находятся в поле .data
+        renderGifs(json.data || []);
     } catch (err) {
-        console.error('Tenor search error:', err);
+        console.error('GIPHY search error:', err);
         gifResults.innerHTML = '<div class="gif-error">Failed to load GIFs. Check your API key.</div>';
     }
 }
@@ -90,24 +81,22 @@ function renderGifs(gifs) {
     }
 
     gifResults.innerHTML = gifs.map(gif => {
-        // Use the tinygif or gif media (smallest preview)
-        const media  = gif.media_object || gif.media;
-        const thumb  = media?.tinygif?.url || media?.gif?.url || '';
-        const gifUrl = gif.url || '';                 // e.g. https://tenor.com/view/...
+        // У GIPHY берем фиксированную высоту для превью и оригинальный URL для вставки
+        const thumb = gif.images?.fixed_height_small?.url || gif.images?.original?.url;
+        const gifUrl = gif.images?.original?.url; 
 
         return `
             <div class="gif-item" data-url="${escapeHtml(gifUrl)}" data-thumb="${escapeHtml(thumb)}">
-                <img src="${escapeHtml(thumb)}" alt="gif" loading="lazy">
+                <img src="${escapeHtml(thumb)}" alt="${escapeHtml(gif.title)}" loading="lazy">
             </div>`;
     }).join('');
 
-    // Click handlers — insert URL into textarea
+    // Click handlers
     gifResults.querySelectorAll('.gif-item').forEach(item => {
         item.addEventListener('click', () => {
             const url = item.dataset.url;
             insertGifUrl(url);
 
-            // Close panel
             const panel = document.getElementById('gifPickerPanel');
             if (panel) panel.style.display = 'none';
         });
@@ -116,7 +105,6 @@ function renderGifs(gifs) {
 
 // ─── Insert GIF URL into active textarea ─────────────────────────
 function insertGifUrl(url) {
-    // Try replyText first, then newThreadContent
     const targets = ['replyText', 'newThreadContent', 'editThreadContent'];
     for (const id of targets) {
         const ta = document.getElementById(id);
@@ -130,7 +118,6 @@ function insertGifUrl(url) {
             return;
         }
     }
-    // Fallback: append to replyText
     const fallback = document.getElementById('replyText');
     if (fallback) {
         fallback.value += (fallback.value ? '\n' : '') + url;
@@ -138,8 +125,8 @@ function insertGifUrl(url) {
     }
 }
 
-// ─── Helper ──────────────────────────────────────────────────────
 function escapeHtml(text) {
+    if (!text) return '';
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
