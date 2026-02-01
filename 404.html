@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>404 — Page not found</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root {
+    --bg: #16223f;
+    --accent: #da415b;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    overflow: hidden;
+}
+
+/* PAGE FADE IN */
+.page {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+    animation: pageIn 0.9s ease forwards;
+}
+
+@keyframes pageIn {
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.container {
+    text-align: center;
+    padding: 32px;
+}
+
+/* IMAGE FLOAT */
+.image-wrap {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 40px;
+    animation: float 4s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.image-wrap img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    position: relative;
+    z-index: 2;
+}
+
+/* SKELETON SHIMMER */
+.image-wrap::before {
+    content: "";
+    position: absolute;
+    inset: -8px;
+    border-radius: 16px;
+    background: linear-gradient(
+        110deg,
+        rgba(218,65,91,0.05) 25%,
+        rgba(218,65,91,0.25) 37%,
+        rgba(218,65,91,0.05) 63%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.6s infinite linear;
+    z-index: 1;
+}
+
+@keyframes shimmer {
+    to {
+        background-position-x: -200%;
+    }
+}
+
+/* BUTTON */
+.back-button {
+    position: relative;
+    display: inline-block;
+    padding: 16px 34px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--bg);
+    background: var(--accent);
+    border-radius: 999px;
+    text-decoration: none;
+    overflow: hidden;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+/* BUTTON GLOW */
+.back-button::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.35), transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.back-button:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 12px 30px rgba(218, 65, 91, 0.45);
+}
+
+.back-button:hover::after {
+    opacity: 1;
+}
+
+.back-button:active {
+    transform: translateY(0) scale(0.98);
+    box-shadow: 0 6px 16px rgba(218, 65, 91, 0.35);
+}
+
+/* SUBTLE BACKGROUND NOISE */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image:
+        radial-gradient(rgba(218,65,91,0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.25;
+    pointer-events: none;
+}
+</style>
+</head>
+
+<body>
+<div class="page">
+    <div class="container">
+        <div class="image-wrap">
+            <img src="404.png" alt="404 — Page not found">
+        </div>
+
+        <a class="back-button" href="https://femfur.space">
+            Back to home
+        </a>
+    </div>
+</div>
+</body>
+</html>
