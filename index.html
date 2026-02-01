@@ -23,7 +23,7 @@
             <div class="header-top">
                 <div class="logo-with-rules">
                     <h1><a href="/" id="logo"><img src="assets/fav.png" alt="" style="width: 32px; height: 32px; vertical-align: middle; margin-right: 10px;">Femfur</a></h1>
-                    <a href="rule.html" class="rules-link" target="_blank">Правила</a>
+                    <a href="rule.html" class="rules-link" target="_blank" data-i18n="rules">Rules</a>
                 </div>
                 <div class="header-controls">
                     <button id="searchBtn" class="btn-secondary" title="Search">🔍</button>
@@ -33,6 +33,9 @@
                             <option value="en">English</option>
                             <option value="uk">Українська</option>
                             <option value="ru">Русский</option>
+                            <option value="ja">日本語</option>
+                            <option value="es">Español</option>
+                            <option value="ar">العربية</option>
                         </select>
                     </div>
                     <div class="user-controls">
@@ -40,6 +43,7 @@
                         <button id="registerBtn" class="btn-secondary" data-i18n="register">Register</button>
                         <div id="userMenu" style="display: none;">
                             <a href="#profile" id="profileLink"></a>
+                            <a href="#groups" id="groupsLink" class="btn-secondary" data-i18n="groups">Groups</a>
                             <button id="logoutBtn" class="btn-secondary" data-i18n="logout">Logout</button>
                         </div>
                     </div>
@@ -213,6 +217,15 @@
             <div id="profileContent"></div>
         </div>
 
+        <!-- Groups View -->
+        <div id="groupsView" style="display: none;">
+            <button id="backToHomeFromGroups" class="btn-secondary">← <span data-i18n="backToHome">Back to home</span></button>
+            <div id="groupsContent">
+                <h2 data-i18n="groups">Groups</h2>
+                <div id="groupsList"></div>
+            </div>
+        </div>
+
         <!-- Search View -->
         <div id="searchView" style="display: none;">
             <div class="search-container">
@@ -383,6 +396,7 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="js/user-roles.js"></script>
     <script type="module" src="js/i18n.js"></script>
     <script type="module" src="js/supabaseClient.js"></script>
     <script type="module" src="js/auth.js"></script>

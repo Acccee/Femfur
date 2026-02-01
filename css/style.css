@@ -2283,13 +2283,13 @@ body.dark-theme .theme-preset.active {
 /* ── Profile Banner ───────────────────────────── */
 .profile-banner {
     width: 100%;
-    height: 180px;
+    height: 250px;
     background-size: cover;
     background-position: center;
     border-radius: 8px 8px 0 0;
     margin-bottom: -30px;
     position: relative;
-    z-index: 0;
+    z-index: 1;
 }
 .profile-banner-placeholder {
     opacity: 0.35;
@@ -2587,3 +2587,64 @@ input[type="color"] {
         max-width: 100%;
     }
 }
+
+/* ========================================
+   VERIFIED BADGES
+   ======================================== */
+
+.verified-badge {
+    display: inline-block;
+    margin-left: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    vertical-align: middle;
+}
+
+.admin-badge {
+    color: #ff8c00;
+    text-shadow: 0 0 3px rgba(255, 140, 0, 0.5);
+}
+
+.verified-badge-blue {
+    color: #1e90ff;
+    text-shadow: 0 0 3px rgba(30, 144, 255, 0.5);
+}
+
+body.dark-theme .admin-badge {
+    color: #ffa500;
+}
+
+body.dark-theme .verified-badge-blue {
+    color: #4da6ff;
+}
+
+
+/* ========================================
+   RTL SUPPORT FOR ARABIC
+   ======================================== */
+
+html[lang="ar"] {
+    direction: rtl;
+}
+
+html[lang="ar"] body {
+    text-align: right;
+}
+
+html[lang="ar"] .header-top,
+html[lang="ar"] .header-controls,
+html[lang="ar"] .user-controls,
+html[lang="ar"] .logo-with-rules {
+    flex-direction: row-reverse;
+}
+
+html[lang="ar"] .thread-meta,
+html[lang="ar"] .reply-header {
+    direction: rtl;
+    text-align: right;
+}
+
+html[lang="ar"] .board-links a {
+    text-align: right;
+}
+

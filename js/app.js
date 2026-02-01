@@ -190,6 +190,8 @@ function setupEventListeners() {
 
     backToBoard.addEventListener('click', () => { if (currentBoard) window.location.hash = currentBoard; });
     backToHome.addEventListener('click', () => { window.location.hash = ''; });
+    const backToHomeFromGroups = document.getElementById('backToHomeFromGroups');
+    if (backToHomeFromGroups) backToHomeFromGroups.addEventListener('click', () => { window.location.hash = ''; });
     submitReply.addEventListener('click', handleReplySubmit);
 
     // Bio char counter
@@ -213,6 +215,7 @@ function handleRoute() {
 
     if (!hash)                          { showHome(); return; }
     if (hash === 'search' || hash.startsWith('search?')) { showSearch(); return; }
+    if (hash === 'groups')              { showGroups(); return; }
     if (hash.startsWith('u/'))          { showProfile(hash.substring(2)); return; }
 
     if (hash.includes('-')) {
@@ -233,6 +236,8 @@ async function showHome() {
     threadView.style.display  = 'none';
     profileView.style.display = 'none';
     searchView.style.display  = 'none';
+    const groupsView = document.getElementById('groupsView');
+    if (groupsView) groupsView.style.display = 'none';
     currentBoard  = null;
     currentThread = null;
     updateActiveNav(null);
@@ -248,6 +253,8 @@ async function showBoard(boardId) {
     threadView.style.display  = 'none';
     profileView.style.display = 'none';
     searchView.style.display  = 'none';
+    const groupsView = document.getElementById('groupsView');
+    if (groupsView) groupsView.style.display = 'none';
 
     const boardInfo = getBoardInfo(boardId);
     boardTitle.textContent = `${boardInfo.name} - ${boardInfo.title}`;
@@ -454,6 +461,8 @@ async function showProfile(userHash) {
     threadView.style.display  = 'none';
     profileView.style.display = 'block';
     searchView.style.display  = 'none';
+    const groupsView = document.getElementById('groupsView');
+    if (groupsView) groupsView.style.display = 'none';
 
     const profileContent = document.getElementById('profileContent');
     profileContent.innerHTML = `<div class="loading">${t('loading', 'Loading...')}</div>`;
@@ -462,12 +471,29 @@ async function showProfile(userHash) {
     renderUserProfile(profileData);
 }
 
+async function showGroups() {
+    homeView.style.display    = 'none';
+    boardView.style.display   = 'none';
+    threadView.style.display  = 'none';
+    profileView.style.display = 'none';
+    searchView.style.display  = 'none';
+    const groupsView = document.getElementById('groupsView');
+    if (groupsView) {
+        groupsView.style.display = 'block';
+        // Load groups content
+        const groupsList = document.getElementById('groupsList');
+        groupsList.innerHTML = '<div class="empty-state"><p data-i18n="groups_coming_soon">Groups feature is coming soon! The groups system scripts are already in place, but the full interface will be available in future updates.</p></div>';
+    }
+}
+
 function showSearch() {
     homeView.style.display    = 'none';
     boardView.style.display   = 'none';
     threadView.style.display  = 'none';
     profileView.style.display = 'none';
     searchView.style.display  = 'block';
+    const groupsView = document.getElementById('groupsView');
+    if (groupsView) groupsView.style.display = 'none';
 
     const urlParams = new URLSearchParams(window.location.hash.slice(1).split('?')[1]);
     const query = urlParams.get('q');
