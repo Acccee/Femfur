@@ -25,6 +25,12 @@ async function getThread(threadId) {
             throw error;
         }
         
+        // Add profile hash to user if exists
+        if (data.user && data.user.id) {
+            const { generateUserHash } = await import('./auth.js');
+            data.user.profile_hash = generateUserHash(data.user.id);
+        }
+        
         return data;
     } catch (error) {
         console.error('Ошибка загрузки треда:', error);
@@ -50,6 +56,16 @@ async function getThreadReplies(threadId) {
         
         if (error) {
             throw error;
+        }
+        
+        // Add profile hash to each reply's user if exists
+        if (data) {
+            const { generateUserHash } = await import('./auth.js');
+            data.forEach(reply => {
+                if (reply.user && reply.user.id) {
+                    reply.user.profile_hash = generateUserHash(reply.user.id);
+                }
+            });
         }
         
         return data || [];

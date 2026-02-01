@@ -1,5 +1,7 @@
 // text-formatting.js - Text Formatting Module (Markdown-like)
 
+import { parseLinks } from './link-parser.js';
+
 // Format text with markdown-like syntax
 function formatText(text) {
     if (!text) return '';
@@ -41,6 +43,9 @@ function formatText(text) {
     
     // Line breaks
     formatted = formatted.replace(/\n/g, '<br>');
+    
+    // Parse URLs and make them clickable (AFTER all other formatting)
+    formatted = parseLinks(formatted);
     
     return formatted;
 }

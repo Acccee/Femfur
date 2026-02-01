@@ -96,7 +96,7 @@ async function loadBoardThreads(boardId) {
             throw error;
         }
         
-        // Get reply counts for each thread
+        // Get reply counts for each thread and add profile hash
         const threadsWithCounts = await Promise.all(data.map(async (thread) => {
             const { count } = await supabaseClient
                 .from('replies')
@@ -104,6 +104,13 @@ async function loadBoardThreads(boardId) {
                 .eq('thread_id', thread.id);
             
             thread.reply_count = count || 0;
+            
+            // Add profile hash to user if exists
+            if (thread.user && thread.user.id) {
+                const { generateUserHash } = await import('./auth.js');
+                thread.user.profile_hash = generateUserHash(thread.user.id);
+            }
+            
             return thread;
         }));
         
@@ -198,6 +205,64 @@ async function bumpThread(threadId) {
     }
 }
 
+// Get popular and active boards
+async function getPopularBoards(limit = 7) {
+    try {
+        // Получаем все треды с группировкой по борду
+        const { data: threadStats, error } = await supabaseClient
+            .from('threads')
+            .select('board');
+        
+        if (error) throw error;
+        
+        // Подсчитываем количество тредов по бордам
+        const boardCounts = {};
+        threadStats.forEach(thread => {
+            if (!boardCounts[thread.board]) {
+                boardCounts[thread.board] = {
+                    board: thread.board,
+                    thread_count: 0,
+                    reply_count: 0
+                };
+            }
+            boardCounts[thread.board].thread_count++;
+        });
+        
+        // Получаем количество ответов для каждого борда
+        for (const boardId in boardCounts) {
+            const { data: threads } = await supabaseClient
+                .from('threads')
+                .select('id')
+                .eq('board', boardId);
+            
+            if (threads && threads.length > 0) {
+                const threadIds = threads.map(t => t.id);
+                const { count } = await supabaseClient
+                    .from('replies')
+                    .select('*', { count: 'exact', head: true })
+                    .in('thread_id', threadIds);
+                
+                boardCounts[boardId].reply_count = count || 0;
+            }
+        }
+        
+        // Сортируем по активности (треды + ответы)
+        const sortedBoards = Object.values(boardCounts)
+            .map(stat => ({
+                ...stat,
+                activity_score: stat.thread_count + (stat.reply_count * 0.5),
+                name: BOARDS[stat.board]?.name || `/${stat.board}/`
+            }))
+            .sort((a, b) => b.activity_score - a.activity_score)
+            .slice(0, limit);
+        
+        return sortedBoards;
+    } catch (error) {
+        console.error('Error getting popular boards:', error);
+        return null;
+    }
+}
+
 export {
     BOARDS,
     getBoardInfo,
@@ -205,5 +270,6 @@ export {
     loadBoardThreads,
     createThread,
     incrementViewCount,
-    bumpThread
+    bumpThread,
+    getPopularBoards
 };

@@ -21,7 +21,10 @@
     <header>
         <div class="container">
             <div class="header-top">
-                <h1><a href="/" id="logo"><img src="assets/fav.png" alt="" style="width: 32px; height: 32px; vertical-align: middle; margin-right: 10px;">Femfur</a></h1>
+                <div class="logo-with-rules">
+                    <h1><a href="/" id="logo"><img src="assets/fav.png" alt="" style="width: 32px; height: 32px; vertical-align: middle; margin-right: 10px;">Femfur</a></h1>
+                    <a href="rule.html" class="rules-link" target="_blank">Правила</a>
+                </div>
                 <div class="header-controls">
                     <button id="searchBtn" class="btn-secondary" title="Search">🔍</button>
                     <button id="themeToggle" class="btn-secondary theme-toggle" title="Toggle Theme">🌙</button>
@@ -51,24 +54,6 @@
         <div id="homeView">
             <h2 data-i18n="welcome">Welcome to Femfur</h2>
             <p data-i18n="selectBoard">Select a board from the menu above</p>
-            
-            <!-- Thread of the Day Widget -->
-            <div class="widget thread-of-day">
-                <h3 data-i18n="threadOfDay">Thread of the Day</h3>
-                <div id="threadOfDayContent" class="loading"></div>
-            </div>
-
-            <!-- Thread of the Week Widget -->
-            <div class="widget thread-of-week">
-                <h3 data-i18n="threadOfWeek">Thread of the Week</h3>
-                <div id="threadOfWeekContent" class="loading"></div>
-            </div>
-
-            <!-- Recent Threads Widget -->
-            <div class="widget recent-threads">
-                <h3 data-i18n="recentThreads">Recent Threads</h3>
-                <div id="recentThreadsContent" class="loading"></div>
-            </div>
             
             <div class="board-categories">
                 <div class="category">
@@ -154,6 +139,24 @@
 
                 <div class="category">
                     <h3>Adult (18+)</h3>
+                    <div class="board-links">
+                        <a href="#e">/e/ - Ecchi (18+)</a>
+                        <a href="#h">/h/ - Hentai (18+)</a>
+                        <a href="#gif">/gif/ - Adult GIF (18+)</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Threads Carousel Widget (moved to bottom) -->
+            <div class="widget recent-threads-carousel">
+                <h3 data-i18n="recentThreads">Recent Threads</h3>
+                <div class="carousel-container">
+                    <button class="carousel-btn carousel-prev" aria-label="Previous">‹</button>
+                    <div id="recentThreadsContent" class="carousel-content loading"></div>
+                    <button class="carousel-btn carousel-next" aria-label="Next">›</button>
+                </div>
+            </div>
+        </div>
                     <div class="board-links">
                         <a href="#e">/e/ - Ecchi</a>
                         <a href="#h">/h/ - Hentai</a>

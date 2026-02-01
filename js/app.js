@@ -98,24 +98,72 @@ function toggleTheme() {
     }
 }
 
-// Рендер навигации бордов
-function renderBoardNav() {
-    const boards = getAllBoards();
-    boardNav.innerHTML = '';
+// Рендер популярных и активных бордов
+async function renderBoardNav() {
+    boardNav.innerHTML = '<div class="board-nav-loading">Loading popular boards...</div>';
     
-    // Show only first few boards in nav
-    const mainBoards = ['b', 'fur', 'a', 'vg', 'g', 'fit', 'sp'];
-    
-    mainBoards.forEach(boardId => {
-        if (boards[boardId]) {
-            const board = boards[boardId];
-            const link = document.createElement('a');
-            link.href = `#${boardId}`;
-            link.textContent = board.name;
-            link.dataset.board = boardId;
-            boardNav.appendChild(link);
+    try {
+        // Получаем статистику по бордам
+        const popularBoards = await getPopularBoards();
+        boardNav.innerHTML = '';
+        
+        if (popularBoards && popularBoards.length > 0) {
+            popularBoards.forEach(boardStat => {
+                const link = document.createElement('a');
+                link.href = `#${boardStat.board}`;
+                link.innerHTML = `
+                    <span class="board-name">${boardStat.name}</span>
+                    <span class="board-stats">📊 ${boardStat.thread_count} 💬 ${boardStat.reply_count}</span>
+                `;
+                link.dataset.board = boardStat.board;
+                link.classList.add('popular-board-link');
+                boardNav.appendChild(link);
+            });
+        } else {
+            // Fallback to main boards if no stats available
+            const mainBoards = ['b', 'fur', 'a', 'vg', 'g', 'fit', 'sp'];
+            const boards = getAllBoards();
+            
+            mainBoards.forEach(boardId => {
+                if (boards[boardId]) {
+                    const board = boards[boardId];
+                    const link = document.createElement('a');
+                    link.href = `#${boardId}`;
+                    link.textContent = board.name;
+                    link.dataset.board = boardId;
+                    boardNav.appendChild(link);
+                }
+            });
         }
-    });
+    } catch (error) {
+        console.error('Error loading popular boards:', error);
+        // Fallback в случае ошибки
+        const mainBoards = ['b', 'fur', 'a', 'vg', 'g'];
+        const boards = getAllBoards();
+        
+        mainBoards.forEach(boardId => {
+            if (boards[boardId]) {
+                const board = boards[boardId];
+                const link = document.createElement('a');
+                link.href = `#${boardId}`;
+                link.textContent = board.name;
+                link.dataset.board = boardId;
+                boardNav.appendChild(link);
+            }
+        });
+    }
+}
+
+// Получить популярные борды
+async function getPopularBoards() {
+    try {
+        // Импортируем функцию из boards.js
+        const { getPopularBoards: getBoardsStats } = await import('./boards.js');
+        return await getBoardsStats();
+    } catch (error) {
+        console.error('Error getting popular boards:', error);
+        return null;
+    }
 }
 
 // Настройка обработчиков событий
@@ -291,6 +339,12 @@ async function renderThreads(threads) {
         threadItem.className = 'thread-item fade-in-up' + (thread.is_sticky ? ' sticky' : '');
         
         const author = thread.is_anonymous ? t('anonymous') : (thread.user ? thread.user.nickname : t('anonymous'));
+        const authorHash = thread.user?.profile_hash || null;
+        
+        // Create clickable author link
+        const authorHtml = !thread.is_anonymous && authorHash 
+            ? `<a href="#u/${authorHash}" class="thread-author-link" onclick="event.stopPropagation();">${escapeHtml(author)}</a>`
+            : `<span class="thread-author ${thread.is_anonymous ? 'anonymous' : ''}">${escapeHtml(author)}</span>`;
         
         // Get reactions for thread
         const reactions = await getReactions('thread', thread.id);
@@ -310,10 +364,10 @@ async function renderThreads(threads) {
             <p>${contentPreview}</p>
             ${thread.image_url ? `<img src="${thread.image_url}" alt="Thread image">` : ''}
             <div class="thread-meta">
-                <span class="thread-author ${thread.is_anonymous ? 'anonymous' : ''}">${author}</span>
+                ${authorHtml}
                 <span>${t('created')}: ${formatDate(thread.created_at)}</span>
                 <span>💬 ${thread.reply_count || 0} ${t('replies')}</span>
-                <span class="view-counter">${thread.views || 0}</span>
+                <span class="view-counter">👁 ${thread.views || 0}</span>
                 <span>ID: ${thread.id}</span>
                 ${reactionsHtml}
             </div>
@@ -383,6 +437,22 @@ async function showThread(boardId, threadId) {
         const thread = await getThread(threadId);
         
         const author = thread.is_anonymous ? t('anonymous') : (thread.user ? thread.user.nickname : t('anonymous'));
+        const authorHash = thread.user?.profile_hash || null;
+        const avatarUrl = thread.user?.avatar_url || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="40" height="40"%3E%3Crect fill="%23ddd" width="40" height="40"/%3E%3Ctext x="20" y="25" font-size="20" text-anchor="middle" fill="%23999"%3E?%3C/text%3E%3C/svg%3E';
+        
+        // Create creator info section
+        let creatorInfoHtml = '';
+        if (!thread.is_anonymous && thread.user) {
+            creatorInfoHtml = `
+                <div class="thread-creator-info">
+                    <img src="${avatarUrl}" alt="${escapeHtml(author)}" class="thread-creator-avatar">
+                    <div class="thread-creator-details">
+                        <a href="#u/${authorHash}" class="thread-creator-name">${escapeHtml(author)}</a>
+                        <div class="thread-creator-date">${formatDate(thread.created_at)}</div>
+                    </div>
+                </div>
+            `;
+        }
         
         // Create container for thread reactions
         const threadReactionsId = `thread-reactions-${threadId}`;
@@ -390,12 +460,13 @@ async function showThread(boardId, threadId) {
         
         threadContent.innerHTML = `
             <h2>${escapeHtml(thread.title)}</h2>
+            ${creatorInfoHtml}
             <div class="thread-text">${formatText(thread.content)}</div>
             ${thread.image_url ? `<img src="${thread.image_url}" alt="Thread image">` : ''}
             <div class="thread-meta">
-                <span class="thread-author ${thread.is_anonymous ? 'anonymous' : ''}">${author}</span>
-                <span>${t('created')}: ${formatDate(thread.created_at)}</span>
-                <span class="view-counter">${thread.views || 0}</span>
+                ${thread.is_anonymous ? `<span class="thread-author anonymous">${author}</span>` : ''}
+                ${thread.is_anonymous ? `<span>${t('created')}: ${formatDate(thread.created_at)}</span>` : ''}
+                <span class="view-counter">👁 ${thread.views || 0}</span>
                 <span>ID: ${thread.id}</span>
             </div>
             <div id="${threadReactionsId}"></div>
@@ -433,6 +504,12 @@ async function renderReplies(replies) {
         replyItem.dataset.replyId = reply.id;
         
         const author = reply.is_anonymous ? t('anonymous') : (reply.user ? reply.user.nickname : t('anonymous'));
+        const authorHash = reply.user?.profile_hash || null;
+        
+        // Create clickable author link
+        const authorHtml = !reply.is_anonymous && authorHash 
+            ? `<a href="#u/${authorHash}" class="thread-author-link">${escapeHtml(author)}</a>`
+            : `<span class="reply-author ${reply.is_anonymous ? 'anonymous' : ''}">${escapeHtml(author)}</span>`;
         
         // Create container for reply reactions
         const replyReactionsId = `reply-reactions-${reply.id}`;
@@ -442,7 +519,7 @@ async function renderReplies(replies) {
             <div class="reply-text">${formatText(reply.content)}</div>
             ${reply.image_url ? `<img src="${reply.image_url}" alt="Reply image">` : ''}
             <div class="reply-meta">
-                <span class="reply-author ${reply.is_anonymous ? 'anonymous' : ''}">${author}</span>
+                ${authorHtml}
                 <span>${formatDate(reply.created_at)}</span>
                 <span class="thread-quote" data-reply-num="${index + 1}">&gt;&gt;${index + 1}</span>
             </div>

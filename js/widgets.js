@@ -100,7 +100,7 @@ async function getRecentThreads(limit = 10) {
         
         if (error) throw error;
         
-        // Get reply counts
+        // Get reply counts and add profile hash
         const threadsWithCounts = await Promise.all(data.map(async (thread) => {
             const { count } = await supabaseClient
                 .from('replies')
@@ -108,6 +108,13 @@ async function getRecentThreads(limit = 10) {
                 .eq('thread_id', thread.id);
             
             thread.reply_count = count || 0;
+            
+            // Add profile hash to user if exists
+            if (thread.user && thread.user.id) {
+                const { generateUserHash } = await import('./auth.js');
+                thread.user.profile_hash = generateUserHash(thread.user.id);
+            }
+            
             return thread;
         }));
         
@@ -181,17 +188,72 @@ function renderRecentThreadsList(threads, containerId) {
 
 // Initialize all widgets
 async function initializeWidgets() {
-    // Thread of the Day
-    const threadOfDay = await getThreadOfDay();
-    renderThreadWidget(threadOfDay, 'threadOfDayContent');
+    // Recent Threads Carousel
+    const recentThreads = await getRecentThreads(15); // Увеличиваем количество для карусели
+    renderRecentThreadsCarousel(recentThreads, 'recentThreadsContent');
+}
+
+// Render recent threads as carousel
+function renderRecentThreadsCarousel(threads, containerId) {
+    const container = document.getElementById(containerId);
     
-    // Thread of the Week
-    const threadOfWeek = await getThreadOfWeek();
-    renderThreadWidget(threadOfWeek, 'threadOfWeekContent');
+    if (!threads || threads.length === 0) {
+        container.innerHTML = `<div class="empty-state">${t('no_threads')}</div>`;
+        return;
+    }
     
-    // Recent Threads
-    const recentThreads = await getRecentThreads(10);
-    renderRecentThreadsList(recentThreads, 'recentThreadsContent');
+    const html = threads.map(thread => {
+        const author = thread.is_anonymous ? t('anonymous') : (thread.user ? thread.user.nickname : t('anonymous'));
+        const authorHash = thread.user?.profile_hash || null;
+        const boardName = thread.board ? `/${thread.board}/` : '';
+        
+        // Создаем кликабельный автор если это не анонимный пост
+        const authorLink = !thread.is_anonymous && authorHash 
+            ? `<a href="#u/${authorHash}" class="thread-author-link" onclick="event.stopPropagation();">${escapeHtml(author)}</a>`
+            : `<span>${escapeHtml(author)}</span>`;
+        
+        return `
+            <div class="widget-thread-item" onclick="window.location.hash='${thread.board}-${thread.id}'">
+                <h4>${escapeHtml(thread.title)}</h4>
+                <div class="meta">
+                    <span>${boardName}</span> • 
+                    ${authorLink} • 
+                    <span>${formatDate(thread.created_at)}</span>
+                </div>
+                <div class="stats">
+                    👁 ${thread.views || 0} • 💬 ${thread.reply_count || 0}
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    container.innerHTML = html;
+    
+    // Initialize carousel controls
+    initCarouselControls();
+}
+
+// Initialize carousel navigation
+function initCarouselControls() {
+    const carouselContent = document.querySelector('.carousel-content');
+    const prevBtn = document.querySelector('.carousel-prev');
+    const nextBtn = document.querySelector('.carousel-next');
+    
+    if (!carouselContent || !prevBtn || !nextBtn) return;
+    
+    prevBtn.addEventListener('click', () => {
+        carouselContent.scrollBy({
+            left: -320,
+            behavior: 'smooth'
+        });
+    });
+    
+    nextBtn.addEventListener('click', () => {
+        carouselContent.scrollBy({
+            left: 320,
+            behavior: 'smooth'
+        });
+    });
 }
 
 // Helper: Format date
