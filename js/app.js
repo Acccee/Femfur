@@ -5,69 +5,60 @@ import { getBoardInfo, getAllBoards, loadBoardThreads, createThread, incrementVi
 import { getThread, getThreadReplies, createReply, formatDate, formatQuotes, addQuote } from './threads.js';
 import { register, login, logout, getCurrentUser, updateAuthUI, updateProfile } from './auth.js';
 import { initializeWidgets } from './widgets.js';
-import { loadUserProfile, renderUserProfile } from './profile.js';
+import { loadUserProfile, renderUserProfile, updateBioCharCount } from './profile.js';
 import { searchContent, renderSearchResults } from './search.js';
 import { getReactions, renderReactions } from './reactions.js';
 import { renderThreadActions } from './thread-actions.js';
 import { formatText, addFormattingToolbar, showFormattingHelp } from './text-formatting.js';
 
-// Состояние приложения
-let currentBoard = null;
+// ─── App state ───────────────────────────────────────────────────
+let currentBoard  = null;
 let currentThread = null;
 
-// DOM элементы
-const homeView = document.getElementById('homeView');
-const boardView = document.getElementById('boardView');
-const threadView = document.getElementById('threadView');
-const profileView = document.getElementById('profileView');
-const boardNav = document.getElementById('boardNav');
-const boardTitle = document.getElementById('boardTitle');
-const threadsList = document.getElementById('threadsList');
-const newThreadBtn = document.getElementById('newThreadBtn');
-const newThreadModal = document.getElementById('newThreadModal');
-const loginModal = document.getElementById('loginModal');
-const registerModal = document.getElementById('registerModal');
-const editProfileModal = document.getElementById('editProfileModal');
-const newThreadForm = document.getElementById('newThreadForm');
-const loginForm = document.getElementById('loginForm');
-const registerForm = document.getElementById('registerForm');
-const threadContent = document.getElementById('threadContent');
-const repliesList = document.getElementById('repliesList');
-const backToBoard = document.getElementById('backToBoard');
-const backToHome = document.getElementById('backToHome');
-const submitReply = document.getElementById('submitReply');
-const replyText = document.getElementById('replyText');
-const searchView = document.getElementById('searchView');
-const searchForm = document.getElementById('searchForm');
-const searchInput = document.getElementById('searchInput');
-const searchResults = document.getElementById('searchResults');
+// ─── DOM refs ────────────────────────────────────────────────────
+const homeView          = document.getElementById('homeView');
+const boardView         = document.getElementById('boardView');
+const threadView        = document.getElementById('threadView');
+const profileView       = document.getElementById('profileView');
+const boardNav          = document.getElementById('boardNav');
+const boardTitle        = document.getElementById('boardTitle');
+const threadsList       = document.getElementById('threadsList');
+const newThreadBtn      = document.getElementById('newThreadBtn');
+const newThreadModal    = document.getElementById('newThreadModal');
+const loginModal        = document.getElementById('loginModal');
+const registerModal     = document.getElementById('registerModal');
+const editProfileModal  = document.getElementById('editProfileModal');
+const newThreadForm     = document.getElementById('newThreadForm');
+const loginForm         = document.getElementById('loginForm');
+const registerForm      = document.getElementById('registerForm');
+const threadContent     = document.getElementById('threadContent');
+const repliesList       = document.getElementById('repliesList');
+const backToBoard       = document.getElementById('backToBoard');
+const backToHome        = document.getElementById('backToHome');
+const submitReply       = document.getElementById('submitReply');
+const replyText         = document.getElementById('replyText');
+const searchView        = document.getElementById('searchView');
+const searchForm        = document.getElementById('searchForm');
+const searchInput       = document.getElementById('searchInput');
+const searchResults     = document.getElementById('searchResults');
 
-// Инициализация приложения
+// ─── Init ────────────────────────────────────────────────────────
 async function init() {
-    // Initialize i18n first
     await initI18n();
-    
-    // Initialize auth
     await getCurrentUser();
     updateAuthUI();
-    
+
     renderBoardNav();
     setupEventListeners();
-    
-    // Initialize theme AFTER elements are ready
     initTheme();
-    
     handleRoute();
 }
 
-// Инициализация темы
+// ─── Theme toggle (global dark/light) ────────────────────────────
 function initTheme() {
     const themeToggle = document.getElementById('themeToggle');
-    if (!themeToggle) {
-        console.error('Theme toggle button not found');
-        return;
-    }
-    
+    if (!themeToggle) return;
+
     const savedTheme = localStorage.getItem('femfur_theme');
     if (savedTheme === 'dark') {
         document.body.classList.add('dark-theme');
@@ -77,16 +68,11 @@ function initTheme() {
     }
 }
 
-// Переключение темы
 function toggleTheme() {
-    const body = document.body;
+    const body        = document.body;
     const themeToggle = document.getElementById('themeToggle');
-    
-    if (!themeToggle) {
-        console.error('Theme toggle button not found');
-        return;
-    }
-    
+    if (!themeToggle) return;
+
     if (body.classList.contains('dark-theme')) {
         body.classList.remove('dark-theme');
         themeToggle.textContent = '🌙';
@@ -98,19 +84,18 @@ function toggleTheme() {
     }
 }
 
-// Рендер популярных и активных бордов
+// ─── Board nav ───────────────────────────────────────────────────
 async function renderBoardNav() {
     boardNav.innerHTML = '<div class="board-nav-loading">Loading popular boards...</div>';
-    
+
     try {
-        // Получаем статистику по бордам
         const popularBoards = await getPopularBoards();
         boardNav.innerHTML = '';
-        
+
         if (popularBoards && popularBoards.length > 0) {
             popularBoards.forEach(boardStat => {
                 const link = document.createElement('a');
-                link.href = `#${boardStat.board}`;
+                link.href  = `#${boardStat.board}`;
                 link.innerHTML = `
                     <span class="board-name">${boardStat.name}</span>
                     <span class="board-stats">📊 ${boardStat.thread_count} 💬 ${boardStat.reply_count}</span>
@@ -120,16 +105,15 @@ async function renderBoardNav() {
                 boardNav.appendChild(link);
             });
         } else {
-            // Fallback to main boards if no stats available
-            const mainBoards = ['b', 'fur', 'a', 'vg', 'g', 'fit', 'sp'];
+            // Fallback — NSFW boards removed from list
+            const mainBoards = ['b', 'fur', 'a', 'vg', 'g', 'fit', 'sp', 'meme', 'ai'];
             const boards = getAllBoards();
-            
+
             mainBoards.forEach(boardId => {
                 if (boards[boardId]) {
-                    const board = boards[boardId];
                     const link = document.createElement('a');
-                    link.href = `#${boardId}`;
-                    link.textContent = board.name;
+                    link.href        = `#${boardId}`;
+                    link.textContent = boards[boardId].name;
                     link.dataset.board = boardId;
                     boardNav.appendChild(link);
                 }
@@ -137,16 +121,14 @@ async function renderBoardNav() {
         }
     } catch (error) {
         console.error('Error loading popular boards:', error);
-        // Fallback в случае ошибки
-        const mainBoards = ['b', 'fur', 'a', 'vg', 'g'];
+        const mainBoards = ['b', 'fur', 'a', 'vg', 'g', 'meme', 'ai'];
         const boards = getAllBoards();
-        
+
         mainBoards.forEach(boardId => {
             if (boards[boardId]) {
-                const board = boards[boardId];
                 const link = document.createElement('a');
-                link.href = `#${boardId}`;
-                link.textContent = board.name;
+                link.href        = `#${boardId}`;
+                link.textContent = boards[boardId].name;
                 link.dataset.board = boardId;
                 boardNav.appendChild(link);
             }
@@ -154,10 +136,8 @@ async function renderBoardNav() {
     }
 }
 
-// Получить популярные борды
 async function getPopularBoards() {
     try {
-        // Импортируем функцию из boards.js
         const { getPopularBoards: getBoardsStats } = await import('./boards.js');
         return await getBoardsStats();
     } catch (error) {
@@ -166,157 +146,115 @@ async function getPopularBoards() {
     }
 }
 
-// Настройка обработчиков событий
+// ─── Event listeners ─────────────────────────────────────────────
 function setupEventListeners() {
-    // Навигация по hash
     window.addEventListener('hashchange', handleRoute);
-    
-    // Кнопка поиска
+
     document.getElementById('searchBtn').addEventListener('click', () => {
         window.location.hash = 'search';
     });
-    
-    // Форма поиска
-    if (searchForm) {
-        searchForm.addEventListener('submit', handleSearchSubmit);
-    }
-    
-    // Переключатель темы
+
+    if (searchForm) searchForm.addEventListener('submit', handleSearchSubmit);
+
     document.getElementById('themeToggle').addEventListener('click', toggleTheme);
-    
-    // Кнопка создания треда
     newThreadBtn.addEventListener('click', openNewThreadModal);
-    
-    // Кнопки авторизации
+
     document.getElementById('loginBtn').addEventListener('click', () => {
         loginModal.style.display = 'block';
     });
-    
     document.getElementById('registerBtn').addEventListener('click', () => {
         registerModal.style.display = 'block';
     });
-    
     document.getElementById('logoutBtn').addEventListener('click', logout);
-    
-    // Закрытие модальных окон
-    const closeButtons = document.querySelectorAll('.close');
-    closeButtons.forEach(btn => {
+
+    // Close modals
+    document.querySelectorAll('.close').forEach(btn => {
         btn.addEventListener('click', () => {
             btn.closest('.modal').style.display = 'none';
         });
     });
-    
-    // Клик вне модального окна
     window.addEventListener('click', (e) => {
-        if (e.target.classList.contains('modal')) {
-            e.target.style.display = 'none';
-        }
+        if (e.target.classList.contains('modal')) e.target.style.display = 'none';
     });
-    
-    // Отправка форм
+
+    // Forms
     newThreadForm.addEventListener('submit', handleNewThreadSubmit);
     loginForm.addEventListener('submit', handleLoginSubmit);
     registerForm.addEventListener('submit', handleRegisterSubmit);
-    
+
     const editProfileForm = document.getElementById('editProfileForm');
-    if (editProfileForm) {
-        editProfileForm.addEventListener('submit', handleEditProfileSubmit);
-    }
-    
-    // Edit thread form handler
+    if (editProfileForm) editProfileForm.addEventListener('submit', handleEditProfileSubmit);
+
     const editThreadForm = document.getElementById('editThreadForm');
-    if (editThreadForm) {
-        editThreadForm.addEventListener('submit', handleEditThreadSubmit);
-    }
-    
-    // Кнопка возврата к борде
-    backToBoard.addEventListener('click', () => {
-        if (currentBoard) {
-            window.location.hash = currentBoard;
-        }
-    });
-    
-    // Кнопка возврата на главную
-    backToHome.addEventListener('click', () => {
-        window.location.hash = '';
-    });
-    
-    // Отправка ответа
+    if (editThreadForm) editThreadForm.addEventListener('submit', handleEditThreadSubmit);
+
+    backToBoard.addEventListener('click', () => { if (currentBoard) window.location.hash = currentBoard; });
+    backToHome.addEventListener('click', () => { window.location.hash = ''; });
     submitReply.addEventListener('click', handleReplySubmit);
+
+    // Bio char counter
+    const bioField = document.getElementById('editBio');
+    if (bioField) {
+        bioField.addEventListener('input', updateBioCharCount);
+    }
+
+    // Theme preset buttons (live switch)
+    document.querySelectorAll('.theme-preset').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.theme-preset').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        });
+    });
 }
 
-// Обработка маршрутизации
+// ─── Routing ─────────────────────────────────────────────────────
 function handleRoute() {
     const hash = window.location.hash.slice(1);
-    
-    if (!hash) {
-        showHome();
-        return;
-    }
-    
-    // Check for search
-    if (hash === 'search' || hash.startsWith('search?')) {
-        showSearch();
-        return;
-    }
-    
-    // Check for user profile (format: u/hash)
-    if (hash.startsWith('u/')) {
-        const userHash = hash.substring(2);
-        showProfile(userHash);
-        return;
-    }
-    
-    // Проверка на тред (формат: boardId-threadId)
+
+    if (!hash)                          { showHome(); return; }
+    if (hash === 'search' || hash.startsWith('search?')) { showSearch(); return; }
+    if (hash.startsWith('u/'))          { showProfile(hash.substring(2)); return; }
+
     if (hash.includes('-')) {
         const [boardId, threadId] = hash.split('-');
         showThread(boardId, threadId);
         return;
     }
-    
-    // Показ борды
+
     const boardInfo = getBoardInfo(hash);
-    if (boardInfo) {
-        showBoard(hash);
-    } else {
-        showHome();
-    }
+    if (boardInfo) showBoard(hash);
+    else           showHome();
 }
 
-// Показать главную страницу
+// ─── Views ───────────────────────────────────────────────────────
 async function showHome() {
-    homeView.style.display = 'block';
-    boardView.style.display = 'none';
-    threadView.style.display = 'none';
+    homeView.style.display    = 'block';
+    boardView.style.display   = 'none';
+    threadView.style.display  = 'none';
     profileView.style.display = 'none';
-    searchView.style.display = 'none';
-    currentBoard = null;
+    searchView.style.display  = 'none';
+    currentBoard  = null;
     currentThread = null;
     updateActiveNav(null);
-    
-    // Initialize widgets
     await initializeWidgets();
 }
 
-// Показать борду
 async function showBoard(boardId) {
-    currentBoard = boardId;
+    currentBoard  = boardId;
     currentThread = null;
-    
-    homeView.style.display = 'none';
-    boardView.style.display = 'block';
-    threadView.style.display = 'none';
+
+    homeView.style.display    = 'none';
+    boardView.style.display   = 'block';
+    threadView.style.display  = 'none';
     profileView.style.display = 'none';
-    searchView.style.display = 'none';
-    
+    searchView.style.display  = 'none';
+
     const boardInfo = getBoardInfo(boardId);
     boardTitle.textContent = `${boardInfo.name} - ${boardInfo.title}`;
-    
     updateActiveNav(boardId);
-    
-    // Загрузка тредов с skeleton
+
     threadsList.innerHTML = renderSkeletonThreads(10);
-    
+
     try {
         const threads = await loadBoardThreads(boardId);
         renderThreads(threads);
@@ -325,40 +263,32 @@ async function showBoard(boardId) {
     }
 }
 
-// Рендер тредов
 async function renderThreads(threads) {
     threadsList.innerHTML = '';
-    
+
     if (threads.length === 0) {
         threadsList.innerHTML = `<div class="empty-state">${t('no_threads')}</div>`;
         return;
     }
-    
+
     for (const thread of threads) {
         const threadItem = document.createElement('div');
         threadItem.className = 'thread-item fade-in-up' + (thread.is_sticky ? ' sticky' : '');
-        
-        const author = thread.is_anonymous ? t('anonymous') : (thread.user ? thread.user.nickname : t('anonymous'));
+
+        const author     = thread.is_anonymous ? t('anonymous') : (thread.user ? thread.user.nickname : t('anonymous'));
         const authorHash = thread.user?.profile_hash || null;
-        
-        // Create clickable author link
-        const authorHtml = !thread.is_anonymous && authorHash 
+
+        const authorHtml = !thread.is_anonymous && authorHash
             ? `<a href="#u/${authorHash}" class="thread-author-link" onclick="event.stopPropagation();">${escapeHtml(author)}</a>`
             : `<span class="thread-author ${thread.is_anonymous ? 'anonymous' : ''}">${escapeHtml(author)}</span>`;
-        
-        // Get reactions for thread
-        const reactions = await getReactions('thread', thread.id);
+
+        const reactions    = await getReactions('thread', thread.id);
         const reactionsHtml = renderInlineReactionsHtml(reactions);
-        
-        // Debug: log thread data
-        if (!thread.content || thread.content.trim() === '') {
-            console.warn('Thread has empty content:', thread);
-        }
-        
-        const contentPreview = thread.content && thread.content.trim() !== '' 
+
+        const contentPreview = thread.content && thread.content.trim() !== ''
             ? escapeHtml(thread.content.substring(0, 200)) + (thread.content.length > 200 ? '...' : '')
             : '<em>' + t('no_content', 'No content') + '</em>';
-        
+
         threadItem.innerHTML = `
             <h3>${escapeHtml(thread.title)}</h3>
             <p>${contentPreview}</p>
@@ -372,75 +302,56 @@ async function renderThreads(threads) {
                 ${reactionsHtml}
             </div>
         `;
-        
+
         threadItem.addEventListener('click', () => {
             window.location.hash = `${currentBoard}-${thread.id}`;
         });
-        
+
         threadsList.appendChild(threadItem);
     }
 }
 
-// Helper to render inline reactions HTML
 function renderInlineReactionsHtml(reactions) {
     if (!reactions) return '';
-    
-    const REACTION_EMOJIS = {
-        skull: '💀',
-        clown: '🤡',
-        based: 'based',
-        cringe: 'cringe',
-        schizo: 'schizo'
-    };
-    
+    const REACTION_EMOJIS = { skull:'💀', clown:'🤡', based:'based', cringe:'cringe', schizo:'schizo' };
     let html = '<div class="reactions-inline">';
     let hasReactions = false;
-    
+
     Object.entries(reactions).forEach(([type, data]) => {
         if (data && data.count > 0) {
             hasReactions = true;
-            const activeClass = data.userReacted ? 'active' : '';
-            html += `
-                <span class="reaction-inline ${activeClass}">
-                    ${REACTION_EMOJIS[type]} ${data.count}
-                </span>
-            `;
+            html += `<span class="reaction-inline ${data.userReacted ? 'active' : ''}">${REACTION_EMOJIS[type]} ${data.count}</span>`;
         }
     });
-    
+
     html += '</div>';
     return hasReactions ? html : '';
 }
 
-// Показать тред
+// ─── Thread view ─────────────────────────────────────────────────
 async function showThread(boardId, threadId) {
-    currentBoard = boardId;
+    currentBoard  = boardId;
     currentThread = threadId;
-    
-    homeView.style.display = 'none';
-    boardView.style.display = 'none';
-    threadView.style.display = 'block';
+
+    homeView.style.display    = 'none';
+    boardView.style.display   = 'none';
+    threadView.style.display  = 'block';
     profileView.style.display = 'none';
-    searchView.style.display = 'none';
-    
+    searchView.style.display  = 'none';
+
     updateActiveNav(boardId);
-    
     threadContent.innerHTML = renderSkeletonThreads(1);
-    repliesList.innerHTML = renderSkeletonReplies(3);
-    replyText.value = '';
-    
+    repliesList.innerHTML   = renderSkeletonReplies(3);
+    replyText.value         = '';
+
     try {
-        // Increment view count
         await incrementViewCount(threadId);
-        
-        // Загрузка треда
         const thread = await getThread(threadId);
-        
-        const author = thread.is_anonymous ? t('anonymous') : (thread.user ? thread.user.nickname : t('anonymous'));
+
+        const author     = thread.is_anonymous ? t('anonymous') : (thread.user ? thread.user.nickname : t('anonymous'));
         const authorHash = thread.user?.profile_hash || null;
-        const avatarUrl = thread.user?.avatar_url || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="40" height="40"%3E%3Crect fill="%23ddd" width="40" height="40"/%3E%3Ctext x="20" y="25" font-size="20" text-anchor="middle" fill="%23999"%3E?%3C/text%3E%3C/svg%3E';
-        
-        // Create creator info section
+        const avatarUrl  = thread.user?.avatar_url || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="40" height="40"%3E%3Crect fill="%23ddd" width="40" height="40"/%3E%3Ctext x="20" y="25" font-size="20" text-anchor="middle" fill="%23999"%3E?%3C/text%3E%3C/svg%3E';
+
         let creatorInfoHtml = '';
         if (!thread.is_anonymous && thread.user) {
             creatorInfoHtml = `
@@ -450,14 +361,12 @@ async function showThread(boardId, threadId) {
                         <a href="#u/${authorHash}" class="thread-creator-name">${escapeHtml(author)}</a>
                         <div class="thread-creator-date">${formatDate(thread.created_at)}</div>
                     </div>
-                </div>
-            `;
+                </div>`;
         }
-        
-        // Create container for thread reactions
+
         const threadReactionsId = `thread-reactions-${threadId}`;
-        const threadActionsId = `thread-actions-${threadId}`;
-        
+        const threadActionsId   = `thread-actions-${threadId}`;
+
         threadContent.innerHTML = `
             <h2>${escapeHtml(thread.title)}</h2>
             ${creatorInfoHtml}
@@ -472,48 +381,45 @@ async function showThread(boardId, threadId) {
             <div id="${threadReactionsId}"></div>
             <div id="${threadActionsId}"></div>
         `;
-        
-        // Render reactions for thread
+
         await renderReactions('thread', threadId, threadReactionsId);
-        
-        // Render edit/delete buttons if user owns thread
         renderThreadActions(threadId, threadActionsId);
-        
-        // Загрузка ответов
+
         const replies = await getThreadReplies(threadId);
         await renderReplies(replies);
-        
+
+        // Add formatting toolbar to reply textarea
+        if (replyText && !replyText.previousElementSibling?.classList.contains('formatting-toolbar')) {
+            addFormattingToolbar('replyText');
+        }
     } catch (error) {
         threadContent.innerHTML = `<div class="error">${t('error_load')}</div>`;
     }
 }
 
-// Рендер ответов
 async function renderReplies(replies) {
     repliesList.innerHTML = '';
-    
+
     if (replies.length === 0) {
         repliesList.innerHTML = `<div class="empty-state">${t('no_replies')}</div>`;
         return;
     }
-    
+
     for (let index = 0; index < replies.length; index++) {
         const reply = replies[index];
         const replyItem = document.createElement('div');
         replyItem.className = 'reply-item fade-in-up';
         replyItem.dataset.replyId = reply.id;
-        
-        const author = reply.is_anonymous ? t('anonymous') : (reply.user ? reply.user.nickname : t('anonymous'));
+
+        const author     = reply.is_anonymous ? t('anonymous') : (reply.user ? reply.user.nickname : t('anonymous'));
         const authorHash = reply.user?.profile_hash || null;
-        
-        // Create clickable author link
-        const authorHtml = !reply.is_anonymous && authorHash 
+
+        const authorHtml = !reply.is_anonymous && authorHash
             ? `<a href="#u/${authorHash}" class="thread-author-link">${escapeHtml(author)}</a>`
             : `<span class="reply-author ${reply.is_anonymous ? 'anonymous' : ''}">${escapeHtml(author)}</span>`;
-        
-        // Create container for reply reactions
+
         const replyReactionsId = `reply-reactions-${reply.id}`;
-        
+
         replyItem.innerHTML = `
             <div class="reply-number">##${index + 1}</div>
             <div class="reply-text">${formatText(reply.content)}</div>
@@ -525,66 +431,54 @@ async function renderReplies(replies) {
             </div>
             <div id="${replyReactionsId}"></div>
         `;
-        
-        // Add click handler for quotes
+
         replyItem.querySelectorAll('.thread-quote').forEach(quote => {
             quote.addEventListener('click', (e) => {
                 e.stopPropagation();
-                const replyNum = quote.getAttribute('data-reply-num');
-                addQuote(replyNum);
+                addQuote(quote.getAttribute('data-reply-num'));
             });
         });
-        
+
         repliesList.appendChild(replyItem);
-        
-        // Render reactions for reply
         await renderReactions('reply', reply.id, replyReactionsId);
     }
 }
 
-// Show user profile
+// ─── Profile & Search ────────────────────────────────────────────
 async function showProfile(userHash) {
-    homeView.style.display = 'none';
-    boardView.style.display = 'none';
-    threadView.style.display = 'none';
+    homeView.style.display    = 'none';
+    boardView.style.display   = 'none';
+    threadView.style.display  = 'none';
     profileView.style.display = 'block';
-    searchView.style.display = 'none';
-    
+    searchView.style.display  = 'none';
+
     const profileContent = document.getElementById('profileContent');
     profileContent.innerHTML = `<div class="loading">${t('loading', 'Loading...')}</div>`;
-    
+
     const profileData = await loadUserProfile(userHash);
     renderUserProfile(profileData);
 }
 
-// Show search page
 function showSearch() {
-    homeView.style.display = 'none';
-    boardView.style.display = 'none';
-    threadView.style.display = 'none';
+    homeView.style.display    = 'none';
+    boardView.style.display   = 'none';
+    threadView.style.display  = 'none';
     profileView.style.display = 'none';
-    searchView.style.display = 'block';
-    
-    // Check if there's a search query in URL
+    searchView.style.display  = 'block';
+
     const urlParams = new URLSearchParams(window.location.hash.slice(1).split('?')[1]);
     const query = urlParams.get('q');
-    
+
     if (query) {
         searchInput.value = query;
         performSearch(query);
     } else {
-        searchResults.innerHTML = `
-            <div class="empty-state">
-                <p>${t('search_empty', 'Enter keywords to search threads and replies')}</p>
-            </div>
-        `;
+        searchResults.innerHTML = `<div class="empty-state"><p>${t('search_empty', 'Enter keywords to search threads and replies')}</p></div>`;
     }
 }
 
-// Perform search
 async function performSearch(query) {
     searchResults.innerHTML = renderSkeletonThreads(5);
-    
     try {
         const results = await searchContent(query);
         renderSearchResults(results, 'searchResults');
@@ -593,17 +487,13 @@ async function performSearch(query) {
     }
 }
 
-// Handle search form submit
 function handleSearchSubmit(e) {
     e.preventDefault();
     const query = searchInput.value.trim();
-    
-    if (query) {
-        window.location.hash = `search?q=${encodeURIComponent(query)}`;
-    }
+    if (query) window.location.hash = `search?q=${encodeURIComponent(query)}`;
 }
 
-// Render skeleton loading for threads
+// ─── Skeleton loaders ────────────────────────────────────────────
 function renderSkeletonThreads(count = 5) {
     let html = '';
     for (let i = 0; i < count; i++) {
@@ -617,13 +507,11 @@ function renderSkeletonThreads(count = 5) {
                     <div class="skeleton skeleton-meta-item"></div>
                     <div class="skeleton skeleton-meta-item"></div>
                 </div>
-            </div>
-        `;
+            </div>`;
     }
     return html;
 }
 
-// Render skeleton loading for replies
 function renderSkeletonReplies(count = 5) {
     let html = '';
     for (let i = 0; i < count; i++) {
@@ -635,90 +523,62 @@ function renderSkeletonReplies(count = 5) {
                     <div class="skeleton skeleton-meta-item"></div>
                     <div class="skeleton skeleton-meta-item"></div>
                 </div>
-            </div>
-        `;
+            </div>`;
     }
     return html;
 }
 
-// Обновить активную борду в навигации
 function updateActiveNav(boardId) {
     document.querySelectorAll('#boardNav a').forEach(link => {
-        if (link.dataset.board === boardId) {
-            link.classList.add('active');
-        } else {
-            link.classList.remove('active');
-        }
+        link.classList.toggle('active', link.dataset.board === boardId);
     });
 }
 
-// Открыть модальное окно создания треда
+// ─── Modals ──────────────────────────────────────────────────────
 function openNewThreadModal() {
     newThreadModal.style.display = 'block';
-    document.getElementById('threadTitle').value = '';
-    document.getElementById('newThreadContent').value = '';
-    document.getElementById('threadImage').value = '';
-    
-    // Add formatting toolbar if not already added
-    const threadContent = document.getElementById('newThreadContent');
-    if (threadContent && !threadContent.previousElementSibling?.classList.contains('formatting-toolbar')) {
+    document.getElementById('threadTitle').value        = '';
+    document.getElementById('newThreadContent').value   = '';
+    document.getElementById('threadImage').value        = '';
+
+    const tc = document.getElementById('newThreadContent');
+    if (tc && !tc.previousElementSibling?.classList.contains('formatting-toolbar')) {
         addFormattingToolbar('newThreadContent');
     }
 }
 
-// Обработка создания треда
+// ─── Form handlers ───────────────────────────────────────────────
 async function handleNewThreadSubmit(e) {
     e.preventDefault();
-    
-    if (!currentBoard) {
-        alert(t('error_empty_fields'));
-        return;
-    }
-    
-    const title = document.getElementById('threadTitle').value.trim();
-    const content = document.getElementById('newThreadContent').value.trim();
+    if (!currentBoard) { alert(t('error_empty_fields')); return; }
+
+    const title     = document.getElementById('threadTitle').value.trim();
+    const content   = document.getElementById('newThreadContent').value.trim();
     const imageFile = document.getElementById('threadImage').files[0];
-    const isAnon = document.getElementById('threadPostAnon').checked;
-    
-    // Debug: log what we're sending
-    console.log('Creating thread with data:', {
-        board: currentBoard,
-        title: title,
-        content: content,
-        contentLength: content.length,
-        hasImage: !!imageFile,
-        isAnon: isAnon
-    });
-    
+    const isAnon    = document.getElementById('threadPostAnon').checked;
+
     try {
         await createThread(currentBoard, title, content, imageFile, isAnon);
         newThreadModal.style.display = 'none';
-        
-        // Очистка формы
-        document.getElementById('threadTitle').value = '';
+
+        document.getElementById('threadTitle').value      = '';
         document.getElementById('newThreadContent').value = '';
-        document.getElementById('threadImage').value = '';
-        
-        // Перезагрузка тредов борды
+        document.getElementById('threadImage').value      = '';
+
         const threads = await loadBoardThreads(currentBoard);
         renderThreads(threads);
-        
-        // Обновляем виджеты на главной странице
         await initializeWidgets();
-        
         alert(t('success_thread'));
     } catch (error) {
         alert(t('error_thread_create') + ': ' + error.message);
     }
 }
 
-// Обработка логина
 async function handleLoginSubmit(e) {
     e.preventDefault();
-    
     const nickname = document.getElementById('loginNickname').value.trim();
     const password = document.getElementById('loginPassword').value;
-    
+
     try {
         await login(nickname, password);
         loginModal.style.display = 'none';
@@ -729,17 +589,15 @@ async function handleLoginSubmit(e) {
     }
 }
 
-// Обработка регистрации
 async function handleRegisterSubmit(e) {
     e.preventDefault();
-    
-    const nickname = document.getElementById('registerNickname').value.trim();
-    const password = document.getElementById('registerPassword').value;
+    const nickname        = document.getElementById('registerNickname').value.trim();
+    const password        = document.getElementById('registerPassword').value;
     const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
-    const avatarFile = document.getElementById('registerAvatar').files[0];
-    const status = document.getElementById('registerStatus').value.trim();
-    const alwaysAnon = document.getElementById('registerAlwaysAnon').checked;
-    
+    const avatarFile      = document.getElementById('registerAvatar').files[0];
+    const status          = document.getElementById('registerStatus').value.trim();
+    const alwaysAnon      = document.getElementById('registerAlwaysAnon').checked;
+
     try {
         await register(nickname, password, passwordConfirm, avatarFile, status, alwaysAnon);
         registerModal.style.display = 'none';
@@ -749,95 +607,89 @@ async function handleRegisterSubmit(e) {
     }
 }
 
-// Обработка отправки ответа
 async function handleReplySubmit() {
-    if (!currentThread) {
-        alert(t('error_empty_fields'));
-        return;
-    }
-    
-    const content = replyText.value.trim();
+    if (!currentThread) { alert(t('error_empty_fields')); return; }
+
+    const content   = replyText.value.trim();
     const imageFile = document.getElementById('replyImage').files[0];
-    const isAnon = document.getElementById('postAnon').checked;
-    
+    const isAnon    = document.getElementById('postAnon').checked;
+
     try {
-        // Добавить skeleton в конец списка ответов
         repliesList.innerHTML += renderSkeletonReplies(1);
-        
         await createReply(currentThread, content, imageFile, isAnon);
         replyText.value = '';
         document.getElementById('replyImage').value = '';
-        
-        // Мгновенная перезагрузка ответов
+
         const replies = await getThreadReplies(currentThread);
         await renderReplies(replies);
-        
-        // Scroll to the new reply
-        repliesList.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        
+        repliesList.lastElementChild?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     } catch (error) {
         alert(t('error_reply_create') + ': ' + error.message);
     }
 }
 
-// Обработка редактирования профиля
+// ═══════════════════════════════════════════════════════════════════
+// EDIT PROFILE SUBMIT  ← passes all new fields to fixed updateProfile
+// ═══════════════════════════════════════════════════════════════════
 async function handleEditProfileSubmit(e) {
     e.preventDefault();
-    
+
     const avatarFile = document.getElementById('editAvatar').files[0];
-    const status = document.getElementById('editStatus').value.trim();
-    
+    const bannerFile = document.getElementById('editBanner').files[0];
+    const status     = document.getElementById('editStatus').value.trim();
+    const bio        = document.getElementById('editBio').value.trim();
+
+    // Get active theme preset
+    const activePresetBtn = document.querySelector('.theme-preset.active');
+    const themePreset     = activePresetBtn ? activePresetBtn.dataset.theme : 'default';
+
+    const themeColor = document.getElementById('editThemeColor').value;
+    const customCss  = document.getElementById('editCustomCss').value.trim();
+
     try {
-        await updateProfile(avatarFile, status);
+        await updateProfile(avatarFile, status, bannerFile, bio, themePreset, themeColor, customCss);
         editProfileModal.style.display = 'none';
         alert(t('success_profile_update', 'Profile updated successfully!'));
-        
-        // Reload current page to show updated profile
+
+        // Reload profile view
         const currentUser = await getCurrentUser();
         if (currentUser) {
             window.location.hash = `u/${currentUser.profile_hash}`;
-            window.location.reload();
+            // Force re-render
+            setTimeout(() => { showProfile(currentUser.profile_hash); }, 150);
         }
     } catch (error) {
         alert(t('error_profile_update', 'Error updating profile: ') + error.message);
     }
 }
 
-// Обработка редактирования треда
 async function handleEditThreadSubmit(e) {
     e.preventDefault();
-    
     const { updateThread } = await import('./thread-actions.js');
-    
-    const threadId = document.getElementById('editThreadId').value;
-    const title = document.getElementById('editThreadTitle').value.trim();
-    const content = document.getElementById('editThreadContent').value.trim();
+
+    const threadId  = document.getElementById('editThreadId').value;
+    const title     = document.getElementById('editThreadTitle').value.trim();
+    const content   = document.getElementById('editThreadContent').value.trim();
     const imageFile = document.getElementById('editThreadImage').files[0];
-    
-    console.log('Updating thread:', { threadId, title, content, hasImage: !!imageFile });
-    
+
     try {
         await updateThread(threadId, title, content, imageFile);
         document.getElementById('editThreadModal').style.display = 'none';
         alert(t('success_thread_update', 'Thread updated successfully!'));
-        
-        // Reload thread view
+
         const hash = window.location.hash;
         window.location.hash = '';
-        setTimeout(() => {
-            window.location.hash = hash;
-        }, 100);
+        setTimeout(() => { window.location.hash = hash; }, 100);
     } catch (error) {
         alert(t('error_thread_update', 'Failed to update thread: ') + error.message);
     }
 }
 
-// Экранирование HTML
 function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
 }
 
-// Запуск приложения
+// ─── Start ───────────────────────────────────────────────────────
 init();

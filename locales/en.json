@@ -25,17 +25,19 @@
   "threadOfDay": "Thread of the Day",
   "threadOfWeek": "Thread of the Week",
   "recentThreads": "Recent Threads",
-  "footerTagline": "Anonymous Imageboard",
-  
+  "footerTagline": "Community Imageboard",
+
   "board_art": "Art",
   "board_lit": "Literature",
   "board_po": "Poetry",
   "board_mu": "Music",
   "board_ph": "Photography",
+  "board_craft": "Crafts",
   "board_soc": "Social",
   "board_chat": "Chat",
   "board_news": "News",
   "board_int": "International",
+  "board_meme": "Memes",
   "board_a": "Anime",
   "board_vn": "Visual Novels",
   "board_vg": "Video Games",
@@ -43,26 +45,38 @@
   "board_vm": "Retro Games",
   "board_tv": "TV & Movies",
   "board_co": "Comics",
+  "board_esports": "Esports",
   "board_g": "Technology",
   "board_pr": "Programming",
   "board_sci": "Science",
   "board_wsr": "Help",
   "board_3": "3D Printing",
+  "board_cyber": "Cybersecurity",
+  "board_ai": "Artificial Intelligence",
+  "board_crypto": "Cryptocurrency",
   "board_fit": "Fitness",
   "board_ck": "Cooking",
   "board_fa": "Fashion",
   "board_adv": "Advice",
   "board_trv": "Travel",
   "board_out": "Outdoors",
+  "board_mental": "Mental Health",
   "board_sp": "Sports",
   "board_auto": "Automobiles",
   "board_an": "Animals",
   "board_his": "History",
   "board_p": "Photography",
-  
+  "board_music": "Music Fans",
+  "board_pol": "Politics",
+  "board_phil": "Philosophy",
+  "board_edu": "Education",
+  "board_eco": "Economy",
+  "board_world": "World",
+  "board_lang": "Languages",
+
   "cat_life": "About Life",
   "cat_hobby": "Hobby",
-  
+
   "anonymous": "Anonymous",
   "created": "Created",
   "replies": "Replies",
@@ -73,30 +87,30 @@
   "allActivity": "All Activity",
   "userThreads": "User Threads",
   "userPosts": "User Posts",
-  
+
   "error_login": "Login failed. Check your credentials.",
-  "error_register": "Registration failed. Username might be taken.",
+  "error_register": "Registration failed. Nickname may already be taken.",
   "error_password_mismatch": "Passwords do not match.",
-  "error_empty_fields": "Please fill all required fields.",
+  "error_empty_fields": "Please fill in all required fields.",
   "error_thread_create": "Failed to create thread.",
-  "error_reply_create": "Failed to post reply.",
-  "error_load": "Failed to load data. Check your Supabase connection.",
-  
-  "success_register": "Registration successful! You can now login.",
+  "error_reply_create": "Failed to submit reply.",
+  "error_load": "Failed to load. Check your Supabase connection.",
+
+  "success_register": "Registration successful! You can now log in.",
   "success_login": "Login successful!",
   "success_thread": "Thread created successfully!",
   "success_reply": "Reply posted successfully!",
   "success_profile_update": "Profile updated successfully!",
-  
+
   "no_threads": "No threads yet. Create the first one!",
   "no_replies": "No replies yet. Be the first!",
   "no_activity": "No activity yet.",
-  
+
   "editProfile": "Edit Profile",
   "changeAvatar": "Change Avatar",
   "save": "Save",
   "error_profile_update": "Error updating profile",
-  
+
   "search": "Search",
   "searchPlaceholder": "Search threads and replies...",
   "no_search_results": "No results found",
@@ -112,9 +126,10 @@
   "confirm_delete_thread": "Are you sure you want to delete this thread? This action cannot be undone.",
   "success_delete_thread": "Thread deleted successfully",
   "error_delete_thread": "Failed to delete thread",
-  "success_thread_update": "Thread updated successfully",
+  "success_thread_update": "Thread updated successfully!",
   "error_thread_update": "Failed to update thread",
   "error_no_permission": "You do not have permission to perform this action",
   "error_login_required": "You must be logged in to perform this action",
-  "no_content": "No content"
+  "no_content": "No description",
+  "loading": "Loading..."
 }

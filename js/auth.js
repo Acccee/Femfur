@@ -7,13 +7,12 @@ let currentUser = null;
 
 // Generate stable hash from user ID
 function generateUserHash(userId) {
-    // Simple hash function - in production use a better one
     const str = `user_${userId}_salt`;
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
         const char = str.charCodeAt(i);
         hash = ((hash << 5) - hash) + char;
-        hash = hash & hash; // Convert to 32bit integer
+        hash = hash & hash;
     }
     return Math.abs(hash).toString(36);
 }
@@ -37,7 +36,6 @@ async function getCurrentUser() {
 // Register new user
 async function register(nickname, password, passwordConfirm, avatar, status, alwaysAnon) {
     try {
-        // Validate
         if (!nickname || !password || !passwordConfirm) {
             throw new Error(t('error_empty_fields'));
         }
@@ -46,7 +44,6 @@ async function register(nickname, password, passwordConfirm, avatar, status, alw
             throw new Error(t('error_password_mismatch'));
         }
         
-        // Check if nickname exists
         const { data: existingUser } = await supabaseClient
             .from('users')
             .select('id')
@@ -57,16 +54,13 @@ async function register(nickname, password, passwordConfirm, avatar, status, alw
             throw new Error(t('error_register'));
         }
         
-        // Hash password (simple hash - in production use better hashing like bcrypt on server)
         const passwordHash = await simpleHash(password);
         
-        // Upload avatar if provided
         let avatarUrl = null;
         if (avatar) {
             avatarUrl = await uploadImage(avatar, 'avatars');
         }
         
-        // Create user
         const { data, error } = await supabaseClient
             .from('users')
             .insert([{
@@ -80,7 +74,6 @@ async function register(nickname, password, passwordConfirm, avatar, status, alw
             .single();
         
         if (error) throw error;
-        
         return data;
     } catch (error) {
         console.error('Registration error:', error);
@@ -108,10 +101,7 @@ async function login(nickname, password) {
             throw new Error(t('error_login'));
         }
         
-        // Generate hash for profile URL
         data.profile_hash = generateUserHash(data.id);
-        
-        // Save to session
         currentUser = data;
         localStorage.setItem('femfur_user', JSON.stringify(data));
         
@@ -130,7 +120,7 @@ function logout() {
     window.location.reload();
 }
 
-// Simple hash function (use better hashing in production)
+// Simple hash function
 async function simpleHash(str) {
     const encoder = new TextEncoder();
     const data = encoder.encode(str);
@@ -139,16 +129,15 @@ async function simpleHash(str) {
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-// Get user by hash
+// Get user by hash — now selects new profile columns
 async function getUserByHash(hash) {
     try {
         const { data, error } = await supabaseClient
             .from('users')
-            .select('id, nickname, avatar_url, status, created_at');
+            .select('id, nickname, avatar_url, status, banner_url, bio, theme_preset, theme_color, custom_css, created_at');
         
         if (error) throw error;
         
-        // Find user with matching hash
         for (const user of data) {
             if (generateUserHash(user.id) === hash) {
                 user.profile_hash = hash;
@@ -175,15 +164,13 @@ function updateAuthUI() {
         registerBtn.style.display = 'none';
         userMenu.style.display = 'flex';
         profileLink.textContent = currentUser.nickname;
-        profileLink.href = `#u/${currentUser.profile_hash}`;
+        profileLink.href = `#u/${currentUser.profile_hash || generateUserHash(currentUser.id)}`;
         
-        // Show anonymous toggle in forms if user is logged in
         const anonContainers = document.querySelectorAll('#anonToggleContainer, #threadAnonToggleContainer');
         anonContainers.forEach(container => {
             container.style.display = 'block';
         });
         
-        // Set default anonymous state
         if (currentUser.always_anonymous) {
             document.getElementById('postAnon').checked = true;
             document.getElementById('threadPostAnon').checked = true;
@@ -193,7 +180,6 @@ function updateAuthUI() {
         registerBtn.style.display = 'inline-block';
         userMenu.style.display = 'none';
         
-        // Hide anonymous toggle
         const anonContainers = document.querySelectorAll('#anonToggleContainer, #threadAnonToggleContainer');
         anonContainers.forEach(container => {
             container.style.display = 'none';
@@ -201,43 +187,91 @@ function updateAuthUI() {
     }
 }
 
-// Update user profile
-async function updateProfile(avatarFile, status) {
+// ═══════════════════════════════════════════════════════════════════
+//  updateProfile  —  BUG FIX
+//
+//  Original crash: "Cannot coerce the result to a single JSON object"
+//
+//  Root cause: Supabase .update().select().single() fails when:
+//    • The updates object is empty (nothing to change)
+//    • The response shape is an array, not a single row
+//
+//  Fix applied:
+//    1. Build the updates object incrementally
+//    2. Return early if updates is empty (nothing to persist)
+//    3. Use .select() WITHOUT .single() — returns an array
+//    4. Manually extract data[0] from the array
+// ═══════════════════════════════════════════════════════════════════
+async function updateProfile(avatarFile, status, bannerFile, bio, themePreset, themeColor, customCss) {
     try {
         const user = await getCurrentUser();
         if (!user) {
             throw new Error(t('error_login'));
         }
 
-        let updates = {};
+        const updates = {};
 
-        // Upload new avatar if provided
+        // Avatar
         if (avatarFile) {
-            const avatarUrl = await uploadImage(avatarFile, 'avatars');
-            updates.avatar_url = avatarUrl;
+            updates.avatar_url = await uploadImage(avatarFile, 'avatars');
         }
 
-        // Update status
+        // Banner (1200×300px recommended)
+        if (bannerFile) {
+            updates.banner_url = await uploadImage(bannerFile, 'banners');
+        }
+
+        // Status
         if (status !== undefined) {
-            updates.status = status || null;
+            updates.status = status.trim() || null;
         }
 
-        // Update in database
+        // Bio (max 500 chars enforced)
+        if (bio !== undefined) {
+            updates.bio = bio.trim().substring(0, 500) || null;
+        }
+
+        // Theme preset (default | minimal | colorful | dark | neon)
+        if (themePreset !== undefined) {
+            updates.theme_preset = themePreset;
+        }
+
+        // Accent colour hex
+        if (themeColor !== undefined) {
+            updates.theme_color = themeColor;
+        }
+
+        // Custom CSS (scoped to .profile-themed)
+        if (customCss !== undefined) {
+            updates.custom_css = customCss.trim() || null;
+        }
+
+        // ── GUARD: nothing changed → skip DB round-trip ──
+        if (Object.keys(updates).length === 0) {
+            return user;
+        }
+
+        // ── FIX: .select() returns an array; never use .single() here ──
         const { data, error } = await supabaseClient
             .from('users')
             .update(updates)
             .eq('id', user.id)
-            .select()
-            .single();
+            .select();   // ← array, NOT single object
 
         if (error) throw error;
 
-        // Update current user
-        data.profile_hash = generateUserHash(data.id);
-        currentUser = data;
-        localStorage.setItem('femfur_user', JSON.stringify(data));
+        // Extract first element from array
+        const updatedRow = Array.isArray(data) && data.length > 0 ? data[0] : null;
+        if (!updatedRow) {
+            throw new Error('Profile update returned no data');
+        }
 
-        return data;
+        // Attach hash and persist to session
+        updatedRow.profile_hash = generateUserHash(updatedRow.id);
+        currentUser = updatedRow;
+        localStorage.setItem('femfur_user', JSON.stringify(updatedRow));
+
+        return updatedRow;
     } catch (error) {
         console.error('Profile update error:', error);
         throw error;

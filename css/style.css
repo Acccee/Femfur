@@ -2217,3 +2217,271 @@ body.dark-theme .auto-link:hover {
 body.dark-theme .auto-link:visited {
     color: #c299ff;
 }
+
+/* ============================================
+   v5 NEW STYLES — Profile, Badges, Levels,
+   Themes, GIF Picker, Modal Wide
+   ============================================ */
+
+/* ── Modal Wide (edit profile) ────────────────── */
+.modal-wide {
+    max-width: 780px;
+}
+
+/* ── Bio char counter ─────────────────────────── */
+.char-count {
+    font-size: 12px;
+    color: #717171;
+    text-align: right;
+}
+body.dark-theme .char-count { color: #aaa; }
+
+/* ── Theme Presets row ────────────────────────── */
+.theme-section { margin-top: 4px; }
+.theme-presets {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+}
+
+.theme-preset {
+    padding: 8px 16px;
+    border: 2px solid #b7c5d9;
+    border-radius: 20px;
+    background: #fff;
+    color: #34345c;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+.theme-preset:hover {
+    border-color: #34345c;
+    background: #eef2ff;
+}
+.theme-preset.active {
+    border-color: #af0a0f;
+    background: #af0a0f;
+    color: #fff;
+    font-weight: 600;
+}
+
+body.dark-theme .theme-preset {
+    background: #0f3460;
+    border-color: #533483;
+    color: #eee;
+}
+body.dark-theme .theme-preset:hover {
+    border-color: #e94560;
+}
+body.dark-theme .theme-preset.active {
+    background: #e94560;
+    border-color: #e94560;
+    color: #fff;
+}
+
+/* ── Profile Banner ───────────────────────────── */
+.profile-banner {
+    width: 100%;
+    height: 180px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 8px 8px 0 0;
+    margin-bottom: -30px;
+    position: relative;
+    z-index: 0;
+}
+.profile-banner-placeholder {
+    opacity: 0.35;
+}
+
+/* ── Profile Bio ──────────────────────────────── */
+.profile-bio {
+    color: #34345c;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 8px;
+    max-width: 480px;
+}
+body.dark-theme .profile-bio { color: #ccc; }
+
+/* ── Reputation line ──────────────────────────── */
+.profile-reputation {
+    margin-top: 6px;
+    font-size: 14px;
+    color: #717171;
+}
+.profile-reputation strong { color: #af0a0f; }
+body.dark-theme .profile-reputation { color: #aaa; }
+body.dark-theme .profile-reputation strong { color: #e94560; }
+
+/* ── Level bar ─────────────────────────────────── */
+.profile-level {
+    margin: 16px 0 8px;
+    padding: 0 4px;
+}
+.level-label {
+    font-size: 13px;
+    color: #717171;
+    margin-bottom: 5px;
+}
+.level-label strong { color: #af0a0f; }
+body.dark-theme .level-label { color: #aaa; }
+body.dark-theme .level-label strong { color: #e94560; }
+
+.level-bar-bg {
+    width: 100%;
+    max-width: 400px;
+    height: 12px;
+    background: #d6daf0;
+    border-radius: 6px;
+    overflow: hidden;
+}
+.level-bar-fill {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 0.6s ease;
+}
+body.dark-theme .level-bar-bg { background: #16213e; }
+
+/* ── Badges ────────────────────────────────────── */
+.profile-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 12px 0 6px;
+}
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    background: linear-gradient(135deg, #eef2ff, #d6daf0);
+    border: 1px solid #b7c5d9;
+    border-radius: 16px;
+    font-size: 13px;
+    color: #34345c;
+    position: relative;
+}
+.badge .badge-label {
+    font-weight: 600;
+}
+body.dark-theme .badge {
+    background: linear-gradient(135deg, #16213e, #0f3460);
+    border-color: #533483;
+    color: #eee;
+}
+
+/* ── GIF Picker ───────────────────────────────── */
+.gif-picker-container {
+    position: relative;
+    margin-bottom: 6px;
+}
+.gif-btn {
+    padding: 6px 14px;
+    font-size: 14px;
+}
+.gif-picker-panel {
+    position: absolute;
+    bottom: 110%;
+    left: 0;
+    width: 380px;
+    max-width: 95vw;
+    background: #fff;
+    border: 1px solid #b7c5d9;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+    z-index: 500;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px;
+    max-height: 420px;
+    overflow: hidden;
+}
+body.dark-theme .gif-picker-panel {
+    background: #16213e;
+    border-color: #0f3460;
+}
+.gif-search-input {
+    padding: 8px 12px;
+    border: 1px solid #b7c5d9;
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+}
+.gif-search-input:focus { border-color: #af0a0f; }
+body.dark-theme .gif-search-input {
+    background: #0f3460;
+    border-color: #533483;
+    color: #eee;
+}
+.gif-results {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    overflow-y: auto;
+    max-height: 320px;
+    padding-right: 4px;
+}
+.gif-item {
+    cursor: pointer;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 2px solid transparent;
+    transition: border-color 0.2s, transform 0.15s;
+}
+.gif-item:hover {
+    border-color: #af0a0f;
+    transform: scale(1.04);
+}
+.gif-item img {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    display: block;
+}
+body.dark-theme .gif-item:hover { border-color: #e94560; }
+
+.gif-loading, .gif-error, .gif-empty, .gif-no-key {
+    text-align: center;
+    padding: 20px 8px;
+    color: #717171;
+    font-size: 13px;
+    grid-column: 1 / -1;
+}
+.gif-no-key p { margin: 4px 0; }
+.gif-no-key code {
+    background: #eef2ff;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 12px;
+}
+body.dark-theme .gif-no-key code {
+    background: #0f3460;
+    color: #eee;
+}
+body.dark-theme .gif-loading,
+body.dark-theme .gif-error,
+body.dark-theme .gif-empty,
+body.dark-theme .gif-no-key { color: #aaa; }
+
+/* ── color picker inside modal ────────────────── */
+input[type="color"] {
+    width: 48px;
+    height: 36px;
+    border: 1px solid #b7c5d9;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 2px;
+    background: transparent;
+}
+
+/* ── Responsive tweaks for new elements ───────── */
+@media (max-width: 600px) {
+    .gif-picker-panel { width: 95vw; left: 0; }
+    .gif-results { grid-template-columns: repeat(2, 1fr); }
+    .profile-banner { height: 120px; }
+    .theme-presets { gap: 6px; }
+    .theme-preset { padding: 6px 12px; font-size: 12px; }
+}

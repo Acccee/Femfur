@@ -25,17 +25,19 @@
   "threadOfDay": "Тред дня",
   "threadOfWeek": "Тред недели",
   "recentThreads": "Последние треды",
-  "footerTagline": "Анонимный имиджборд",
-  
+  "footerTagline": "Тематический имиджборд",
+
   "board_art": "Искусство",
   "board_lit": "Литература",
   "board_po": "Поэзия",
   "board_mu": "Музыка",
   "board_ph": "Фотография",
+  "board_craft": "Рукоделие",
   "board_soc": "Общение",
   "board_chat": "Чат",
   "board_news": "Новости",
   "board_int": "Международное",
+  "board_meme": "Мемы",
   "board_a": "Аниме",
   "board_vn": "Визуальные новеллы",
   "board_vg": "Видеоигры",
@@ -43,26 +45,38 @@
   "board_vm": "Ретро игры",
   "board_tv": "ТВ и фильмы",
   "board_co": "Комиксы",
+  "board_esports": "Киберспорт",
   "board_g": "Технологии",
   "board_pr": "Программирование",
   "board_sci": "Наука",
   "board_wsr": "Помощь",
   "board_3": "3D печать",
+  "board_cyber": "Кибербезопасность",
+  "board_ai": "Искусственный интеллект",
+  "board_crypto": "Криптовалюта",
   "board_fit": "Фитнес",
   "board_ck": "Кулинария",
   "board_fa": "Мода",
   "board_adv": "Советы",
   "board_trv": "Путешествия",
   "board_out": "Природа",
+  "board_mental": "Психическое здоровье",
   "board_sp": "Спорт",
   "board_auto": "Автомобили",
   "board_an": "Животные",
   "board_his": "История",
   "board_p": "Фотография",
-  
+  "board_music": "Поклонники музыки",
+  "board_pol": "Политика",
+  "board_phil": "Философия",
+  "board_edu": "Образование",
+  "board_eco": "Экономика",
+  "board_world": "Мир",
+  "board_lang": "Языки",
+
   "cat_life": "О жизни",
   "cat_hobby": "Хобби",
-  
+
   "anonymous": "Аноним",
   "created": "Создано",
   "replies": "Ответов",
@@ -73,7 +87,7 @@
   "allActivity": "Вся активность",
   "userThreads": "Треды пользователя",
   "userPosts": "Посты пользователя",
-  
+
   "error_login": "Ошибка входа. Проверьте данные.",
   "error_register": "Ошибка регистрации. Возможно, никнейм уже занят.",
   "error_password_mismatch": "Пароли не совпадают.",
@@ -81,22 +95,22 @@
   "error_thread_create": "Не удалось создать тред.",
   "error_reply_create": "Не удалось отправить ответ.",
   "error_load": "Ошибка загрузки. Проверьте подключение к Supabase.",
-  
+
   "success_register": "Регистрация успешна! Теперь вы можете войти.",
   "success_login": "Успешный вход!",
   "success_thread": "Тред успешно создан!",
   "success_reply": "Ответ успешно отправлен!",
   "success_profile_update": "Профиль успешно обновлен!",
-  
+
   "no_threads": "Пока нет тредов. Создайте первый!",
   "no_replies": "Пока нет ответов. Будьте первым!",
   "no_activity": "Пока нет активности.",
-  
+
   "editProfile": "Редактировать профиль",
   "changeAvatar": "Изменить аватар",
   "save": "Сохранить",
   "error_profile_update": "Ошибка обновления профиля",
-  
+
   "search": "Поиск",
   "searchPlaceholder": "Поиск тредов и ответов...",
   "no_search_results": "Ничего не найдено",
@@ -116,5 +130,6 @@
   "error_thread_update": "Не удалось обновить тред",
   "error_no_permission": "У вас нет прав для выполнения этого действия",
   "error_login_required": "Вы должны войти в систему для выполнения этого действия",
-  "no_content": "Нет описания"
+  "no_content": "Нет описания",
+  "loading": "Загрузка..."
 }
