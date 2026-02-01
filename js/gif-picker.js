@@ -1,5 +1,5 @@
 
-const GIPHY_API_KEY = 'YOUR_GIPHY_API_KEY_HERE';
+const GIPHY_API_KEY = 'klPbJhZNWOjGSvJBKXA43BVR6c61wRSh';
 
 const GIPHY_BASE = 'https://api.giphy.com/v1/gifs';
 
