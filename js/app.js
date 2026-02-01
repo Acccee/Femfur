@@ -367,10 +367,12 @@ async function showThread(boardId, threadId) {
         const threadReactionsId = `thread-reactions-${threadId}`;
         const threadActionsId   = `thread-actions-${threadId}`;
 
+        const formattedContent = await formatText(thread.content);
+        
         threadContent.innerHTML = `
             <h2>${escapeHtml(thread.title)}</h2>
             ${creatorInfoHtml}
-            <div class="thread-text">${formatText(thread.content)}</div>
+            <div class="thread-text">${formattedContent}</div>
             ${thread.image_url ? `<img src="${thread.image_url}" alt="Thread image">` : ''}
             <div class="thread-meta">
                 ${thread.is_anonymous ? `<span class="thread-author anonymous">${author}</span>` : ''}
@@ -419,10 +421,11 @@ async function renderReplies(replies) {
             : `<span class="reply-author ${reply.is_anonymous ? 'anonymous' : ''}">${escapeHtml(author)}</span>`;
 
         const replyReactionsId = `reply-reactions-${reply.id}`;
+        const formattedContent = await formatText(reply.content);
 
         replyItem.innerHTML = `
             <div class="reply-number">##${index + 1}</div>
-            <div class="reply-text">${formatText(reply.content)}</div>
+            <div class="reply-text">${formattedContent}</div>
             ${reply.image_url ? `<img src="${reply.image_url}" alt="Reply image">` : ''}
             <div class="reply-meta">
                 ${authorHtml}

@@ -1,9 +1,10 @@
-// text-formatting.js - Text Formatting Module (Markdown-like)
+// text-formatting.js - Text Formatting Module (Markdown-like with Media Support)
 
 import { parseLinks } from './link-parser.js';
+import { parseLinksWithMedia } from './media-parser.js';
 
 // Format text with markdown-like syntax
-function formatText(text) {
+async function formatText(text) {
     if (!text) return '';
     
     let formatted = text;
@@ -44,8 +45,12 @@ function formatText(text) {
     // Line breaks
     formatted = formatted.replace(/\n/g, '<br>');
     
-    // Parse URLs and make them clickable (AFTER all other formatting)
-    formatted = parseLinks(formatted);
+    // Parse URLs with media embedding (AFTER all other formatting)
+    formatted = await parseLinksWithMedia(formatted, {
+        maxWidth: 400,
+        maxHeight: 300,
+        showLink: true
+    });
     
     return formatted;
 }

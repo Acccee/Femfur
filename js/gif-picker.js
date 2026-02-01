@@ -1,7 +1,10 @@
+// gif-picker.js – Tenor GIF Picker Integration
 
-const GIPHY_API_KEY = 'klPbJhZNWOjGSvJBKXA43BVR6c61wRSh';
+// ⚠️  Replace with your own Tenor API key:
+// https://developers.tenor.com/
+const TENOR_API_KEY = 'YOUR_TENOR_API_KEY_HERE';
 
-const GIPHY_BASE = 'https://api.giphy.com/v1/gifs';
+const TENOR_BASE = 'https://api.tenor.com/v2';
 
 // ─── Initialize on DOM ready ─────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -10,8 +13,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const gifSearch = document.getElementById('gifSearchInput');
     const gifResults= document.getElementById('gifResults');
 
-    if (!gifBtn) return;
+    if (!gifBtn) return; // not on a page with the GIF picker
 
+    // Toggle panel
     gifBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         const open = gifPanel.style.display !== 'none';
@@ -19,12 +23,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!open && gifSearch) gifSearch.focus();
     });
 
+    // Close when clicking outside
     document.addEventListener('click', (e) => {
         if (!gifPanel.contains(e.target) && e.target !== gifBtn) {
             gifPanel.style.display = 'none';
         }
     });
 
+    // Search on Enter or after 600 ms debounce
     let debounceTimer = null;
     if (gifSearch) {
         gifSearch.addEventListener('keydown', (e) => {
@@ -44,32 +50,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// ─── Search GIPHY ────────────────────────────────────────────────
+// ─── Search Tenor ────────────────────────────────────────────────
 async function searchGifs(query) {
     const gifResults = document.getElementById('gifResults');
     if (!gifResults) return;
 
-    gifResults.innerHTML = '<div class="gif-loading">Поиск…</div>';
+    gifResults.innerHTML = '<div class="gif-loading">Searching…</div>';
 
-    if (GIPHY_API_KEY === 'YOUR_GIPHY_API_KEY_HERE') {
+    // If key is placeholder, show message
+    if (TENOR_API_KEY === 'YOUR_TENOR_API_KEY_HERE') {
         gifResults.innerHTML = `
             <div class="gif-no-key">
-                <p>🔑 GIPHY API key not configured.</p>
-                <p>Open <code>js/gif-picker.js</code> and replace <code>YOUR_GIPHY_API_KEY_HERE</code> with your key from <a href="https://developers.giphy.com/dashboard/" target="_blank">developers.giphy.com</a></p>
+                <p>🔑 Tenor API key not configured.</p>
+                <p>Open <code>js/gif-picker.js</code> and replace <code>YOUR_TENOR_API_KEY_HERE</code> with your key from <a href="https://developers.tenor.com/" target="_blank">developers.tenor.com</a></p>
             </div>`;
         return;
     }
 
     try {
-        // GIPHY search endpoint: https://api.giphy.com/v1/gifs/search
-        const url = `${GIPHY_BASE}/search?api_key=${GIPHY_API_KEY}&q=${encodeURIComponent(query)}&limit=12&rating=pg`;
+        const url = `${TENOR_BASE}/search?q=${encodeURIComponent(query)}&key=${TENOR_API_KEY}&limit=12`;
         const res = await fetch(url);
-        if (!res.ok) throw new Error(`GIPHY API ${res.status}`);
+        if (!res.ok) throw new Error(`Tenor API ${res.status}`);
         const json = await res.json();
-        renderGifs(json.data || []); // GIPHY использует поле 'data'
+        renderGifs(json.results || []);
     } catch (err) {
-        console.error('GIPHY search error:', err);
-        gifResults.innerHTML = '<div class="gif-error">Ошибка загрузки GIF. Проверьте ваш API-ключ.</div>';
+        console.error('Tenor search error:', err);
+        gifResults.innerHTML = '<div class="gif-error">Failed to load GIFs. Check your API key.</div>';
     }
 }
 
@@ -79,33 +85,38 @@ function renderGifs(gifs) {
     if (!gifResults) return;
 
     if (gifs.length === 0) {
-        gifResults.innerHTML = '<div class="gif-empty">Ничего не найдено.</div>';
+        gifResults.innerHTML = '<div class="gif-empty">No GIFs found.</div>';
         return;
     }
 
     gifResults.innerHTML = gifs.map(gif => {
-        // GIPHY использует другую структуру объектов изображений
-        const thumbUrl  = gif.images.fixed_height_small_still.url || ''; // Маленькая превьюшка
-        const gifUrl    = gif.url || '';                 // Ссылка на страницу GIPHY
+        // Use the tinygif or gif media (smallest preview)
+        const media  = gif.media_object || gif.media;
+        const thumb  = media?.tinygif?.url || media?.gif?.url || '';
+        const gifUrl = gif.url || '';                 // e.g. https://tenor.com/view/...
 
         return `
-            <div class="gif-item" data-url="${escapeHtml(gifUrl)}" data-thumb="${escapeHtml(thumbUrl)}">
-                <img src="${escapeHtml(thumbUrl)}" alt="gif" loading="lazy">
+            <div class="gif-item" data-url="${escapeHtml(gifUrl)}" data-thumb="${escapeHtml(thumb)}">
+                <img src="${escapeHtml(thumb)}" alt="gif" loading="lazy">
             </div>`;
     }).join('');
 
+    // Click handlers — insert URL into textarea
     gifResults.querySelectorAll('.gif-item').forEach(item => {
         item.addEventListener('click', () => {
             const url = item.dataset.url;
             insertGifUrl(url);
 
+            // Close panel
             const panel = document.getElementById('gifPickerPanel');
             if (panel) panel.style.display = 'none';
         });
     });
 }
 
+// ─── Insert GIF URL into active textarea ─────────────────────────
 function insertGifUrl(url) {
+    // Try replyText first, then newThreadContent
     const targets = ['replyText', 'newThreadContent', 'editThreadContent'];
     for (const id of targets) {
         const ta = document.getElementById(id);
@@ -119,6 +130,7 @@ function insertGifUrl(url) {
             return;
         }
     }
+    // Fallback: append to replyText
     const fallback = document.getElementById('replyText');
     if (fallback) {
         fallback.value += (fallback.value ? '\n' : '') + url;
@@ -126,6 +138,7 @@ function insertGifUrl(url) {
     }
 }
 
+// ─── Helper ──────────────────────────────────────────────────────
 function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;

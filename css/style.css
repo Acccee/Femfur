@@ -2485,3 +2485,105 @@ input[type="color"] {
     .theme-presets { gap: 6px; }
     .theme-preset { padding: 6px 12px; font-size: 12px; }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   EMBEDDED MEDIA STYLES (GIF, Images, Videos)
+   ═══════════════════════════════════════════════════════════════ */
+
+.embedded-media {
+    margin: 12px 0;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    display: inline-block;
+    max-width: 100%;
+}
+
+.dark-theme .embedded-media {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.embedded-media img,
+.embedded-media video {
+    display: block;
+    border-radius: 4px;
+    max-width: 100%;
+    height: auto;
+}
+
+.embedded-media img {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.embedded-media img:hover {
+    transform: scale(1.02);
+}
+
+.media-source {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #666;
+}
+
+.dark-theme .media-source {
+    color: #aaa;
+}
+
+.media-source a {
+    color: #af0a0f;
+    text-decoration: none;
+}
+
+.media-source a:hover {
+    text-decoration: underline;
+}
+
+.media-error {
+    padding: 20px;
+    text-align: center;
+    color: #999;
+    font-style: italic;
+}
+
+/* GIF specific styling */
+.media-gif img {
+    border: 2px solid #af0a0f33;
+}
+
+.dark-theme .media-gif img {
+    border-color: #af0a0f66;
+}
+
+/* Video controls */
+.media-video video {
+    background: #000;
+}
+
+/* Loading state for media */
+.embedded-media img[src=""],
+.embedded-media img:not([src]) {
+    min-height: 200px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Make media responsive */
+@media (max-width: 768px) {
+    .embedded-media {
+        padding: 8px;
+    }
+    
+    .embedded-media img,
+    .embedded-media video {
+        max-width: 100%;
+    }
+}
