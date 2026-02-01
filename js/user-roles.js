@@ -6,13 +6,11 @@
  * Add user IDs (from Supabase auth.users table) here
  */
 export const ADMIN_USERS = [
-Sesla: '1'
+    Sesla: '1'
 ];
 
-/**
- * VERIFIED USERS - Blue verified badge
- * Add user IDs here for verified status
- */
+Sesla: '1'
+
 export const VERIFIED_USERS = [
     // Example: 'uuid-here',
     // 'another-uuid',
