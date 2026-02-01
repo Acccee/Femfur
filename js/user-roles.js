@@ -6,10 +6,8 @@
  * Add user IDs (from Supabase auth.users table) here
  */
 export const ADMIN_USERS = [
-    Sesla: '1'
+    1,
 ];
-
-Sesla: '1'
 
 export const VERIFIED_USERS = [
     // Example: 'uuid-here',
