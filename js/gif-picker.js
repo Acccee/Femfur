@@ -1,6 +1,7 @@
-const KLIPY_API_KEY = 'yvqj3uv2Z8QVxphbKlqyRjmfQH5dYEqKD6zaOv1MK9JjqzaqZWavDxoMiKvVaMM4';
 
-const KLIPY_BASE = 'https://api.klipy.com'; // <-- Здесь добавлено /v2
+const GIPHY_API_KEY = 'YOUR_GIPHY_API_KEY_HERE';
+
+const GIPHY_BASE = 'https://api.giphy.com/v1/gifs';
 
 // ─── Initialize on DOM ready ─────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -43,32 +44,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// ─── Search Klipy ────────────────────────────────────────────────
+// ─── Search GIPHY ────────────────────────────────────────────────
 async function searchGifs(query) {
     const gifResults = document.getElementById('gifResults');
     if (!gifResults) return;
 
     gifResults.innerHTML = '<div class="gif-loading">Поиск…</div>';
 
-    if (KLIPY_API_KEY === 'YOUR_KLIPY_API_KEY_HERE') {
+    if (GIPHY_API_KEY === 'YOUR_GIPHY_API_KEY_HERE') {
         gifResults.innerHTML = `
             <div class="gif-no-key">
-                <p>🔑 API ключ Klipy не настроен.</p>
-                <p>Замените <code>YOUR_KLIPY_API_KEY_HERE</code> в файле скрипта ключом из <a href="https://partner.klipy.com" target="_blank">partner.klipy.com</a></p>
+                <p>🔑 GIPHY API key not configured.</p>
+                <p>Open <code>js/gif-picker.js</code> and replace <code>YOUR_GIPHY_API_KEY_HERE</code> with your key from <a href="https://developers.giphy.com/dashboard/" target="_blank">developers.giphy.com</a></p>
             </div>`;
         return;
     }
 
     try {
-        // Запрос теперь будет идти на https://api.klipy.com/search
-        const url = `${KLIPY_BASE}/search?q=${encodeURIComponent(query)}&key=${KLIPY_API_KEY}&limit=12`;
+        // GIPHY search endpoint: https://api.giphy.com/v1/gifs/search
+        const url = `${GIPHY_BASE}/search?api_key=${GIPHY_API_KEY}&q=${encodeURIComponent(query)}&limit=12&rating=pg`;
         const res = await fetch(url);
-        if (!res.ok) throw new Error(`Klipy API ${res.status}`);
+        if (!res.ok) throw new Error(`GIPHY API ${res.status}`);
         const json = await res.json();
-        renderGifs(json.results || []);
+        renderGifs(json.data || []); // GIPHY использует поле 'data'
     } catch (err) {
-        console.error('Klipy search error:', err);
-        gifResults.innerHTML = '<div class="gif-error">Ошибка загрузки GIF. Проверьте ключ API.</div>';
+        console.error('GIPHY search error:', err);
+        gifResults.innerHTML = '<div class="gif-error">Ошибка загрузки GIF. Проверьте ваш API-ключ.</div>';
     }
 }
 
@@ -83,14 +84,13 @@ function renderGifs(gifs) {
     }
 
     gifResults.innerHTML = gifs.map(gif => {
-        // Klipy v2 сохраняет структуру Tenor для легкого перехода
-        const media = gif.media_formats || gif.media || {};
-        const thumb = media.tinygif?.url || media.gif?.url || '';
-        const gifUrl = gif.url || '';
+        // GIPHY использует другую структуру объектов изображений
+        const thumbUrl  = gif.images.fixed_height_small_still.url || ''; // Маленькая превьюшка
+        const gifUrl    = gif.url || '';                 // Ссылка на страницу GIPHY
 
         return `
-            <div class="gif-item" data-url="${escapeHtml(gifUrl)}" data-thumb="${escapeHtml(thumb)}">
-                <img src="${escapeHtml(thumb)}" alt="gif" loading="lazy">
+            <div class="gif-item" data-url="${escapeHtml(gifUrl)}" data-thumb="${escapeHtml(thumbUrl)}">
+                <img src="${escapeHtml(thumbUrl)}" alt="gif" loading="lazy">
             </div>`;
     }).join('');
 
