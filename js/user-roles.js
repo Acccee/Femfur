@@ -6,7 +6,8 @@
  * Add user IDs (from Supabase auth.users table) here
  */
 export const ADMIN_USERS = [
-    '1',
+    1, // Ваш ID без кавычек
+    "1" // И на всякий случай как строка
 ];
 
 export const VERIFIED_USERS = [
@@ -20,7 +21,8 @@ export const VERIFIED_USERS = [
  * @returns {boolean}
  */
 export function isAdmin(userId) {
-    return ADMIN_USERS.includes(userId);
+    // Приводим оба значения к строке для надежности
+    return ADMIN_USERS.some(adminId => String(adminId) === String(userId));
 }
 
 /**
@@ -29,7 +31,7 @@ export function isAdmin(userId) {
  * @returns {boolean}
  */
 export function isVerified(userId) {
-    return VERIFIED_USERS.includes(userId) || isAdmin(userId);
+    return VERIFIED_USERS.some(verifiedId => String(verifiedId) === String(userId)) || isAdmin(userId);
 }
 
 /**
