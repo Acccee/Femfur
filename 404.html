@@ -26,31 +26,32 @@ body {
     overflow: hidden;
 }
 
-/* PAGE FADE IN */
+/* PAGE APPEAR */
 .page {
     opacity: 0;
-    transform: translateY(20px) scale(0.98);
-    animation: pageIn 0.9s ease forwards;
+    transform: translateY(16px);
+    animation: pageIn 0.8s ease forwards;
 }
 
 @keyframes pageIn {
     to {
         opacity: 1;
-        transform: translateY(0) scale(1);
+        transform: translateY(0);
     }
 }
 
 .container {
     text-align: center;
-    padding: 32px;
+    padding: 24px;
 }
 
-/* IMAGE FLOAT */
+/* IMAGE */
 .image-wrap {
     position: relative;
     display: inline-block;
-    margin-bottom: 40px;
-    animation: float 4s ease-in-out infinite;
+    margin-bottom: 28px;
+    animation: float 5s ease-in-out infinite;
+    will-change: transform;
 }
 
 @keyframes float {
@@ -59,31 +60,31 @@ body {
 }
 
 .image-wrap img {
-    max-width: 100%;
-    height: auto;
     display: block;
-    position: relative;
-    z-index: 2;
+    max-width: 420px;
+    max-height: 55vh;
+    width: auto;
+    height: auto;
 }
 
-/* SKELETON SHIMMER */
+/* SKELETON PLACEHOLDER */
 .image-wrap::before {
     content: "";
     position: absolute;
-    inset: -8px;
-    border-radius: 16px;
+    inset: 0;
+    border-radius: 12px;
     background: linear-gradient(
-        110deg,
-        rgba(218,65,91,0.05) 25%,
-        rgba(218,65,91,0.25) 37%,
-        rgba(218,65,91,0.05) 63%
+        100deg,
+        rgba(218,65,91,0.08) 30%,
+        rgba(218,65,91,0.18) 40%,
+        rgba(218,65,91,0.08) 50%
     );
     background-size: 200% 100%;
-    animation: shimmer 1.6s infinite linear;
-    z-index: 1;
+    animation: skeleton 1.4s linear infinite;
+    z-index: -1;
 }
 
-@keyframes shimmer {
+@keyframes skeleton {
     to {
         background-position-x: -200%;
     }
@@ -91,61 +92,31 @@ body {
 
 /* BUTTON */
 .back-button {
-    position: relative;
     display: inline-block;
-    padding: 16px 34px;
+    padding: 14px 32px;
     font-size: 16px;
     font-weight: 600;
     color: var(--bg);
     background: var(--accent);
     border-radius: 999px;
     text-decoration: none;
-    overflow: hidden;
-    transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease;
-}
-
-/* BUTTON GLOW */
-.back-button::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.35), transparent 60%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .back-button:hover {
-    transform: translateY(-3px) scale(1.03);
-    box-shadow: 0 12px 30px rgba(218, 65, 91, 0.45);
-}
-
-.back-button:hover::after {
-    opacity: 1;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(218, 65, 91, 0.35);
 }
 
 .back-button:active {
-    transform: translateY(0) scale(0.98);
-    box-shadow: 0 6px 16px rgba(218, 65, 91, 0.35);
-}
-
-/* SUBTLE BACKGROUND NOISE */
-body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background-image:
-        radial-gradient(rgba(218,65,91,0.05) 1px, transparent 1px);
-    background-size: 40px 40px;
-    opacity: 0.25;
-    pointer-events: none;
+    transform: translateY(0);
+    box-shadow: 0 6px 14px rgba(218, 65, 91, 0.25);
 }
 </style>
 </head>
 
 <body>
-<div class="page">
+<div class="page" id="parallax">
     <div class="container">
         <div class="image-wrap">
             <img src="404.png" alt="404 — Page not found">
@@ -156,5 +127,16 @@ body::before {
         </a>
     </div>
 </div>
+
+<script>
+const parallax = document.getElementById('parallax');
+
+document.addEventListener('mousemove', (e) => {
+    const x = (e.clientX / window.innerWidth - 0.5) * 10;
+    const y = (e.clientY / window.innerHeight - 0.5) * 10;
+
+    parallax.style.transform = `translate(${x}px, ${y}px)`;
+});
+</script>
 </body>
 </html>
