@@ -2,13 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>404</title>
+<title>404 - Not Found</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 :root {
     --bg: #16223f;
     --accent: #da415b;
+    --accent-light: #ff5e78;
 }
 
 * {
@@ -21,17 +22,21 @@ body {
     background: var(--bg);
     font-family: system-ui, sans-serif;
     overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    perspective: 1000px; /* Важно для 3D параллакса */
 }
 
 /* PAGE FADE */
 .page {
-    min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     opacity: 0;
-    animation: fadeIn 0.7s ease forwards;
+    animation: fadeIn 0.8s ease-out forwards;
+    width: 100%;
 }
 
 @keyframes fadeIn {
@@ -42,35 +47,32 @@ body {
 .image-wrap {
     position: relative;
     margin-bottom: 80px;
+    transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Плавный возврат */
     will-change: transform;
 }
 
-/* FLOAT */
 .image {
-    animation: float 5s ease-in-out infinite;
+    animation: float 6s ease-in-out infinite;
     display: block;
     max-width: 360px;
     max-height: 50vh;
     width: auto;
     height: auto;
+    filter: drop-shadow(0 20px 50px rgba(0,0,0,0.5));
 }
 
 @keyframes float {
-    0%,100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    33% { transform: translateY(-15px) rotate(2deg); }
+    66% { transform: translateY(-5px) rotate(-2deg); }
 }
 
-/* SKELETON (STRICT) */
+/* SKELETON */
 .skeleton {
     position: absolute;
     inset: 0;
     border-radius: 18px;
-    background: linear-gradient(
-        90deg,
-        rgba(218,65,91,0.08) 25%,
-        rgba(218,65,91,0.18) 37%,
-        rgba(218,65,91,0.08) 63%
-    );
+    background: linear-gradient(90deg, rgba(218,65,91,0.05) 25%, rgba(218,65,91,0.15) 37%, rgba(218,65,91,0.05) 63%);
     background-size: 200% 100%;
     animation: skeleton 1.4s linear infinite;
 }
@@ -79,31 +81,53 @@ body {
     to { background-position-x: -200%; }
 }
 
-/* BUTTON */
-.button-wrap {
-    position: absolute;
-    bottom: 40px;
-    left: 50%;
-    transform: translateX(-50%);
+/* IMPROVED BUTTON */
+.back-button {
+    position: relative;
+    display: inline-block;
+    padding: 16px 42px;
+    border-radius: 50px;
+    background: var(--accent);
+    color: white;
+    font-size: 18px;
+    font-weight: 700;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    overflow: hidden; /* Чтобы блик не вылезал */
+    transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+    box-shadow: 0 10px 20px rgba(218, 65, 91, 0.2);
 }
 
-.back-button {
-    padding: 14px 36px;
-    border-radius: 999px;
-    background: var(--accent);
-    color: var(--bg);
-    font-size: 16px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: transform 0.15s ease;
+/* Эффект глянцевого блика при наведении */
+.back-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        120deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    );
+    transition: all 0.6s;
 }
 
 .back-button:hover {
-    transform: translateY(-2px);
+    transform: translateY(-5px) scale(1.05);
+    background: var(--accent-light);
+    box-shadow: 0 15px 30px rgba(218, 65, 91, 0.4);
+}
+
+.back-button:hover::before {
+    left: 100%;
 }
 
 .back-button:active {
-    transform: translateY(1px) scale(0.98);
+    transform: translateY(-2px) scale(0.98);
 }
 </style>
 </head>
@@ -113,10 +137,10 @@ body {
 
     <div class="image-wrap" id="parallax">
         <div class="skeleton" id="skeleton"></div>
-        <img
-            src="404.png"
-            alt="404"
-            class="image"
+        <img 
+            src="404.png" 
+            alt="404" 
+            class="image" 
             onload="document.getElementById('skeleton').style.display='none'"
         >
     </div>
@@ -133,12 +157,29 @@ body {
 const target = document.getElementById('parallax');
 
 document.addEventListener('mousemove', (e) => {
-    const x = (e.clientX / window.innerWidth - 0.5) * 18;
-    const y = (e.clientY / window.innerHeight - 0.5) * 18;
+    // Вычисляем положение курсора от -0.5 до 0.5
+    const xOffset = (e.clientX / window.innerWidth - 0.5);
+    const yOffset = (e.clientY / window.innerHeight - 0.5);
 
-    target.style.transform = `translate(${x}px, ${y}px)`;
+    // Смещение (Translate)
+    const moveX = xOffset * 30; 
+    const moveY = yOffset * 30;
+
+    // Наклон (Rotate) - создает 3D эффект
+    const rotateY = xOffset * 15; 
+    const rotateX = -yOffset * 15;
+
+    target.style.transform = `
+        translate3d(${moveX}px, ${moveY}px, 0) 
+        rotateX(${rotateX}deg) 
+        rotateY(${rotateY}deg)
+    `;
+});
+
+// Плавный возврат в центр, когда мышка уходит из окна
+document.addEventListener('mouseleave', () => {
+    target.style.transform = `translate3d(0, 0, 0) rotateX(0) rotateY(0)`;
 });
 </script>
 </body>
 </html>
-
