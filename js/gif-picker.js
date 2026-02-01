@@ -1,9 +1,6 @@
-// gif-picker.js – Klipy GIF Picker Integration (Tenor Alternative)
-
-// ⚠️ Получите ваш API ключ здесь: https://partner.klipy.com
 const KLIPY_API_KEY = 'yvqj3uv2Z8QVxphbKlqyRjmfQH5dYEqKD6zaOv1MK9JjqzaqZWavDxoMiKvVaMM4';
 
-const KLIPY_BASE = 'https://api.klipy.com';
+const KLIPY_BASE = 'https://api.klipy.com'; // <-- Здесь добавлено /v2
 
 // ─── Initialize on DOM ready ─────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -63,6 +60,7 @@ async function searchGifs(query) {
     }
 
     try {
+        // Запрос теперь будет идти на https://api.klipy.com/search
         const url = `${KLIPY_BASE}/search?q=${encodeURIComponent(query)}&key=${KLIPY_API_KEY}&limit=12`;
         const res = await fetch(url);
         if (!res.ok) throw new Error(`Klipy API ${res.status}`);
