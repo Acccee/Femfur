@@ -1,10 +1,9 @@
-// gif-picker.js – Tenor GIF Picker Integration
+// gif-picker.js – Klipy GIF Picker Integration (Tenor Alternative)
 
-// ⚠️  Replace with your own Tenor API key:
-// https://developers.tenor.com/
-const TENOR_API_KEY = 'YOUR_TENOR_API_KEY_HERE';
+// ⚠️ Получите ваш API ключ здесь: https://partner.klipy.com
+const KLIPY_API_KEY = 'yvqj3uv2Z8QVxphbKlqyRjmfQH5dYEqKD6zaOv1MK9JjqzaqZWavDxoMiKvVaMM4';
 
-const TENOR_BASE = 'https://api.tenor.com/v2';
+const KLIPY_BASE = 'https://api.klipy.com';
 
 // ─── Initialize on DOM ready ─────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -13,9 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const gifSearch = document.getElementById('gifSearchInput');
     const gifResults= document.getElementById('gifResults');
 
-    if (!gifBtn) return; // not on a page with the GIF picker
+    if (!gifBtn) return;
 
-    // Toggle panel
     gifBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         const open = gifPanel.style.display !== 'none';
@@ -23,14 +21,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!open && gifSearch) gifSearch.focus();
     });
 
-    // Close when clicking outside
     document.addEventListener('click', (e) => {
         if (!gifPanel.contains(e.target) && e.target !== gifBtn) {
             gifPanel.style.display = 'none';
         }
     });
 
-    // Search on Enter or after 600 ms debounce
     let debounceTimer = null;
     if (gifSearch) {
         gifSearch.addEventListener('keydown', (e) => {
@@ -50,32 +46,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// ─── Search Tenor ────────────────────────────────────────────────
+// ─── Search Klipy ────────────────────────────────────────────────
 async function searchGifs(query) {
     const gifResults = document.getElementById('gifResults');
     if (!gifResults) return;
 
-    gifResults.innerHTML = '<div class="gif-loading">Searching…</div>';
+    gifResults.innerHTML = '<div class="gif-loading">Поиск…</div>';
 
-    // If key is placeholder, show message
-    if (TENOR_API_KEY === 'YOUR_TENOR_API_KEY_HERE') {
+    if (KLIPY_API_KEY === 'YOUR_KLIPY_API_KEY_HERE') {
         gifResults.innerHTML = `
             <div class="gif-no-key">
-                <p>🔑 Tenor API key not configured.</p>
-                <p>Open <code>js/gif-picker.js</code> and replace <code>YOUR_TENOR_API_KEY_HERE</code> with your key from <a href="https://developers.tenor.com/" target="_blank">developers.tenor.com</a></p>
+                <p>🔑 API ключ Klipy не настроен.</p>
+                <p>Замените <code>YOUR_KLIPY_API_KEY_HERE</code> в файле скрипта ключом из <a href="https://partner.klipy.com" target="_blank">partner.klipy.com</a></p>
             </div>`;
         return;
     }
 
     try {
-        const url = `${TENOR_BASE}/search?q=${encodeURIComponent(query)}&key=${TENOR_API_KEY}&limit=12`;
+        const url = `${KLIPY_BASE}/search?q=${encodeURIComponent(query)}&key=${KLIPY_API_KEY}&limit=12`;
         const res = await fetch(url);
-        if (!res.ok) throw new Error(`Tenor API ${res.status}`);
+        if (!res.ok) throw new Error(`Klipy API ${res.status}`);
         const json = await res.json();
         renderGifs(json.results || []);
     } catch (err) {
-        console.error('Tenor search error:', err);
-        gifResults.innerHTML = '<div class="gif-error">Failed to load GIFs. Check your API key.</div>';
+        console.error('Klipy search error:', err);
+        gifResults.innerHTML = '<div class="gif-error">Ошибка загрузки GIF. Проверьте ключ API.</div>';
     }
 }
 
@@ -85,15 +80,15 @@ function renderGifs(gifs) {
     if (!gifResults) return;
 
     if (gifs.length === 0) {
-        gifResults.innerHTML = '<div class="gif-empty">No GIFs found.</div>';
+        gifResults.innerHTML = '<div class="gif-empty">Ничего не найдено.</div>';
         return;
     }
 
     gifResults.innerHTML = gifs.map(gif => {
-        // Use the tinygif or gif media (smallest preview)
-        const media  = gif.media_object || gif.media;
-        const thumb  = media?.tinygif?.url || media?.gif?.url || '';
-        const gifUrl = gif.url || '';                 // e.g. https://tenor.com/view/...
+        // Klipy v2 сохраняет структуру Tenor для легкого перехода
+        const media = gif.media_formats || gif.media || {};
+        const thumb = media.tinygif?.url || media.gif?.url || '';
+        const gifUrl = gif.url || '';
 
         return `
             <div class="gif-item" data-url="${escapeHtml(gifUrl)}" data-thumb="${escapeHtml(thumb)}">
@@ -101,22 +96,18 @@ function renderGifs(gifs) {
             </div>`;
     }).join('');
 
-    // Click handlers — insert URL into textarea
     gifResults.querySelectorAll('.gif-item').forEach(item => {
         item.addEventListener('click', () => {
             const url = item.dataset.url;
             insertGifUrl(url);
 
-            // Close panel
             const panel = document.getElementById('gifPickerPanel');
             if (panel) panel.style.display = 'none';
         });
     });
 }
 
-// ─── Insert GIF URL into active textarea ─────────────────────────
 function insertGifUrl(url) {
-    // Try replyText first, then newThreadContent
     const targets = ['replyText', 'newThreadContent', 'editThreadContent'];
     for (const id of targets) {
         const ta = document.getElementById(id);
@@ -130,7 +121,6 @@ function insertGifUrl(url) {
             return;
         }
     }
-    // Fallback: append to replyText
     const fallback = document.getElementById('replyText');
     if (fallback) {
         fallback.value += (fallback.value ? '\n' : '') + url;
@@ -138,7 +128,6 @@ function insertGifUrl(url) {
     }
 }
 
-// ─── Helper ──────────────────────────────────────────────────────
 function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
